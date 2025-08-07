@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧党建系统 - PC端演示</title>
+    <style>
+        :root {
+            --primary-red: #c12c1f;
+            --dark-red: #8e1c11;
+            --light-red: #f8e6e5;
+            --gold: #d4af37;
+            --sidebar-width: 240px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            color: #333;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: var(--primary-red);
+            color: white;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 30px;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-right: 20px;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            background-color: var(--dark-red);
+        }
+
+        .user-info {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: white;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-red);
+            font-weight: bold;
+        }
+
+        /* 主体布局 */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左侧菜单栏 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .menu-title {
+            padding: 15px 20px;
+            font-weight: bold;
+            color: var(--primary-red);
+            border-bottom: 1px solid var(--light-red);
+        }
+
+        .menu-list {
+            list-style: none;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            background-color: var(--light-red);
+        }
+
+        .menu-item.active {
+            border-left-color: var(--primary-red);
+            background-color: var(--light-red);
+            font-weight: bold;
+        }
+
+        .menu-item i {
+            color: var(--gold);
+            margin-right: 10px;
+        }
+
+        /* 主内容区 */
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .page-title {
+            color: var(--primary-red);
+            font-size: 1.5em;
+        }
+
+        .breadcrumb {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--light-red);
+        }
+
+        .card-title {
+            color: var(--primary-red);
+            font-size: 1.2em;
+        }
+
+        /* 数据统计区域 */
+        .stats-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background-color: white;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-title {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--primary-red);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-red);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn:hover {
+            background-color: var(--dark-red);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--light-red);
+        }
+
+        /* 表格样式 */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table th {
+            background-color: var(--light-red);
+            color: var(--primary-red);
+        }
+
+        .table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-nav">
+        <div class="logo">智慧党建系统</div>
+        <ul class="nav-menu">
+            <li><a href="#">首页</a></li>
+            <li><a href="#">组织管理</a></li>
+            <li><a href="#">党员发展</a></li>
+            <li><a href="#">学习教育</a></li>
+            <li><a href="#">数据分析</a></li>
+        </ul>
+        <div class="user-info">
+            <div class="user-avatar">党</div>
+            <span>管理员</span>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <div class="main-container">
+        <!-- 左侧菜单栏 -->
+        <aside class="sidebar">
+            <div class="menu-title">功能菜单</div>
+            <ul class="menu-list">
+                <li class="menu-item active">
+                    <i>★</i>工作台
+                </li>
+                <li class="menu-item">
+                    <i>★</i>党员管理
+                </li>
+                <li class="menu-item">
+                    <i>★</i>组织生活
+                </li>
+                <li class="menu-item">
+                    <i>★</i>三会一课
+                </li>
+                <li class="menu-item">
+                    <i>★</i>党费管理
+                </li>
+                <li class="menu-item">
+                    <i>★</i>党员发展
+                </li>
+                <li class="menu-item">
+                    <i>★</i>学习教育
+                </li>
+                <li class="menu-item">
+                    <i>★</i>民主评议
+                </li>
+                <li class="menu-item">
+                    <i>★</i>统计分析
+                </li>
+                <li class="menu-item">
+                    <i>★</i>系统设置
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="content">
+            <div class="page-header">
+                <h1 class="page-title">工作台</h1>
+                <div class="breadcrumb">首页 / 工作台</div>
+            </div>
+
+            <!-- 数据统计卡片 -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-title">党员总数</div>
+                    <div class="stat-value">1,245</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">党组织数</div>
+                    <div class="stat-value">36</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">本月活动</div>
+                    <div class="stat-value">28</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">待办任务</div>
+                    <div class="stat-value">5</div>
+                </div>
+            </div>
+
+            <!-- 近期活动卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">近期组织活动</h2>
+                    <button class="btn">查看全部</button>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>活动名称</th>
+                            <th>时间</th>
+                            <th>地点</th>
+                            <th>参与人数</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>庆祝建党102周年主题党日</td>
+                            <td>2023-07-01</td>
+                            <td>党员活动室</td>
+                            <td>45</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>第二季度党员大会</td>
+                            <td>2023-06-25</td>
+                            <td>会议室</td>
+                            <td>52</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>党史学习专题党课</td>
+                            <td>2023-06-15</td>
+                            <td>报告厅</td>
+                            <td>38</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>七一文艺汇演筹备会</td>
+                            <td>2023-06-28</td>
+                            <td>党员活动室</td>
+                            <td>12</td>
+                            <td><span class="status-badge status-pending">进行中</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 待办任务卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">我的待办任务</h2>
+                    <button class="btn">新增任务</button>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>任务名称</th>
+                            <th>截止时间</th>
+                            <th>负责人</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>完成上半年党员发展材料</td>
+                            <td>2023-07-10</td>
+                            <td>张书记</td>
+                            <td><span class="status-badge status-pending">进行中</span></td>
+                            <td>
+                                <button class="btn-outline">处理</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>组织七一主题党日活动</td>
+                            <td>2023-06-30</td>
+                            <td>李委员</td>
+                            <td><span class="status-badge status-pending">进行中</span></td>
+                            <td>
+                                <button class="btn-outline">处理</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>提交第二季度党费收缴表</td>
+                            <td>2023-07-05</td>
+                            <td>王会计</td>
+                            <td><span class="status-badge status-pending">进行中</span></td>
+                            <td>
+                                <button class="btn-outline">处理</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 党员学习情况卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">党员学习情况统计</h2>
+                    <div>
+                        <button class="btn-outline">本月</button>
+                        <button class="btn-outline">本季度</button>
+                        <button class="btn">本年度</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="study-chart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 模拟图表数据
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('study-chart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['党史学习', '政策学习', '业务学习', '专题培训'],
+                    datasets: [{
+                        label: '已完成',
+                        data: [85, 78, 92, 65],
+                        backgroundColor: '#c12c1f',
+                        borderWidth: 1
+                    }, {
+                        label: '进行中',
+                        data: [15, 22, 8, 35],
+                        backgroundColor: '#d4af37',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        });
+
+        // 菜单点击效果
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                menuItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

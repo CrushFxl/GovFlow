@@ -6,6 +6,7 @@
     <file url="file://$PROJECT_DIR$/backend-server/app/routes/__init__.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/backend-server/app/routes/auth.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/backend-server/start.py" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/frontend-server/app/routes/__init__.py" charset="GBK" />
     <file url="file://$PROJECT_DIR$/frontend-server/app/routes/home.py" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/frontend-server/start.py" charset="UTF-8" />
   </component>

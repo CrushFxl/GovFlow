@@ -287,6 +287,7 @@
     </style>
 </head>
 <body>
+    <p id="URL" style="display: none">{{URL}}</p>
     <!-- 顶部导航栏 -->
     <nav class="top-nav">
         <div class="logo">智慧党建系统</div>
@@ -299,7 +300,7 @@
         </ul>
         <div class="user-info">
             <div class="user-avatar">党</div>
-            <span>管理员</span>
+            <span id="username"></span>
         </div>
     </nav>
 
@@ -482,8 +483,26 @@
             </div>
         </main>
     </div>
-
+    <script src="../static/sdk/jquery.min.js"></script>
     <script>
+        const URL = $('#URL').text();
+        $(document).ready(function (){
+            $.ajax({
+                url: URL + "/user/get_info",
+                xhrFields: {withCredentials: true},
+                type: "POST",
+                dataType: "json",
+                success: function (resp) {
+                    if(resp.code === 1000){
+                        const name = resp.data['username'];
+                        $('#username').text(name);
+                    }
+                },
+                error: function() {
+                    alert("同步状态失败：无法连接至服务器，请联系网站管理员或稍后再试。");
+                }
+            });
+        });
         // 模拟图表数据
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('study-chart').getContext('2d');

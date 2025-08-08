@@ -9,6 +9,7 @@ from flask_cors import CORS
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+    app.config['SESSION_TYPE'] = 'filesystem'
     CORS(app, supports_credentials=True)
     db.init_app(app)
 

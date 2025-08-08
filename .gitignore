@@ -1,1 +1,3 @@
-./gov.db
+/.idea
+/gov.db
+/backend-server/instance/gov.db

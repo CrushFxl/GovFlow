@@ -5,8 +5,6 @@ import time
 from app.models import db
 from app.models.User import User
 
-VALID_CHAR = ("0123456789ABCEDFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-              "!@#$%^&*()_+.-/<>,';:=`~|\\")
 
 user_bk = Blueprint('user', __name__, url_prefix='/user')
 
@@ -17,7 +15,7 @@ def get_user_info():
     user = User.query.filter_by(uid=uid).first()
     if user:
         return {'code':1000, 'msg': 'ok', 'data':{'username': user.nick,}}
-    return {'code': 1001, 'msg': '用户不存在！'}
+    return {'code': 1001, 'msg': '用户不存在'}
 
 
 

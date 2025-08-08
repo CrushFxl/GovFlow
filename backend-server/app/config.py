@@ -24,7 +24,7 @@ class ProductionConfig(BaseConfig):
 class DevelopmentConfig(BaseConfig):
     FRONTEND_SERVER_DOMAIN = "http://127.0.0.1"
 
-    SQLALCHEMY_DATABASE_URI = "sqlite:///C:/Users/news/Desktop/代码和笔记/GovFlow/gov.db"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///./gov.db"
     CHERRYPY = {
         'server.socket_host': '0.0.0.0',
         'server.socket_port': 15262,

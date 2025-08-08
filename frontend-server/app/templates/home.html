@@ -279,6 +279,10 @@
             color: #155724;
         }
 
+        #username, #exit{
+            cursor: pointer;
+        }
+
         /* 图表容器 */
         .chart-container {
             height: 300px;
@@ -301,6 +305,7 @@
         <div class="user-info">
             <div class="user-avatar">党</div>
             <span id="username"></span>
+            <span id="exit" style="margin-left: 30px">退出登录</span>
         </div>
     </nav>
 
@@ -541,6 +546,23 @@
             item.addEventListener('click', function() {
                 menuItems.forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
+            });
+        });
+
+        // 退出登录点击
+        document.getElementById('exit').addEventListener('click', function (){
+            sessionStorage.clear();
+            $.ajax({
+                url: URL + "/auth/logout",
+                xhrFields: {withCredentials: true},
+                type: "POST",
+                dataType: "json",
+                success: function (resp) {
+                    window.location.replace('/login');
+                },
+                error: function() {
+                    alert("退出登陆失败：无法连接至服务器。");
+                }
             });
         });
     </script>

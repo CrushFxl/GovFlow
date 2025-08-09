@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>智慧党建系统 - 注册</title>
+</head>
+<style>
+        :root {
+            --primary-red: #c12c1f;
+            --dark-red: #8e1c11;
+            --light-red: #f8e6e5;
+            --gold: #d4af37;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .register-header {
+            background-color: var(--primary-red);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .register-header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .register-header a{
+            text-decoration: none;
+            color: white;
+        }
+
+        .register-header a:hover{
+            text-decoration: underline;
+        }
+
+        .register-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group p{
+            font-size: 12px;
+            margin-top: 5px;
+            color: var(--primary-red);
+            display: none;
+        }
+
+        .form-group div{
+            width: 100px;
+            height: 42px;
+            background: #f0f0f0;
+            border: 1px solid #D4AF37FF;
+            display: inline-block;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-red);
+            cursor: pointer;
+            user-select: none;
+            line-height: 42px;     /* 文字垂直居中 */
+            text-align: center;
+            margin-left: 35px;
+            border-radius: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-red);
+            outline: none;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-register:hover {
+            background-color: var(--dark-red);
+        }
+
+        .register-footer {
+            text-align: center;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        .register-footer a {
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .register-footer p{
+            display: inline;
+        }
+
+        .register-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .party-icon {
+            color: var(--gold);
+            margin-right: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .register-body {
+                padding: 20px;
+            }
+
+            .register-header h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <p id="URL" style="display: none">{{URL}}</p>
+    <div class="register-container">
+        <div class="register-header">
+            <div style="text-align: left; width: 100%;">
+                <label for="back-login" style="display: inline"><</label>
+                <a id="back-login" href="/login/">返回登录</a>
+            </div>
+            <h1><span class="party-icon">★</span>智慧党建系统</h1>
+            <p>请注册您的账号</p>
+        </div>
+
+        <div class="register-body">
+            <form>
+                <div class="form-group">
+                    <label for="username">用户昵称</label>
+                    <input type="text" id="username" class="form-control" placeholder="请输入用户昵称" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">手机号</label>
+                    <input type="text" id="phone" class="form-control" placeholder="请输入11位手机号" required>
+                    <p id="phone_p">*手机号已注册！</p>
+                    <p id="phone_p1">*手机号必须为数字且长度必须大于11位！</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" class="form-control" placeholder="请设置密码" required>
+                    <p id="password_p">*密码需为正常字符且长度必须大于8位！</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="code">验证码</label>
+                    <input type="text" id="code" class="form-control" placeholder="请输入右边验证码" required style="width: 300px">
+                    <div id="code1"> <img src=""> </div>
+                    <p id="code_p">*验证码错误！</p>
+                </div>
+
+                <button type="submit" class="btn-register">注册</button>
+            </form>
+        </div>
+        <div class="register-footer">
+            <p>已有账号?&nbsp;&nbsp;</p><a href="/login/">立即登录</a>
+        </div>
+    </div>
+
+    <script src="../static/sdk/jquery.min.js"></script>
+    <script>
+        const URL1 = $("#URL").text();
+        //获取验证码图片的函数
+        function load_code(){
+            $.ajax({
+                url:URL1 + "/register/code",
+                xhrFields: {withCredentials: true,
+                            responseType: 'blob'},
+                success: function(blob) {
+                    // 创建临时 URL 来引用 blob 对象
+                    const objectURL = URL.createObjectURL(blob);
+                    // 设置背景图片
+                    document.querySelector('#code1').style.backgroundImage = `url(${objectURL})`;
+                    document.querySelector('#code1').style.backgroundSize = 'cover';
+                    document.querySelector('#code1').style.backgroundPosition = 'center';
+                },
+                error: function() {
+                    alert("获取验证码失败：无法连接至服务器，请联系网站管理员或稍后再试。")
+                }
+            });
+        };
+        //加载页面时调用一次
+        load_code();
+
+        //点击刷新事件
+        document.querySelector("#code1").addEventListener('click',()=>{
+            load_code();
+        });
+        //注册向服务器发送请求
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            const code = document.getElementById('code').value;
+            document.querySelector('#phone_p1').style.display= 'none';
+            if(phone.length!==11){
+                document.querySelector('#phone_p1').style.display='block';
+                return;
+            }
+            $.ajax({
+                url: URL1 + "/register/register",
+                xhrFields: {withCredentials: true},
+                type: "POST",
+                dataType: "json",
+                data: {
+                    'username': username,
+                    'phone':phone,
+                    'password': password,
+                    'code':code
+                },
+                success: function (resp) {
+                    if(resp.code === 1000){
+                        const shouldContinue = confirm(`注册成功！点击确定或取消后跳转登录...`);
+                        window.location.replace('/login');
+                    }else if(resp.code===1001){
+                        document.querySelector('#password_p').style.display='block';
+                        document.querySelector('#phone_p').style.display='none';
+                        document.querySelector('#code_p').style.display='none';
+                        load_code();
+                    }else if(resp.code===1002){
+                        document.querySelector('#password_p').style.display='none';
+                        document.querySelector('#phone_p').style.display='block';
+                        document.querySelector('#code_p').style.display='none';
+                        load_code();
+                    }else if(resp.code===1003){
+                        document.querySelector('#password_p').style.display='none';
+                        document.querySelector('#phone_p').style.display='none';
+                        document.querySelector('#code_p').style.display='block';
+                        load_code();
+                    }
+                    else{
+                        alert(resp.msg);
+                    }
+                },
+                error: function() {
+                    alert("登录失败：无法连接至服务器，请联系网站管理员或稍后再试。");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

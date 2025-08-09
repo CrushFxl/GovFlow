@@ -1,18 +1,21 @@
 import os
+from multiprocessing.reduction import register
 
 from .. import config
 from .index import index_ft
 from .home import home_ft
+from .register import register_ft
 
 
-# ×¢²áµÄÀ¶Í¼ÁÐ±í
+# ×¢ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½Ð±ï¿½
 routes = [
     index_ft,
-    home_ft
+    home_ft,
+    register_ft
 ]
 
 
-# ×¢ÈëÈ«¾ÖÄ£°å±äÁ¿
+# ×¢ï¿½ï¿½È«ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½
 URL = config[os.getenv('ENV') or 'production'].BACKEND_SERVER_DOMAIN
 for route in routes:
     @route.context_processor

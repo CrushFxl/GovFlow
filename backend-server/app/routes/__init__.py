@@ -1,7 +1,9 @@
 from .auth import auth_bk
 from .user import user_bk
+from .auth import register_bk
 
 routes = [
     auth_bk,
-    user_bk
+    user_bk,
+    register_bk
 ]

@@ -4,8 +4,8 @@ db = SQLAlchemy()
 
 
 def to_json(model_list):
-    if isinstance(model_list, list):  # Èç¹û´«ÈëµÄ²ÎÊıÊÇÒ»¸ölistÀàĞÍµÄ£¬ËµÃ÷ÊÇÊ¹ÓÃµÄall()µÄ·½Ê½²éÑ¯µÄ
-        if isinstance(model_list[0], db.Model):  # ÕâÖÖ·½Ê½ÊÇ»ñµÃµÄÕû¸ö¶ÔÏó  Ïàµ±ÓÚ select * from table
+    if isinstance(model_list, list):  # å¦‚æœä¼ å…¥çš„å‚æ•°æ˜¯ä¸€ä¸ªlistç±»å‹çš„ï¼Œè¯´æ˜æ˜¯ä½¿ç”¨çš„all()çš„æ–¹å¼æŸ¥è¯¢çš„
+        if isinstance(model_list[0], db.Model):  # è¿™ç§æ–¹å¼æ˜¯è·å¾—çš„æ•´ä¸ªå¯¹è±¡  ç›¸å½“äº select * from table
             lst = []
             for model in model_list:
                 dic = {}
@@ -13,16 +13,16 @@ def to_json(model_list):
                     dic[col.name] = getattr(model, col.name)
                 lst.append(dic)
             return lst
-        else:  # ÕâÖÖ·½Ê½»ñµÃÁËÊı¾İ¿âÖĞµÄ¸ö±ğ×Ö¶Î  Ïàµ±ÓÚselect id,name from table
+        else:  # è¿™ç§æ–¹å¼è·å¾—äº†æ•°æ®åº“ä¸­çš„ä¸ªåˆ«å­—æ®µ  ç›¸å½“äºselect id,name from table
             lst = []
-            for result in model_list:  # µ±ÒÔÕâÖÖ·½Ê½·µ»ØµÄÊ±ºò£¬resultÖĞ»áÓĞÒ»¸ökeys()µÄÊôĞÔ
+            for result in model_list:  # å½“ä»¥è¿™ç§æ–¹å¼è¿”å›çš„æ—¶å€™ï¼Œresultä¸­ä¼šæœ‰ä¸€ä¸ªkeys()çš„å±æ€§
                 lst.append([dict(zip(result.keys, r)) for r in result])
             return lst
     else:
-        if isinstance(model_list, db.Model):  # ÕâÖÖ·½Ê½ÊÇ»ñµÃµÄÕû¸ö¶ÔÏó  Ïàµ±ÓÚ select * from table limit=1
+        if isinstance(model_list, db.Model):  # è¿™ç§æ–¹å¼æ˜¯è·å¾—çš„æ•´ä¸ªå¯¹è±¡  ç›¸å½“äº select * from table limit=1
             dic = {}
             for col in model_list.__table__.columns:
                 dic[col.name] = getattr(model_list, col.name)
             return dic
-        else:  # ÕâÖÖ·½Ê½»ñµÃÁËÊı¾İ¿âÖĞµÄ¸ö±ğ×Ö¶Î  Ïàµ±ÓÚselect id,name from table limit = 1
+        else:  # è¿™ç§æ–¹å¼è·å¾—äº†æ•°æ®åº“ä¸­çš„ä¸ªåˆ«å­—æ®µ  ç›¸å½“äºselect id,name from table limit = 1
             return dict(zip(model_list.keys(), model_list))

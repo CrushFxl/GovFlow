@@ -1,5 +1,4 @@
 import os
-from multiprocessing.reduction import register
 
 from .. import config
 from .index import index_ft

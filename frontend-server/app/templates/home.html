@@ -279,15 +279,147 @@
             color: #155724;
         }
 
-        #username, #exit{
-            cursor: pointer;
-        }
-
         /* 图表容器 */
         .chart-container {
             height: 300px;
             margin-top: 20px;
         }
+
+        /* SPA页面内容 */
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        .placeholder-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            font-size: 3em;
+            color: #ccc;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .action-bar {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+    }
+
+    .search-input {
+        padding: 8px 12px;
+        border-width: 1px 0 1px 1px;
+        border-style: solid none solid solid;
+        border-color: #ddd;
+        border-radius: 4px 0 0 4px;
+        width: 200px;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border: 1px solid var(--primary-red);
+        color: var(--primary-red);
+        padding: 6px 15px;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-outline:hover {
+        background-color: var(--light-red);
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-right: 5px;
+        font-size: 0.85em;
+    }
+
+    .btn-detail {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-detail:hover {
+        background-color: #0069d9;
+    }
+
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background-color: #c82333;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 0.85em;
+        font-weight: bold;
+    }
+
+    .status-upcoming {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-pending {
+        background-color: #bee5eb;
+        color: #0c5460;
+    }
+
+    .status-completed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-canceled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+
+    .page-info {
+        margin: 0 15px;
+        color: #666;
+    }
+
+    .icon {
+        margin-right: 5px;
+    }
+    #daily-input{
+        margin-right: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+    }
+    #exit{
+        cursor: pointer;
+    }
     </style>
 </head>
 <body>
@@ -315,34 +447,34 @@
         <aside class="sidebar">
             <div class="menu-title">功能菜单</div>
             <ul class="menu-list">
-                <li class="menu-item active">
+                <li class="menu-item active" data-page="dashboard">
                     <i>★</i>工作台
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" data-page="member">
                     <i>★</i>党员管理
                 </li>
-                <li class="menu-item">
-                    <i>★</i>组织生活
+                <li class="menu-item" data-page="activity">
+                    <i>★</i>日程下发
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" data-page="meeting">
                     <i>★</i>三会一课
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" data-page="fee">
                     <i>★</i>党费管理
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" data-page="development">
                     <i>★</i>党员发展
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" data-page="study">
                     <i>★</i>学习教育
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" data-page="review">
                     <i>★</i>民主评议
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" data-page="statistics">
                     <i>★</i>统计分析
                 </li>
-                <li class="menu-item">
+                <li class="menu-item" data-page="settings">
                     <i>★</i>系统设置
                 </li>
             </ul>
@@ -350,221 +482,278 @@
 
         <!-- 主内容区 -->
         <main class="content">
-            <div class="page-header">
-                <h1 class="page-title">工作台</h1>
-                <div class="breadcrumb">首页 / 工作台</div>
-            </div>
+            <!-- 工作台页面 -->
+            <div id="dashboard" class="page-content active">
+                <div class="page-header">
+                    <h1 class="page-title">工作台</h1>
+                    <div class="breadcrumb">首页 / 工作台</div>
+                </div>
 
-            <!-- 数据统计卡片 -->
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-title">党员总数</div>
-                    <div class="stat-value">1,245</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">党组织数</div>
-                    <div class="stat-value">36</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">本月活动</div>
-                    <div class="stat-value">28</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">待办任务</div>
-                    <div class="stat-value">5</div>
-                </div>
-            </div>
-
-            <!-- 近期活动卡片 -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">近期组织活动</h2>
-                    <button class="btn">查看全部</button>
-                </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>活动名称</th>
-                            <th>时间</th>
-                            <th>地点</th>
-                            <th>参与人数</th>
-                            <th>状态</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>庆祝建党102周年主题党日</td>
-                            <td>2023-07-01</td>
-                            <td>党员活动室</td>
-                            <td>45</td>
-                            <td><span class="status-badge status-completed">已完成</span></td>
-                        </tr>
-                        <tr>
-                            <td>第二季度党员大会</td>
-                            <td>2023-06-25</td>
-                            <td>会议室</td>
-                            <td>52</td>
-                            <td><span class="status-badge status-completed">已完成</span></td>
-                        </tr>
-                        <tr>
-                            <td>党史学习专题党课</td>
-                            <td>2023-06-15</td>
-                            <td>报告厅</td>
-                            <td>38</td>
-                            <td><span class="status-badge status-completed">已完成</span></td>
-                        </tr>
-                        <tr>
-                            <td>七一文艺汇演筹备会</td>
-                            <td>2023-06-28</td>
-                            <td>党员活动室</td>
-                            <td>12</td>
-                            <td><span class="status-badge status-pending">进行中</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- 待办任务卡片 -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">我的待办任务</h2>
-                    <button class="btn">新增任务</button>
-                </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>任务名称</th>
-                            <th>截止时间</th>
-                            <th>负责人</th>
-                            <th>状态</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>完成上半年党员发展材料</td>
-                            <td>2023-07-10</td>
-                            <td>张书记</td>
-                            <td><span class="status-badge status-pending">进行中</span></td>
-                            <td>
-                                <button class="btn-outline">处理</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>组织七一主题党日活动</td>
-                            <td>2023-06-30</td>
-                            <td>李委员</td>
-                            <td><span class="status-badge status-pending">进行中</span></td>
-                            <td>
-                                <button class="btn-outline">处理</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>提交第二季度党费收缴表</td>
-                            <td>2023-07-05</td>
-                            <td>王会计</td>
-                            <td><span class="status-badge status-pending">进行中</span></td>
-                            <td>
-                                <button class="btn-outline">处理</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- 党员学习情况卡片 -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">党员学习情况统计</h2>
-                    <div>
-                        <button class="btn-outline">本月</button>
-                        <button class="btn-outline">本季度</button>
-                        <button class="btn">本年度</button>
+                <!-- 数据统计卡片 -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-title">党员总数</div>
+                        <div class="stat-value">1,245</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">党组织数</div>
+                        <div class="stat-value">36</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">本月活动</div>
+                        <div class="stat-value">28</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">待办任务</div>
+                        <div class="stat-value">5</div>
                     </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="study-chart"></canvas>
+
+                <!-- 近期活动卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">近期组织活动</h2>
+                        <button class="btn">查看全部</button>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>活动名称</th>
+                                <th>时间</th>
+                                <th>地点</th>
+                                <th>参与人数</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>庆祝建党102周年主题党日</td>
+                                <td>2023-07-01</td>
+                                <td>党员活动室</td>
+                                <td>45</td>
+                                <td><span class="status-badge status-completed">已完成</span></td>
+                            </tr>
+                            <tr>
+                                <td>第二季度党员大会</td>
+                                <td>2023-06-25</td>
+                                <td>会议室</td>
+                                <td>52</td>
+                                <td><span class="status-badge status-completed">已完成</span></td>
+                            </tr>
+                            <tr>
+                                <td>党史学习专题党课</td>
+                                <td>2023-06-15</td>
+                                <td>报告厅</td>
+                                <td>38</td>
+                                <td><span class="status-badge status-completed">已完成</span></td>
+                            </tr>
+                            <tr>
+                                <td>七一文艺汇演筹备会</td>
+                                <td>2023-06-28</td>
+                                <td>党员活动室</td>
+                                <td>12</td>
+                                <td><span class="status-badge status-pending">进行中</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+
+                <!-- 待办任务卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">我的待办任务</h2>
+                        <button class="btn">新增任务</button>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>任务名称</th>
+                                <th>截止时间</th>
+                                <th>负责人</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>完成上半年党员发展材料</td>
+                                <td>2023-07-10</td>
+                                <td>张书记</td>
+                                <td><span class="status-badge status-pending">进行中</span></td>
+                                <td>
+                                    <button class="btn-outline">处理</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>组织七一主题党日活动</td>
+                                <td>2023-06-30</td>
+                                <td>李委员</td>
+                                <td><span class="status-badge status-pending">进行中</span></td>
+                                <td>
+                                    <button class="btn-outline">处理</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>提交第二季度党费收缴表</td>
+                                <td>2023-07-05</td>
+                                <td>王会计</td>
+                                <td><span class="status-badge status-pending">进行中</span></td>
+                                <td>
+                                    <button class="btn-outline">处理</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 党员学习情况卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">党员学习情况统计</h2>
+                        <div>
+                            <button class="btn-outline">本月</button>
+                            <button class="btn-outline">本季度</button>
+                            <button class="btn">本年度</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="study-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 党员管理页面 -->
+            <div id="member" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">党员管理</h1>
+                    <div class="breadcrumb">首页 / 党员管理</div>
+                </div>
+                <div class="placeholder-content">A</div>
+            </div>
+
+            <!-- 日程下发页面 -->
+            <div id="activity" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">日程下发</h1>
+                    <div class="breadcrumb">首页 / 日程下发</div>
+                </div>
+                <!-- 操作按钮区域 -->
+                <div class="action-bar">
+                    <input id="daily-input" type="text" placeholder="在此描述日程信息，一键下发日程任务，例如：通知信工党支部今天下午两点来学院105开会，主题是党建教育" class="search-input">
+                    <button class="btn" id="add-activity" style="min-width: 110px">
+                        <i class="icon">+</i> 添加日程
+                    </button>
+                </div>
+
+                <!-- 日程表格 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">日程列表</h2>
+                        <div class="search-box">
+                            <input type="text" placeholder="搜索日程..." class="search-input">
+                            <button class="btn-outline">搜索</button>
+                        </div>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>日程名称</th>
+                                <th>时间</th>
+                                <th>地点</th>
+                                <th>参与人员</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>  
+                        </tbody>
+                    </table>
+
+                    <!-- 分页控件 -->
+                    <div class="pagination">
+                        <button class="btn-outline" disabled>上一页</button>
+                        <span class="page-info">第 1 页 / 共 3 页</span>
+                        <button class="btn-outline">下一页</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 三会一课页面 -->
+            <div id="meeting" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">三会一课</h1>
+                    <div class="breadcrumb">首页 / 三会一课</div>
+                </div>
+                <div class="placeholder-content">C</div>
+            </div>
+
+            <!-- 党费管理页面 -->
+            <div id="fee" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">党费管理</h1>
+                    <div class="breadcrumb">首页 / 党费管理</div>
+                </div>
+                <div class="placeholder-content">D</div>
+            </div>
+
+            <!-- 党员发展页面 -->
+            <div id="development" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">党员发展</h1>
+                    <div class="breadcrumb">首页 / 党员发展</div>
+                </div>
+                <div class="placeholder-content">E</div>
+            </div>
+
+            <!-- 学习教育页面 -->
+            <div id="study" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">学习教育</h1>
+                    <div class="breadcrumb">首页 / 学习教育</div>
+                </div>
+                <div class="placeholder-content">F</div>
+            </div>
+
+            <!-- 民主评议页面 -->
+            <div id="review" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">民主评议</h1>
+                    <div class="breadcrumb">首页 / 民主评议</div>
+                </div>
+                <div class="placeholder-content">G</div>
+            </div>
+
+            <!-- 统计分析页面 -->
+            <div id="statistics" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">统计分析</h1>
+                    <div class="breadcrumb">首页 / 统计分析</div>
+                </div>
+                <div class="placeholder-content">H</div>
+            </div>
+
+            <!-- 系统设置页面 -->
+            <div id="settings" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">系统设置</h1>
+                    <div class="breadcrumb">首页 / 系统设置</div>
+                </div>
+                <div class="placeholder-content">I</div>
             </div>
         </main>
     </div>
-    <script src="../static/sdk/jquery.min.js"></script>
-    <script>
-        const URL = $('#URL').text();
-        $(document).ready(function (){
-            $.ajax({
-                url: URL + "/user/get_info",
-                xhrFields: {withCredentials: true},
-                type: "POST",
-                dataType: "json",
-                success: function (resp) {
-                    if(resp.code === 1000){
-                        const name = resp.data['username'];
-                        $('#username').text(name);
-                    }
-                },
-                error: function() {
-                    alert("同步状态失败：无法连接至服务器，请联系网站管理员或稍后再试。");
-                }
-            });
-        });
-        // 模拟图表数据
-        document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('study-chart').getContext('2d');
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['党史学习', '政策学习', '业务学习', '专题培训'],
-                    datasets: [{
-                        label: '已完成',
-                        data: [85, 78, 92, 65],
-                        backgroundColor: '#c12c1f',
-                        borderWidth: 1
-                    }, {
-                        label: '进行中',
-                        data: [15, 22, 8, 35],
-                        backgroundColor: '#d4af37',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-        });
-
-        // 菜单点击效果
-        const menuItems = document.querySelectorAll('.menu-item');
-        menuItems.forEach(item => {
-            item.addEventListener('click', function() {
-                menuItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        // 退出登录点击
-        document.getElementById('exit').addEventListener('click', function (){
-            sessionStorage.clear();
-            $.ajax({
-                url: URL + "/auth/logout",
-                xhrFields: {withCredentials: true},
-                type: "POST",
-                dataType: "json",
-                success: function (resp) {
-                    window.location.replace('/login');
-                },
-                error: function() {
-                    alert("退出登陆失败：无法连接至服务器。");
-                }
-            });
-        });
-    </script>
+    <script src="../static/sdk/jquery.min.js" defer></script>
+    <script src="../static/js/home.js" defer></script>
+    <script src="../static/js/dashboard.js" defer></script>
+    <script src="../static/js/member.js" defer></script>
+    <script src="../static/js/activity.js" defer></script>
+    <script src="../static/js/meeting.js" defer></script>
+    <script src="../static/js/fee.js" defer></script>
+    <script src="../static/js/development.js" defer></script>
+    <script src="../static/js/study.js" defer></script>
+    <script src="../static/js/review.js" defer></script>
+    <script src="../static/js/statistics.js" defer></script>
+    <script src="../static/js/settings.js" defer></script>
 </body>
 </html>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智慧党建系统 - PC端演示</title>
+    <link rel="stylesheet" href="../static/css/activity.css">
     <style>
         :root {
             --primary-red: #c12c1f;
@@ -743,6 +744,61 @@
             </div>
         </main>
     </div>
+
+
+    <!-- 日程确认表单弹窗 -->
+    <div id="activity-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>活动详情</h2>
+            </div>
+            <div class="modal-body">
+                <div class="modal-scrollable-content">
+                    <form id="activity-form">
+                        <div class="form-group">
+                            <label for="form-title">标题</label>
+                            <input type="text" id="form-title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-date">日期</label>
+                            <input type="date" id="form-date" name="date" required>
+                        </div>
+                        <div class="time-container">
+                            <div class="form-group">
+                                <label for="form-start-time">开始时间</label>
+                                <input type="time" id="form-start-time" name="start_time" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="form-end-time">结束时间</label>
+                                <input type="time" id="form-end-time" name="end_time" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-location">地点</label>
+                            <input type="text" id="form-location" name="location" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-description">描述</label>
+                            <textarea id="form-description" name="description" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-organizations">参与组织</label>
+                            <input type="text" id="form-organizations" name="organizations">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-partners">参与人员</label>
+                            <input type="text" id="form-partners" name="partners">
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-btn" class="btn-cancel">取消</button>
+                <button id="confirm-btn" class="btn-confirm">确认</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../static/sdk/jquery.min.js" defer></script>
     <script src="../static/js/home.js" defer></script>
     <script src="../static/js/dashboard.js" defer></script>

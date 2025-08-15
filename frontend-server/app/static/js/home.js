@@ -1,5 +1,7 @@
 $(document).ready(function() {
     const URL = $('#URL').text();
+
+    // 初始化用户信息
     $.ajax({
         url: URL + "/user/get_info",
         xhrFields: {withCredentials: true},
@@ -16,6 +18,7 @@ $(document).ready(function() {
         }
     });
 
+    // 页面切换渲染
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
         item.addEventListener('click', function() {
@@ -37,7 +40,7 @@ $(document).ready(function() {
         });
     });
 
-    // 退出登录点击
+    // 退出登录点击事件
     document.getElementById('exit').addEventListener('click', function () {
         sessionStorage.clear();
         $.ajax({
@@ -52,9 +55,9 @@ $(document).ready(function() {
                 alert("退出登陆失败：无法连接至服务器。");
             }
         });
-    });
+    });    
 
-    // 初始化对应模块
+    // 初始化当前激活的页面模块
     function initModule(pageId) {
         switch(pageId) {
             case 'dashboard':
@@ -111,13 +114,8 @@ $(document).ready(function() {
                 console.log('未找到对应模块的初始化函数');
         }
     }
-
-    // 初始化当前激活的页面模块
     const activeMenuItem = document.querySelector('.menu-item.active');
-    if (activeMenuItem) {
-        const activePageId = activeMenuItem.getAttribute('data-page');
-        initModule(activePageId);
-    }
+    initModule(activeMenuItem.getAttribute('data-page'));
 });
 
 
@@ -126,7 +124,6 @@ function showLoading(text = '加载中') {
     if ($('#loading-mask').length) {
         $('#loading-mask').remove();
     }
-    // 创建遮罩层
     const mask = $('<div>', {
         id: 'loading-mask',
         css: {
@@ -158,8 +155,6 @@ function showLoading(text = '加载中') {
             alignItems: 'center'
         }
     });
-    
-    // 添加加载图标
     const loadingIcon = $('<div>', {
         text: '⟳',
         css: {
@@ -168,7 +163,6 @@ function showLoading(text = '加载中') {
             color: '#333',
         }
     });
-    // 添加加载文本
     const loadingText = $('<div>', {
         text: text,
         css: {
@@ -178,11 +172,9 @@ function showLoading(text = '加载中') {
             color: '#333'
         }
     });
-    // 组装元素
     loadingBox.append(loadingIcon).append(loadingText);
     mask.append(loadingBox);
     $('body').append(mask);
-    // 添加旋转动画
     if (!$('style#loading-animation').length) {
         const style = $('<style>', {
             id: 'loading-animation',

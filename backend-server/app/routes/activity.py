@@ -8,7 +8,7 @@ from flask import Blueprint, request, session
 
 activity_bk = Blueprint('activity', __name__, url_prefix='/activity')
 
-API_KEY = 'app-xxx'        # 警告，生产环境下请删除
+API_KEY = 'app-4a1hijBsd0XBqDLXwJfkoKen'        # 警告，生产环境下请删除
 headers = {
     'Authorization': f'Bearer {API_KEY}',
     'Content-Type': 'application/json'

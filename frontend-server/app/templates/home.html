@@ -451,11 +451,11 @@
                 <li class="menu-item active" data-page="dashboard">
                     <i>★</i>工作台
                 </li>
-                <li class="menu-item" data-page="member">
-                    <i>★</i>党员管理
+                <li class="menu-item" data-page="profile">
+                    <i>★</i>党员档案
                 </li>
                 <li class="menu-item" data-page="activity">
-                    <i>★</i>日程下发
+                    <i>★</i>任务下发
                 </li>
                 <li class="menu-item" data-page="meeting">
                     <i>★</i>三会一课
@@ -623,35 +623,35 @@
                 </div>
             </div>
 
-            <!-- 党员管理页面 -->
-            <div id="member" class="page-content">
+            <!-- 党员档案页面 -->
+            <div id="profile" class="page-content">
                 <div class="page-header">
-                    <h1 class="page-title">党员管理</h1>
-                    <div class="breadcrumb">首页 / 党员管理</div>
+                    <h1 class="page-title">党员档案</h1>
+                    <div class="breadcrumb">首页 / 党员档案</div>
                 </div>
                 <div class="placeholder-content">A</div>
             </div>
 
-            <!-- 日程下发页面 -->
+            <!-- 任务下发页面 -->
             <div id="activity" class="page-content">
                 <div class="page-header">
-                    <h1 class="page-title">日程下发</h1>
-                    <div class="breadcrumb">首页 / 日程下发</div>
+                    <h1 class="page-title">任务下发</h1>
+                    <div class="breadcrumb">首页 / 任务下发</div>
                 </div>
                 <!-- 操作按钮区域 -->
                 <div class="action-bar">
-                    <input id="daily-input" type="text" placeholder="在此描述日程信息，一键下发日程任务，例如：通知信工党支部今天下午两点来学院105开会，主题是党建教育" class="search-input">
+                    <input id="daily-input" type="text" placeholder="在此描述任务信息，一键下发任务，例如：通知信工党支部今天下午两点来学院105开会，主题是党建教育" class="search-input">
                     <button class="btn" id="add-activity" style="min-width: 110px">
-                        <i class="icon">+</i> 添加日程
+                        <i class="icon">+</i> 添加任务
                     </button>
                 </div>
 
-                <!-- 日程表格 -->
+                <!-- 任务表格 -->
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">日程列表</h2>
+                        <h2 class="card-title">任务列表</h2>
                         <div class="search-box">
-                            <input type="text" placeholder="搜索日程..." class="search-input">
+                            <input type="text" placeholder="搜索任务..." class="search-input">
                             <button class="btn-outline">搜索</button>
                         </div>
                     </div>
@@ -659,11 +659,11 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>日程名称</th>
+                                <th>任务名称</th>
                                 <th>时间</th>
                                 <th>地点</th>
                                 <th>参与人员</th>
-                                <th>状态</th>
+                                <th>任务状态</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
@@ -746,7 +746,7 @@
     </div>
 
 
-    <!-- 日程确认表单弹窗 -->
+    <!-- 任务确认表单弹窗 -->
     <div id="activity-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -803,6 +803,7 @@
     <script src="../static/js/home.js" defer></script>
     <script src="../static/js/dashboard.js" defer></script>
     <script src="../static/js/member.js" defer></script>
+    <script src="../static/js/profile.js" defer></script>
     <script src="../static/js/activity.js" defer></script>
     <script src="../static/js/meeting.js" defer></script>
     <script src="../static/js/fee.js" defer></script>

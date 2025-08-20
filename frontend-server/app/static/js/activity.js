@@ -101,7 +101,7 @@ $(document).ready(function() {
                 hideLoading();
                 if (resp.code === 1000) {
                     console.log(resp.data);
-                    showActivityForm(resp.data);
+                    showActivityForm(resp.data, false); // 添加/编辑模式，显示确认按钮
                 }
             },
             error: function () {
@@ -132,7 +132,7 @@ $(document).ready(function() {
             button.addEventListener('click', function() {
                 const index = this.closest('tr').rowIndex - 1;
                 const item = scheduleData[(currentPage - 1) * itemsPerPage + index];
-                showActivityForm(item);
+                showActivityForm(item, true); // 查看详情模式，隐藏确认按钮
             });
         });
 
@@ -183,11 +183,68 @@ $(document).ready(function() {
         }
     });
 
+    // 关闭弹窗函数
+    function closeModal() {
+        const modal = document.getElementById('activity-modal');
+        modal.classList.remove('show');
+    }
+    
+    // 存储当前活动数据
+    let currentActivityData = null;
+    
+    // 日程表单确认提交处理函数
+    function confirmHandler() {
+        showLoading('提交中...');
+        
+        // 从表单中获取用户修改后的数据
+        const formData = {
+            acid: currentActivityData.acid,
+            title: document.getElementById('form-title').value,
+            date: document.getElementById('form-date').value,
+            start_time: document.getElementById('form-start-time').value,
+            end_time: document.getElementById('form-end-time').value,
+            location: document.getElementById('form-location').value,
+            description: document.getElementById('form-description').value,
+            organizations: document.getElementById('form-organizations').value.split(',').map(item => item.trim()).filter(item => item),
+            partners: document.getElementById('form-partners').value.split(',').map(item => item.trim()).filter(item => item)
+        };
+        
+        // 保留原始数据中的id（如果存在）
+        if (currentActivityData && currentActivityData.id) {
+            formData.id = currentActivityData.id;
+        }
+        
+        $.ajax({
+            url: URL + "/activity/save",
+            xhrFields: {withCredentials: true},
+            type: "POST",
+            data: JSON.stringify({ data: formData }),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (resp) {
+                hideLoading();
+                if (resp.code === 1000) {
+                    alert('提交成功');
+                    fetchScheduleData();
+                    closeModal();
+                }
+            },
+            error: function () {
+                hideLoading();
+                alert("连接失败：无法连接至服务器，请联系站长或稍后再试。");
+            }
+        });
+    }
+    
     // 显示活动表单弹窗
-    function showActivityForm(activityData) {
+    function showActivityForm(activityData, isDetailMode = false) {
+        // 存储当前活动数据
+        currentActivityData = activityData;
+        
         const modal = document.getElementById('activity-modal');
         const cancelBtn = document.getElementById('cancel-btn');
         const confirmBtn = document.getElementById('confirm-btn');
+        
         // 填充表单数据
         document.getElementById('form-title').value = activityData.title || '';
         document.getElementById('form-date').value = activityData.date || '';
@@ -198,44 +255,34 @@ $(document).ready(function() {
         document.getElementById('form-organizations').value = activityData.organizations ? activityData.organizations.join(', ') : '';
         document.getElementById('form-partners').value = activityData.partners ? activityData.partners.join(', ') : '';
         // 显示弹窗
-        modal.classList.add('show');
-        // 关闭弹窗函数
-        function closeModal() {
-            modal.classList.remove('show');
-        }
-        // 移除之前可能存在的事件监听器
-        cancelBtn.removeEventListener('click', closeModal);
-        confirmBtn.removeEventListener('click', confirmHandler);
+        modal.classList.add('show');        
+        // 先移除所有已存在的监听器
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
         // 添加新的事件监听器
-        cancelBtn.addEventListener('click', closeModal);
-
-        // 日程表单确认提交按钮事件
-        function confirmHandler() {
-            showLoading('提交中...');
-            $.ajax({
-                url: URL + "/activity/save",
-                xhrFields: {withCredentials: true},
-                type: "POST",
-                data: JSON.stringify({ data: activityData }),
-                contentType: "application/json",
-                dataType: "json",
-                success: function (resp) {
-                hideLoading();
-                if (resp.code === 1000) {
-                    alert('提交成功');
-                    fetchScheduleData();
-                    closeModal();
-                }
-            },
-                error: function () {
-                    hideLoading();
-                    alert("连接失败：无法连接至服务器，请联系站长或稍后再试。");
-                }
+        newCancelBtn.addEventListener('click', closeModal);
+        // 根据模式决定是否显示确认按钮和添加事件监听器
+        if (isDetailMode) {
+            // 查看详情模式：隐藏确认按钮，使表单变为只读
+            newConfirmBtn.style.display = 'none';            
+            const formElements = document.querySelectorAll('#activity-modal input, #activity-modal textarea');
+            formElements.forEach(element => {
+                element.readOnly = true;
+                element.style.backgroundColor = '#f5f5f5';
+            });
+        } else {
+            // 添加/编辑模式：显示确认按钮
+            newConfirmBtn.style.display = 'inline-block';
+            newConfirmBtn.addEventListener('click', confirmHandler);            
+            const formElements = document.querySelectorAll('#activity-modal input, #activity-modal textarea');
+            formElements.forEach(element => {
+                element.readOnly = false;
+                element.style.backgroundColor = '';
             });
         }
-        confirmBtn.addEventListener('click', confirmHandler);
     }
-
     // 暴露初始化函数供home.js调用
     window.activityModule = {
         init: initActivity

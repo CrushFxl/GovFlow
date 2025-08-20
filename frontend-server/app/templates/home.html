@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智慧党建系统 - PC端演示</title>
     <link rel="stylesheet" href="../static/css/activity.css">
+            <link rel="stylesheet" href="../static/css/profile.css">
     <style>
         :root {
             --primary-red: #c12c1f;
@@ -452,7 +453,7 @@
                     <i>★</i>工作台
                 </li>
                 <li class="menu-item" data-page="profile">
-                    <i>★</i>党员档案
+                    <i>★</i>党员档案 
                 </li>
                 <li class="menu-item" data-page="activity">
                     <i>★</i>任务下发
@@ -624,12 +625,138 @@
             </div>
 
             <!-- 党员档案页面 -->
-            <div id="profile" class="page-content">
+            <div id="profile" class="page-content profile-page">
                 <div class="page-header">
                     <h1 class="page-title">党员档案</h1>
                     <div class="breadcrumb">首页 / 党员档案</div>
                 </div>
-                <div class="placeholder-content">A</div>
+                
+                <!-- 个人信息和组织关系区域 -->
+                <div class="profile-content">
+                    <!-- 个人基本信息卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">个人基本信息</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="profile-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="real-name">真实姓名</label>
+                                        <input type="text" id="real-name" name="real_name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="alias">别名</label>
+                                        <input type="text" id="alias" name="alias">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="gender">性别</label>
+                                        <select id="gender" name="gender">
+                                            <option value="male">男</option>
+                                            <option value="female">女</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="birth-date">出生日期</label>
+                                        <input type="date" id="birth-date" name="birth_date" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="age">年龄</label>
+                                        <input type="text" id="age" name="age" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="native-place">籍贯</label>
+                                        <input type="text" id="native-place" name="native_place" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="education">学历</label>
+                                        <select id="education" name="education">
+                                            <option value="primary">小学</option>
+                                            <option value="junior">初中</option>
+                                            <option value="senior">高中</option>
+                                            <option value="college">专科</option>
+                                            <option value="bachelor">本科</option>
+                                            <option value="master">硕士</option>
+                                            <option value="doctor">博士</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="position">职务</label>
+                                        <input type="text" id="position" name="position">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contact">联系方式</label>
+                                        <input type="tel" id="contact" name="contact">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group" style="text-align: left;">
+                                    <label for="address">备注</label>
+                                    <textarea id="address" name="address" rows="3"></textarea>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- 组织关系信息卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">组织关系信息</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="party-relation-form">
+                                <div class="form-group">
+                                    <label for="party-committee">党总支</label>
+                                    <select id="party-committee" name="party_committee">
+                                        <option value="">请选择...</option>
+                                        <option value="committee1">信息工程学院党总支</option>
+                                        <option value="committee2">商学院党总支</option>
+                                        <option value="committee3">文学院党总支</option>
+                                        <option value="committee4">理学院党总支</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="party-branch">党支部</label>
+                                    <select id="party-branch" name="party_branch">
+                                        <option value="">请选择...</option>
+                                        <!-- 党支部选项将根据党总支的选择动态加载 -->
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="party-status">党员状态</label>
+                                    <select id="party-status" name="party_status">
+                                        <option value="official">正式党员</option>
+                                        <option value="probationary">预备党员</option>
+                                        <option value="activist">入党积极分子</option>
+                                        <option value="applicant">入党申请人</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="join-date">入党时间</label>
+                                    <input type="date" id="join-date" name="join_date">
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" id="edit-btn" class="btn">编辑</button>
+                                    <button type="button" id="save-btn" class="btn" style="display: none;">保存</button>
+                                    <button type="button" id="cancel-btn" class="btn-outline" style="display: none;">取消</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 任务下发页面 -->

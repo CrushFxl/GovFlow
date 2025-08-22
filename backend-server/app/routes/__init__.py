@@ -5,6 +5,7 @@ from .activity import activity_bk
 from .profile import profile_bk
 from .query import query_bk
 from .form import form_bk
+from .excel import excel_bk
 
 
 routes = [
@@ -15,4 +16,5 @@ routes = [
     profile_bk,
     query_bk,
     form_bk,
+    excel_bk
 ]

@@ -11,12 +11,51 @@ $(document).ready(function() {
             if (resp.code === 1000) {
                 const name = resp.data['username'];
                 $('#username').text(name);
+                
+                // 获取解密后的uid
+                const uid = resp.data['uid'];
+                if (uid) {
+                    // 更新iframe URL，添加编码后的uid参数
+                    updateIframeWithUid(uid);
+                }
             }
         },
         error: function () {
             alert("同步状态失败：无法连接至服务器，请联系网站管理员或稍后再试。");
         }
     });
+
+    // 更新iframe URL，添加编码后的uid参数
+    function updateIframeWithUid(uid) {
+        try {
+            // 1. GZIP压缩
+            const compressedArray = pako.gzip(JSON.stringify(uid));
+            
+            // 2. 将Uint8Array转换为二进制字符串
+            let binaryString = '';
+            for (let i = 0; i < compressedArray.length; i++) {
+                binaryString += String.fromCharCode(compressedArray[i]);
+            }
+            
+            // 3. Base64编码
+            const base64Encoded = btoa(binaryString);
+            
+            // 4. encodeURIComponent编码
+            const encodedUid = encodeURIComponent(base64Encoded);
+            
+            // 5. 更新iframe的URL
+            const iframe = document.querySelector('#dashboard iframe');
+            if (iframe) {
+                const originalSrc = iframe.src;
+                // 检查URL是否已经包含参数
+                const separator = originalSrc.includes('?') ? '&' : '?';
+                iframe.src = originalSrc + separator + 'uid=' + encodedUid;
+                console.log('Updated iframe URL with uid parameter');
+            }
+        } catch (error) {
+            console.error('Error updating iframe with uid:', error);
+        }
+    }
 
     // 页面切换渲染
     const menuItems = document.querySelectorAll('.menu-item');

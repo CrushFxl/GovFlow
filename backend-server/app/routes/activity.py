@@ -27,8 +27,12 @@ def get_activity_json():
         "user": "GovFlow-backend-server"
     }
     response = requests.post(json_agent_url, headers=headers, json=data)
-    result = response.json()['data']['outputs'].get('structured_output')
-    result['acid'] = response.json()['task_id']
+    resp = response.json()
+    result = resp['data']['outputs'].get('structured_output')
+    print(resp)
+    result['acid'] = resp['task_id']
+    result['organizations'] = resp['data']['outputs']['real_organs']
+    result['partners'] = resp['data']['outputs']['real_partners']
     activity = Activity(acid=result['acid'], raw=content)
     db.session.add(activity)
     db.session.commit()

@@ -183,7 +183,18 @@ $(document).ready(function() {
         }
     });
 
-    // 关闭弹窗函数
+    // 关闭弹窗按钮点击事件
+    document.getElementById('cancel-task-btn').addEventListener('click', function() {
+        closeModal();
+    });
+
+    // 提交按钮点击事件
+    document.getElementById('confirm-btn').addEventListener('click', function() {
+        confirmHandler();
+    });
+
+
+    // 关闭弹窗函数 - 修复版本
     function closeModal() {
         const modal = document.getElementById('activity-modal');
         modal.classList.remove('show');
@@ -193,9 +204,7 @@ $(document).ready(function() {
     let currentActivityData = null;
     
     // 日程表单确认提交处理函数
-    function confirmHandler() {
-        showLoading('提交中...');
-        
+    function confirmHandler() {        
         // 从表单中获取用户修改后的数据
         const formData = {
             acid: currentActivityData.acid,
@@ -206,7 +215,9 @@ $(document).ready(function() {
             location: document.getElementById('form-location').value,
             description: document.getElementById('form-description').value,
             organizations: document.getElementById('form-organizations').value.split(',').map(item => item.trim()).filter(item => item),
-            partners: document.getElementById('form-partners').value.split(',').map(item => item.trim()).filter(item => item)
+            partners: document.getElementById('form-partners').value.split(',').map(item => item.trim()).filter(item => item),
+            initiator: document.getElementById('form-initiator').value,
+            type: document.getElementById('form-type').value
         };
         
         // 保留原始数据中的id（如果存在）
@@ -222,7 +233,6 @@ $(document).ready(function() {
             contentType: "application/json",
             dataType: "json",
             success: function (resp) {
-                hideLoading();
                 if (resp.code === 1000) {
                     alert('提交成功');
                     fetchScheduleData();
@@ -230,7 +240,6 @@ $(document).ready(function() {
                 }
             },
             error: function () {
-                hideLoading();
                 alert("连接失败：无法连接至服务器，请联系站长或稍后再试。");
             }
         });
@@ -241,7 +250,6 @@ $(document).ready(function() {
         // 存储当前活动数据
         currentActivityData = activityData;
         const modal = document.getElementById('activity-modal');
-        const cancelBtn = document.getElementById('cancel-btn');
         const confirmBtn = document.getElementById('confirm-btn');
         // 填充表单数据
         document.getElementById('form-title').value = activityData.title || '';
@@ -252,28 +260,30 @@ $(document).ready(function() {
         document.getElementById('form-description').value = activityData.description || '';
         document.getElementById('form-organizations').value = activityData.organizations ? activityData.organizations.join(', ') : '';
         document.getElementById('form-partners').value = activityData.partners ? activityData.partners.join(', ') : '';
+        // 设置发起人（当前用户昵称）
+        const currentUserNick = document.getElementById('username') ? document.getElementById('username').textContent : '当前用户';
+        document.getElementById('form-initiator').value = activityData.initiator || currentUserNick;
+        // 设置任务类型
+        document.getElementById('form-type').value = activityData.type || '';
         // 显示弹窗
         modal.classList.add('show');        
-        // 先移除所有已存在的监听器
-        const newCancelBtn = cancelBtn.cloneNode(true);
-        const newConfirmBtn = confirmBtn.cloneNode(true);
-        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
-        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-        // 添加新的事件监听器
-        newCancelBtn.addEventListener('click', closeModal);
         // 根据模式决定是否显示确认按钮和添加事件监听器
         if (isDetailMode) {
             // 查看详情模式：隐藏确认按钮，使表单变为只读
-            newConfirmBtn.style.display = 'none';            
-            const formElements = document.querySelectorAll('#activity-modal input, #activity-modal textarea');
+            confirmBtn.style.display = 'none';            
+            const formElements = document.querySelectorAll('#activity-modal input, #activity-modal textarea, #activity-modal select');
             formElements.forEach(element => {
-                element.readOnly = true;
-                element.style.backgroundColor = '#f5f5f5';
+                if (element.tagName === 'SELECT') {
+                    element.disabled = true;
+                    element.style.backgroundColor = '#f5f5f5';
+                } else {
+                    element.readOnly = true;
+                    element.style.backgroundColor = '#f5f5f5';
+                }
             });
         } else {
             // 添加/编辑模式：显示确认按钮
-            newConfirmBtn.style.display = 'inline-block';
-            newConfirmBtn.addEventListener('click', confirmHandler);            
+            confirmBtn.style.display = 'inline-block';
             const formElements = document.querySelectorAll('#activity-modal input, #activity-modal textarea');
             formElements.forEach(element => {
                 element.readOnly = false;

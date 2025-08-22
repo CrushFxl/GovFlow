@@ -240,11 +240,9 @@ $(document).ready(function() {
     function showActivityForm(activityData, isDetailMode = false) {
         // 存储当前活动数据
         currentActivityData = activityData;
-        
         const modal = document.getElementById('activity-modal');
         const cancelBtn = document.getElementById('cancel-btn');
         const confirmBtn = document.getElementById('confirm-btn');
-        
         // 填充表单数据
         document.getElementById('form-title').value = activityData.title || '';
         document.getElementById('form-date').value = activityData.date || '';

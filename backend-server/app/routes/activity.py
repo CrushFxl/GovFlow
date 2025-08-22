@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 from app.models import db
 from app.models.Activity import Activity
 

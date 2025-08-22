@@ -12,7 +12,7 @@ class ProductionConfig(BaseConfig):
         'server.socket_host': '0.0.0.0',
         'server.socket_port': 15262,
     }
-    FRONTEND_SERVER_DOMAIN = "http://127.0.0.1:15261"
+    FRONTEND_SERVER_DOMAIN = "http://10.112.101.34:15261"
     # SESSION_COOKIE_DOMAIN = ".weactive.online"
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
     SECRET_KEY = os.getenv('SECRET_KEY')

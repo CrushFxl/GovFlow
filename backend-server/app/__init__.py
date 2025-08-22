@@ -2,6 +2,8 @@ from .config import config
 from .routes import routes
 from .models import db
 
+from .models.Branch import init_branches
+
 from flask import Flask
 from flask_cors import CORS
 
@@ -15,6 +17,7 @@ def create_app(config_name):
 
     with app.app_context():
         db.create_all()
+        init_branches()     # 初始化党支部树状表
     for route in routes:    # 批量注册蓝图
         app.register_blueprint(route)
 

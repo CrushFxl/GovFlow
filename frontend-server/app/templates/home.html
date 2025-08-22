@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智慧党建系统 - PC端演示</title>
     <link rel="stylesheet" href="../static/css/activity.css">
+            <link rel="stylesheet" href="../static/css/profile.css">
     <style>
         :root {
             --primary-red: #c12c1f;
@@ -451,11 +452,11 @@
                 <li class="menu-item active" data-page="dashboard">
                     <i>★</i>工作台
                 </li>
-                <li class="menu-item" data-page="member">
-                    <i>★</i>党员管理
+                <li class="menu-item" data-page="profile">
+                    <i>★</i>党员档案 
                 </li>
                 <li class="menu-item" data-page="activity">
-                    <i>★</i>日程下发
+                    <i>★</i>任务下发
                 </li>
                 <li class="menu-item" data-page="meeting">
                     <i>★</i>三会一课
@@ -623,35 +624,173 @@
                 </div>
             </div>
 
-            <!-- 党员管理页面 -->
-            <div id="member" class="page-content">
+            <!-- 党员档案页面 -->
+            <div id="profile" class="page-content profile-page">
                 <div class="page-header">
-                    <h1 class="page-title">党员管理</h1>
-                    <div class="breadcrumb">首页 / 党员管理</div>
+                    <h1 class="page-title">党员档案</h1>
+                    <div class="breadcrumb">首页 / 党员档案</div>
                 </div>
-                <div class="placeholder-content">A</div>
+                
+                <!-- 个人信息和组织关系区域 -->
+                <div class="profile-content">
+                    <!-- 个人基本信息卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">个人基本信息</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="profile-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="real-name">真实姓名</label>
+                                        <input type="text" id="real-name" name="real_name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="alias">别名</label>
+                                        <input type="text" id="alias" name="alias">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="gender">性别</label>
+                                        <select id="gender" name="gender">
+                                            <option value="male">男</option>
+                                            <option value="female">女</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="birth-date">出生日期</label>
+                                        <input type="date" id="birth-date" name="birth_date" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="age">年龄</label>
+                                        <input type="text" id="age" name="age" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="native-place">籍贯</label>
+                                        <input type="text" id="native-place" name="native_place" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="education">学历</label>
+                                        <select id="education" name="education">
+                                            <option value="primary">小学</option>
+                                            <option value="junior">初中</option>
+                                            <option value="senior">高中</option>
+                                            <option value="college">专科</option>
+                                            <option value="bachelor">本科</option>
+                                            <option value="master">硕士</option>
+                                            <option value="doctor">博士</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="position">职务</label>
+                                        <input type="text" id="position" name="position">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contact">联系方式</label>
+                                        <input type="tel" id="contact" name="contact">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group" style="text-align: left;">
+                                    <label for="address">备注</label>
+                                    <textarea id="address" name="address" rows="3"></textarea>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- 组织关系信息卡片 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">组织关系信息</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="party-relation-form">
+                                <div class="form-group">
+                                    <label for="party-committee">党总委</label>
+                                    <select id="party-committee" name="party_committee">
+                                        <option value="">请选择党总委</option>
+                                        <option value="committee1">信息工程学院党总委</option>
+                                        <option value="committee2">商学院党总委</option>
+                                        <option value="committee3">文学院党总委</option>
+                                        <option value="committee4">理学院党总委</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="party-subcommittee">二级党组织</label>
+                                    <select id="party-subcommittee" name="party_subcommittee" disabled>
+                                        <option value="">请选择二级党组织</option>
+                                        <!-- 二级党组织选项将根据党总委的选择动态加载 -->
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="party-branch">基层党支部</label>
+                                    <select id="party-branch" name="party_branch" disabled>
+                                        <option value="">请选择基层党支部</option>
+                                        <!-- 基层党支部选项将根据二级党组织的选择动态加载 -->
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="party-status">党员状态</label>
+                                    <select id="party-status" name="party_status">
+                                        <option value="组织部管理员">组织部管理员</option>
+                                        <option value="二级党组织书记">二级党组织书记</option>
+                                        <option value="二级党组织组织员">二级党组织组织员</option>
+                                        <option value="二级党组织委员">二级党组织委员</option>
+                                        <option value="支部书记">支部书记</option>
+                                        <option value="支部委员">支部委员</option>
+                                        <option value="普通正式党员">普通正式党员</option>
+                                        <option value="预备党员">预备党员</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="join-date">入党时间</label>
+                                    <input type="date" id="join-date" name="join_date">
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" id="edit-btn" class="btn">编辑</button>
+                                    <button type="button" id="save-btn" class="btn" style="display: none;">保存</button>
+                                    <button type="button" id="cancel-btn" class="btn-outline" style="display: none;">取消</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- 日程下发页面 -->
+            <!-- 任务下发页面 -->
             <div id="activity" class="page-content">
                 <div class="page-header">
-                    <h1 class="page-title">日程下发</h1>
-                    <div class="breadcrumb">首页 / 日程下发</div>
+                    <h1 class="page-title">任务下发</h1>
+                    <div class="breadcrumb">首页 / 任务下发</div>
                 </div>
                 <!-- 操作按钮区域 -->
                 <div class="action-bar">
-                    <input id="daily-input" type="text" placeholder="在此描述日程信息，一键下发日程任务，例如：通知信工党支部今天下午两点来学院105开会，主题是党建教育" class="search-input">
+                    <input id="daily-input" type="text" placeholder="在此描述任务信息，一键下发任务，例如：通知信工党支部今天下午两点来学院105开会，主题是党建教育" class="search-input">
                     <button class="btn" id="add-activity" style="min-width: 110px">
-                        <i class="icon">+</i> 添加日程
+                        <i class="icon">+</i> 添加任务
                     </button>
                 </div>
 
-                <!-- 日程表格 -->
+                <!-- 任务表格 -->
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">日程列表</h2>
+                        <h2 class="card-title">任务列表</h2>
                         <div class="search-box">
-                            <input type="text" placeholder="搜索日程..." class="search-input">
+                            <input type="text" placeholder="搜索任务..." class="search-input">
                             <button class="btn-outline">搜索</button>
                         </div>
                     </div>
@@ -659,11 +798,11 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>日程名称</th>
+                                <th>任务名称</th>
                                 <th>时间</th>
                                 <th>地点</th>
                                 <th>参与人员</th>
-                                <th>状态</th>
+                                <th>任务状态</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
@@ -746,7 +885,7 @@
     </div>
 
 
-    <!-- 日程确认表单弹窗 -->
+    <!-- 任务确认表单弹窗 -->
     <div id="activity-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -758,6 +897,33 @@
                         <div class="form-group">
                             <label for="form-title">标题</label>
                             <input type="text" id="form-title" name="title" required>
+                        </div>
+                        <div class="two-column-container">
+                            <div class="form-group">
+                                <label for="form-initiator">发起人</label>
+                                <input type="text" id="form-initiator" name="initiator" readonly style="background-color: #f5f5f5;">
+                            </div>
+                            <div class="form-group">
+                                <label for="form-type">任务类型</label>
+                                <select id="form-type" name="type" required>
+                                    <option value="支部党员大会">支部党员大会</option>
+                                    <option value="支部委员会">支部委员会</option>
+                                    <option value="党小组会议">党小组会议</option>
+                                    <option value="党课学习">党课学习</option>
+                                    <option value="主题党日">主题党日</option>
+                                    <option value="专题会议">专题会议</option>
+                                    <option value="组织生活会">组织生活会</option>
+                                    <option value="二级党组织委员会议">二级党组织委员会议</option>
+                                    <option value="党员大会">党员大会</option>
+                                    <option value="党课学习">党课学习</option>
+                                    <option value="理论学习中心组会议">理论学习中心组会议</option>
+                                    <option value="民主生活会">民主生活会</option>
+                                    <option value="党风廉政分析会">党风廉政分析会</option>
+                                    <option value="专项工作任务上报">专项工作任务上报</option>
+                                    <option value="数据统计上报">数据统计上报</option>
+                                    <option value="其它">其它</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="form-date">日期</label>
@@ -778,10 +944,6 @@
                             <input type="text" id="form-location" name="location" required>
                         </div>
                         <div class="form-group">
-                            <label for="form-description">描述</label>
-                            <textarea id="form-description" name="description" rows="4"></textarea>
-                        </div>
-                        <div class="form-group">
                             <label for="form-organizations">参与组织</label>
                             <input type="text" id="form-organizations" name="organizations">
                         </div>
@@ -789,11 +951,15 @@
                             <label for="form-partners">参与人员</label>
                             <input type="text" id="form-partners" name="partners">
                         </div>
+                        <div class="form-group">
+                            <label for="form-description">描述</label>
+                            <textarea id="form-description" name="description" rows="4"></textarea>
+                        </div>
                     </form>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="cancel-btn" class="btn-cancel">取消</button>
+                <button id="cancel-task-btn" class="btn-cancel">取消</button>
                 <button id="confirm-btn" class="btn-confirm">确认</button>
             </div>
         </div>
@@ -803,6 +969,7 @@
     <script src="../static/js/home.js" defer></script>
     <script src="../static/js/dashboard.js" defer></script>
     <script src="../static/js/member.js" defer></script>
+    <script src="../static/js/profile.js" defer></script>
     <script src="../static/js/activity.js" defer></script>
     <script src="../static/js/meeting.js" defer></script>
     <script src="../static/js/fee.js" defer></script>

@@ -65,9 +65,9 @@ $(document).ready(function() {
                     dashboardModule.init();
                 }
                 break;
-            case 'member':
-                if (window.memberModule && window.memberModule.init) {
-                    memberModule.init();
+            case 'profile':
+                if (window.profileModule && window.profileModule.init) {
+                    profileModule.init();
                 }
                 break;
             case 'activity':

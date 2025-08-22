@@ -70,6 +70,12 @@ $(document).ready(function() {
                     profileModule.init();
                 }
                 break;
+            case 'cloud-form':
+                // 云表单页面初始化
+                if (window.cloudFormModule && window.cloudFormModule.init) {
+                    cloudFormModule.init();
+                }
+                break;
             case 'activity':
                 if (window.activityModule && window.activityModule.init) {
                     activityModule.init();

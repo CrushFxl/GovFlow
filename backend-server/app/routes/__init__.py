@@ -4,6 +4,7 @@ from .auth import register_bk
 from .activity import activity_bk
 from .profile import profile_bk
 from .query import query_bk
+from .form import form_bk
 
 
 routes = [
@@ -13,4 +14,5 @@ routes = [
     activity_bk,
     profile_bk,
     query_bk,
+    form_bk,
 ]

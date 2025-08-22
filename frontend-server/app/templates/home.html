@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智慧党建系统 - PC端演示</title>
     <link rel="stylesheet" href="../static/css/activity.css">
-            <link rel="stylesheet" href="../static/css/profile.css">
+    <link rel="stylesheet" href="../static/css/profile.css">
+    <link rel="stylesheet" href="../static/css/cloud-form.css">
+
     <style>
         :root {
             --primary-red: #c12c1f;
@@ -452,6 +454,9 @@
                 <li class="menu-item active" data-page="dashboard">
                     <i>★</i>工作台
                 </li>
+                <li class="menu-item" data-page="cloud-form">
+                    <i>★</i>云表单 
+                </li>
                 <li class="menu-item" data-page="profile">
                     <i>★</i>党员档案 
                 </li>
@@ -819,6 +824,79 @@
                 </div>
             </div>
 
+            <!-- 云表单页面 -->
+            <div id="cloud-form" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">云表单</h1>
+                    <div class="breadcrumb">首页 / 云表单</div>
+                </div>
+                
+                <div class="action-bar">
+                    <button id="add-form-btn" class="btn btn-primary">添加新表单</button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>表单名称</th>
+                                <th>描述</th>
+                                <th>创建者</th>
+                                <th>创建时间</th>
+                                <th>更新时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="form-list-body">
+                            <!-- 表单列表内容将通过JavaScript动态加载 -->
+                            <tr class="no-data">
+                                <td colspan="6" class="text-center">暂无表单数据</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 表单创建/编辑模态框 -->
+                <div id="form-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="modal-title">添加新表单</h3>
+                            <button id="close-modal" class="close-btn">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="form-form">
+                                <div class="form-group">
+                                    <label for="form-name">表单名称 <span class="required">*</span></label>
+                                    <input type="text" id="form-name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="form-description">表单描述</label>
+                                    <textarea id="form-description" class="form-control" rows="3"></textarea>
+                                </div>
+                                
+                                <!-- 控件列表 -->
+                                <div class="form-group">
+                                    <label>表单控件</label>
+                                    <div id="controls-container">
+                                        <!-- 控件将通过JavaScript动态添加 -->
+                                    </div>
+                                    <div class="control-actions">
+                                        <button type="button" id="add-select-control" class="btn btn-sm btn-outline">添加选择题</button>
+                                        <button type="button" id="add-radio-control" class="btn btn-sm btn-outline">添加判断题</button>
+                                        <button type="button" id="add-text-control" class="btn btn-sm btn-outline">添加填空题</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="cancel-form" class="btn btn-outline">取消</button>
+                            <button id="save-form" class="btn btn-primary">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 三会一课页面 -->
             <div id="meeting" class="page-content">
                 <div class="page-header">
@@ -978,5 +1056,6 @@
     <script src="../static/js/review.js" defer></script>
     <script src="../static/js/statistics.js" defer></script>
     <script src="../static/js/settings.js" defer></script>
+    <script src="../static/js/cloud-form.js" defer></script>
 </body>
 </html>

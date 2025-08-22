@@ -7,10 +7,10 @@ from flask import Blueprint, request, session
 
 
 activity_bk = Blueprint('activity', __name__, url_prefix='/activity')
+JSON_AGENT_API_KEY = os.getenv('JSON_AGENT_API_KEY')
 
-API_KEY = 'app-4a1hijBsd0XBqDLXwJfkoKen'        # 警告，生产环境下请删除
 headers = {
-    'Authorization': f'Bearer {API_KEY}',
+    'Authorization': f'Bearer {JSON_AGENT_API_KEY}',
     'Content-Type': 'application/json'
 }
 json_agent_url = 'http://127.0.0.1/v1/workflows/run'

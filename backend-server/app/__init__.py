@@ -12,6 +12,8 @@ def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     app.config['SESSION_TYPE'] = 'filesystem'
+    # 设置cookie的SameSite属性为None，以支持跨站点使用
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
     CORS(app, supports_credentials=True)
     db.init_app(app)
 

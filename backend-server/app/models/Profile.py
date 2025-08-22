@@ -14,6 +14,7 @@ class Profile(db.Model):
     contact = db.Column('contact', db.Text, nullable=True)
     address = db.Column('address', db.Text, nullable=True)  # 备注字段
     party_committee = db.Column('party_committee', db.Text, nullable=True)
+    party_subcommittee = db.Column('party_subcommittee', db.Text, nullable=True)
     party_branch = db.Column('party_branch', db.Text, nullable=True)
     party_status = db.Column('party_status', db.Text, nullable=True)
     join_date = db.Column('join_date', db.Text, nullable=True)

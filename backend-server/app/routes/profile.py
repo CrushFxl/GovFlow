@@ -66,14 +66,25 @@ def get_profile():
 @profile_bk.route('/branches', methods=['GET'])
 def get_branches():
     try:
-        # 获取所有党总支
+        # 获取所有党总委
         committees = Branch.query.filter_by(level=1).all()
         committees_data = []
         for committee in committees:
-            # 获取该党总支下的所有党支部
-            branches = Branch.query.filter_by(parent_id=committee.id).all()
             committee_info = to_json(committee)
-            committee_info['branches'] = to_json(branches)
+            
+            # 获取该党总委下的所有二级党组织
+            subcommittees = Branch.query.filter_by(parent_id=committee.id).all()
+            committee_info['subcommittees'] = []
+            
+            for subcommittee in subcommittees:
+                subcommittee_info = to_json(subcommittee)
+                
+                # 获取该二级党组织下的所有基层党支部
+                branches = Branch.query.filter_by(parent_id=subcommittee.id).all()
+                subcommittee_info['branches'] = to_json(branches)
+                
+                committee_info['subcommittees'].append(subcommittee_info)
+            
             committees_data.append(committee_info)
         return jsonify({'code': 1000, 'msg': '成功', 'data': committees_data})
     except Exception as e:

@@ -5,51 +5,94 @@ $(document).ready(function() {
         console.log('党员档案页面初始化');
         const URL = $('#URL').text();
         // 存储从后端获取的组织结构数据
-        let branchData = {};  // 格式: {committeeId: [{value: branchId, text: branchName}, ...]}
-        let allCommittees = [];  // 存储所有党总支信息
+        let branchData = { committees: [], subcommittees: {}, branches: {} };  // 格式: {committees: [], subcommittees: {committeeId: [...]}, branches: {subcommitteeId: [...]}}
+        let allCommittees = [];  // 存储所有党总委信息
         // 从后端获取组织结构数据
         function fetchBranchData() {
-            return $.ajax({
-                url: URL + '/profile/branches',
-                xhrFields: {withCredentials: true},
-                type: 'GET',
-                dataType: 'json'
-            }).done(function(resp) {
-                if (resp.code === 1000) {
-                    // 构建组织结构映射
-                    resp.data.forEach(committee => {
-                        allCommittees.push({
-                            value: committee.value,
-                            text: committee.name
+                return $.ajax({
+                    url: URL + '/profile/branches',
+                    xhrFields: {withCredentials: true},
+                    type: 'GET',
+                    dataType: 'json'
+                }).done(function(resp) {
+                    if (resp.code === 1000) {
+                        // 构建三级组织结构映射
+                        resp.data.forEach(committee => {
+                            // 保存党总委信息
+                            const committeeInfo = {
+                                value: committee.value,
+                                text: committee.name
+                            };
+                            branchData.committees.push(committeeInfo);
+                            allCommittees.push(committeeInfo);
+                             
+                            // 处理二级党组织和基层党支部
+                            if (committee.subcommittees) {
+                                committee.subcommittees.forEach(subcommittee => {
+                                    // 保存二级党组织信息
+                                    if (!branchData.subcommittees[committee.value]) {
+                                        branchData.subcommittees[committee.value] = [];
+                                    }
+                                    branchData.subcommittees[committee.value].push({
+                                        value: subcommittee.value,
+                                        text: subcommittee.name
+                                    });
+                                    
+                                    // 保存基层党支部信息
+                                    if (subcommittee.branches) {
+                                        branchData.branches[subcommittee.value] = subcommittee.branches.map(branch => ({
+                                            value: branch.value,
+                                            text: branch.name
+                                        }));
+                                    }
+                                });
+                            }
                         });
-                        branchData[committee.value] = committee.branches.map(branch => ({
-                            value: branch.value,
-                            text: branch.name
-                        }));
-                    });
-                    // 填充党总支下拉框
-                    populateCommittees();
-                } else {
-                    console.error('获取组织结构数据失败:', resp.msg);
-                }
-            }).fail(function() {
-                console.error('获取组织结构数据失败：无法连接至服务器');
-            });
-        }
+                        // 填充党总委下拉框
+                        populateCommittees();
+                    } else {
+                        console.error('获取组织结构数据失败:', resp.msg);
+                    }
+                }).fail(function() {
+                    console.error('获取组织结构数据失败：无法连接至服务器');
+                });
+            }
         
-        // 填充党总支下拉框
+        // 填充党总委下拉框
         function populateCommittees() {
             const committeeSelect = $('#party-committee');
             committeeSelect.empty();
-            committeeSelect.append('<option value="">请选择...</option>');
+            committeeSelect.append('<option value="">请选择党总委</option>');
             
             allCommittees.forEach(committee => {
                 committeeSelect.append(`<option value="${committee.value}">${committee.text}</option>`);
             });
         }
+
+        // 加载二级党组织
+        function loadPartySubcommittees(committeeId) {
+            const subcommitteeSelect = $('#party-subcommittee');
+            subcommitteeSelect.empty();
+            subcommitteeSelect.append('<option value="">请选择二级党组织</option>');
+            
+            // 清空并禁用基层党支部
+            const branchSelect = $('#party-branch');
+            branchSelect.empty();
+            branchSelect.append('<option value="">请选择基层党支部</option>');
+            branchSelect.prop('disabled', true);
+            
+            if (committeeId && branchData.subcommittees[committeeId]) {
+                branchData.subcommittees[committeeId].forEach(subcommittee => {
+                    subcommitteeSelect.append(`<option value="${subcommittee.value}">${subcommittee.text}</option>`);
+                });
+                subcommitteeSelect.prop('disabled', false);
+            } else {
+                subcommitteeSelect.prop('disabled', true);
+            }
+        }
         
         // 填充表单数据
-        function populateForm(data) {
+        function populateForm(data, isReadOnly) {
             // 个人基本信息表单
             $('#real-name').val(data.real_name || '');
             $('#alias').val(data.alias || '');
@@ -71,15 +114,43 @@ $(document).ready(function() {
             // 组织关系信息表单
             $('#party-committee').val(data.party_committee || '');
             
-            // 设置党支部
-            if (data.party_committee && data.party_branch) {
-                loadPartyBranches(data.party_committee);
+            // 设置党总委、二级党组织和基层党支部
+            if (data.party_committee) {
+                // 先加载二级党组织
+                loadPartySubcommittees(data.party_committee);
+                
+                // 使用 setTimeout 确保二级党组织数据已加载
                 setTimeout(() => {
-                    $('#party-branch').val(data.party_branch);
-                }, 10);
+                    if (data.party_subcommittee) {
+                        $('#party-subcommittee').val(data.party_subcommittee);
+                        // 再加载基层党支部
+                        loadPartyBranches(data.party_subcommittee);
+                        
+                        // 使用 setTimeout 确保基层党支部数据已加载并设置只读状态
+                        setTimeout(() => {
+                            if (data.party_branch) {
+                                $('#party-branch').val(data.party_branch);
+                            }
+                            // 确保表单处于正确的只读状态
+                            if (isReadOnly !== undefined) {
+                                setFormReadOnly(isReadOnly);
+                            }
+                        }, 5);
+                    } else {
+                        // 如果没有二级党组织数据，也确保表单处于正确的只读状态
+                        if (isReadOnly !== undefined) {
+                            setFormReadOnly(isReadOnly);
+                        }
+                    }
+                }, 5);
+            } else {
+                // 如果没有党总委数据，也确保表单处于正确的只读状态
+                if (isReadOnly !== undefined) {
+                    setFormReadOnly(isReadOnly);
+                }
             }
             
-            $('#party-status').val(data.party_status || 'official');
+            $('#party-status').val(data.party_status || '普通正式党员');
             $('#join-date').val(data.join_date || '');
             
             // 如果有党支部名称，显示出来
@@ -108,16 +179,19 @@ $(document).ready(function() {
             }
             return age + '岁';
         }
-        // 加载党支部选项
-        function loadPartyBranches(committeeId) {
+        // 加载基层党支部选项
+        function loadPartyBranches(subcommitteeId) {
             const branchSelect = $('#party-branch');
             branchSelect.empty();
-            branchSelect.append('<option value="">请选择...</option>');
+            branchSelect.append('<option value="">请选择基层党支部</option>');
             
-            if (committeeId && branchData[committeeId]) {
-                branchData[committeeId].forEach(branch => {
+            if (subcommitteeId && branchData.branches[subcommitteeId]) {
+                branchData.branches[subcommitteeId].forEach(branch => {
                     branchSelect.append(`<option value="${branch.value}">${branch.text}</option>`);
                 });
+                branchSelect.prop('disabled', false);
+            } else {
+                branchSelect.prop('disabled', true);
             }
         }
         
@@ -171,8 +245,15 @@ $(document).ready(function() {
             }
             
             if (!committee) {
-                alert('请选择党总支');
+                alert('请选择党总委');
                 $('#party-committee').focus();
+                return;
+            }
+            
+            const subcommittee = $('#party-subcommittee').val();
+            if (!subcommittee) {
+                alert('请选择二级党组织');
+                $('#party-subcommittee').focus();
                 return;
             }
             
@@ -188,6 +269,7 @@ $(document).ready(function() {
                 contact: $('#contact').val().trim(),
                 address: $('#address').val().trim(),
                 party_committee: committee,
+                party_subcommittee: subcommittee,
                 party_branch: $('#party-branch').val(),
                 party_status: status,
                 join_date: $('#join-date').val()
@@ -245,26 +327,34 @@ $(document).ready(function() {
                 }
             });
             
-            // 党总支变化事件
+            // 党总委变化事件
             $('#party-committee').on('change', function() {
                 const committeeId = $(this).val();
-                loadPartyBranches(committeeId);
+                loadPartySubcommittees(committeeId);
                 // 移除党支部名称显示
                 $('#branch-name-display').remove();
             });
             
-            // 党支部变化事件
+            // 二级党组织变化事件
+            $('#party-subcommittee').on('change', function() {
+                const subcommitteeId = $(this).val();
+                loadPartyBranches(subcommitteeId);
+                // 移除党支部名称显示
+                $('#branch-name-display').remove();
+            });
+            
+            // 基层党支部变化事件
             $('#party-branch').on('change', function() {
                 const branchId = $(this).val();
-                const committeeId = $('#party-committee').val();
+                const subcommitteeId = $('#party-subcommittee').val();
                 
-                // 如果有选择党支部，显示名称
-                if (branchId && committeeId && branchData[committeeId]) {
-                    const selectedBranch = branchData[committeeId].find(branch => branch.value === branchId);
+                // 如果有选择基层党支部，显示名称
+                if (branchId && subcommitteeId && branchData.branches[subcommitteeId]) {
+                    const selectedBranch = branchData.branches[subcommitteeId].find(branch => branch.value === branchId);
                     if (selectedBranch) {
                         if ($('#branch-name-display').length === 0) {
                             const branchSelect = $(this);
-                            const nameDisplay = $(`<span id="branch-name-display" class="ml-2 text-muted">(${selectedBranch.text})</span>`);
+                            const nameDisplay = $(`<span id="branch-name-display" class="ml-2 text-muted" style="display: none">(${selectedBranch.text})</span>`);
                             branchSelect.after(nameDisplay);
                         } else {
                             $('#branch-name-display').text(`(${selectedBranch.text})`);
@@ -289,10 +379,10 @@ $(document).ready(function() {
                     let isReadOnly = true;
                     if (resp.code === 1000) {
                         // 如果有数据，使用后端返回的数据
-                        populateForm(resp.data || {});
+                        populateForm(resp.data || {}, isReadOnly);
                     } else {
                         // 如果没有数据，渲染空表单
-                        populateForm({});
+                        populateForm({}, isReadOnly);
                         // 没有数据时默认为可编辑状态
                         isReadOnly = false;
                     }

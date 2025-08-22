@@ -715,31 +715,43 @@
                         <div class="card-body">
                             <form id="party-relation-form">
                                 <div class="form-group">
-                                    <label for="party-committee">党总支</label>
+                                    <label for="party-committee">党总委</label>
                                     <select id="party-committee" name="party_committee">
-                                        <option value="">请选择...</option>
-                                        <option value="committee1">信息工程学院党总支</option>
-                                        <option value="committee2">商学院党总支</option>
-                                        <option value="committee3">文学院党总支</option>
-                                        <option value="committee4">理学院党总支</option>
+                                        <option value="">请选择党总委</option>
+                                        <option value="committee1">信息工程学院党总委</option>
+                                        <option value="committee2">商学院党总委</option>
+                                        <option value="committee3">文学院党总委</option>
+                                        <option value="committee4">理学院党总委</option>
                                     </select>
                                 </div>
                                 
                                 <div class="form-group">
-                                    <label for="party-branch">党支部</label>
-                                    <select id="party-branch" name="party_branch">
-                                        <option value="">请选择...</option>
-                                        <!-- 党支部选项将根据党总支的选择动态加载 -->
+                                    <label for="party-subcommittee">二级党组织</label>
+                                    <select id="party-subcommittee" name="party_subcommittee" disabled>
+                                        <option value="">请选择二级党组织</option>
+                                        <!-- 二级党组织选项将根据党总委的选择动态加载 -->
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="party-branch">基层党支部</label>
+                                    <select id="party-branch" name="party_branch" disabled>
+                                        <option value="">请选择基层党支部</option>
+                                        <!-- 基层党支部选项将根据二级党组织的选择动态加载 -->
                                     </select>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="party-status">党员状态</label>
                                     <select id="party-status" name="party_status">
-                                        <option value="official">正式党员</option>
-                                        <option value="probationary">预备党员</option>
-                                        <option value="activist">入党积极分子</option>
-                                        <option value="applicant">入党申请人</option>
+                                        <option value="组织部管理员">组织部管理员</option>
+                                        <option value="二级党组织书记">二级党组织书记</option>
+                                        <option value="二级党组织组织员">二级党组织组织员</option>
+                                        <option value="二级党组织委员">二级党组织委员</option>
+                                        <option value="支部书记">支部书记</option>
+                                        <option value="支部委员">支部委员</option>
+                                        <option value="普通正式党员">普通正式党员</option>
+                                        <option value="预备党员">预备党员</option>
                                     </select>
                                 </div>
                                 

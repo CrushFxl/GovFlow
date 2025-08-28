@@ -11,6 +11,3 @@ class Todo(db.Model):
     create_user_uid = db.Column('create_user_uid', db.Integer, nullable=False)
     accept_user_uid = db.Column('accept_user_uid', db.Integer, nullable=False)
     status = db.Column('status', db.Integer, nullable=False, default=0)
-    
-    def __repr__(self):
-        return f'<Todo {self.id}: {self.title}>'

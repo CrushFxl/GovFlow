@@ -13,24 +13,18 @@ profile_bk = Blueprint('profile', __name__, url_prefix='/profile')
 @profile_bk.route('/modify', methods=['POST', 'PUT'])
 def modify_or_add_profile():
     try:
-        # 获取当前登录用户的uid
         user_id = session.get('uid')
-        if not user_id:
-            return jsonify({'code': 401, 'msg': '未登录'})
-        # 获取请求数据
         data = request.get_json()
-        if not data:
-            return jsonify({'code': 400, 'msg': '请求数据为空'})
-        # 查找当前用户的profile
         profile = Profile.query.filter_by(uid=user_id).first()
         if profile:
-            # 更新现有profile
             for key, value in data.items():
                 if hasattr(profile, key):
                     setattr(profile, key, value)
         else:
-            # 创建新profile
             data['uid'] = user_id
+            # 对有职级人员授予权限
+            if data['party_status'] not in ['普通正式党员', '预备党员']:
+                data['admin_status'] = 1
             profile = Profile(**data)
             db.session.add(profile)
         # 提交更改

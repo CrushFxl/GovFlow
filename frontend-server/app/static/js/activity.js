@@ -217,7 +217,8 @@ $(document).ready(function() {
             organizations: document.getElementById('form-organizations').value.split(',').map(item => item.trim()).filter(item => item),
             partners: document.getElementById('form-partners').value.split(',').map(item => item.trim()).filter(item => item),
             initiator: document.getElementById('form-initiator').value,
-            type: document.getElementById('form-type').value
+            type: document.getElementById('form-type').value,
+            need_attachment: document.getElementById('form-need-attachment').checked
         };
         
         // 保留原始数据中的id（如果存在）
@@ -265,6 +266,8 @@ $(document).ready(function() {
         document.getElementById('form-initiator').value = activityData.initiator || currentUserNick;
         // 设置任务类型
         document.getElementById('form-type').value = activityData.type || '';
+        // 设置是否需要附件
+        document.getElementById('form-need-attachment').checked = activityData.need_attachment || false;
         // 显示弹窗
         modal.classList.add('show');        
         // 根据模式决定是否显示确认按钮和添加事件监听器

@@ -1,23 +1,26 @@
 $(document).ready(function() {
     const URL = $('#URL').text();
+    window.isForcedProfile = false; // 标记是否强制在档案页面（全局变量）
 
     // 初始化用户信息
     $.ajax({
-        url: URL + "/user/get_info",
+        url: URL + "/user/get_nick",
         xhrFields: {withCredentials: true},
         type: "POST",
         dataType: "json",
         success: function (resp) {
             if (resp.code === 1000) {
-                const name = resp.data['username'];
+                const name = resp.data['nick'];
                 $('#username').text(name);
-                
                 // 获取解密后的uid
                 const uid = resp.data['uid'];
                 if (uid) {
                     // 更新iframe URL，添加编码后的uid参数
                     updateIframeWithUid(uid);
                 }
+                
+                // 检查用户档案是否完整
+                checkUserProfileComplete();
             }
         },
         error: function () {
@@ -25,24 +28,45 @@ $(document).ready(function() {
         }
     });
 
+    // 检查用户档案是否完整
+    function checkUserProfileComplete() {
+        $.ajax({
+            url: URL + "/user/check_profile_complete",
+            xhrFields: {withCredentials: true},
+            type: "GET",
+            dataType: "json",
+            success: function (resp) {
+                if (resp.code === 1000 && !resp.data.is_complete) {
+                    // 档案不完整，强制跳转到档案页面
+                    window.isForcedProfile = true;
+                    // 找到档案页面的菜单项并点击
+                    const profileMenuItem = document.querySelector('.menu-item[data-page="profile"]');
+                    if (profileMenuItem) {
+                        profileMenuItem.click();
+                        alert("您的党员档案信息尚未完善，需要先完善档案才能使用其它功能噢！");
+                    }
+                }
+            },
+            error: function () {
+                console.log("检查档案完整性失败");
+            }
+        });
+    }
+
     // 更新iframe URL，添加编码后的uid参数
     function updateIframeWithUid(uid) {
         try {
             // 1. GZIP压缩
             const compressedArray = pako.gzip(JSON.stringify(uid));
-            
             // 2. 将Uint8Array转换为二进制字符串
             let binaryString = '';
             for (let i = 0; i < compressedArray.length; i++) {
                 binaryString += String.fromCharCode(compressedArray[i]);
             }
-            
             // 3. Base64编码
             const base64Encoded = btoa(binaryString);
-            
             // 4. encodeURIComponent编码
             const encodedUid = encodeURIComponent(base64Encoded);
-            
             // 5. 更新iframe的URL
             const iframe = document.querySelector('#dashboard iframe');
             if (iframe) {
@@ -61,12 +85,18 @@ $(document).ready(function() {
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
         item.addEventListener('click', function() {
+            // 获取要显示的页面ID
+            const pageId = this.getAttribute('data-page');
+            // 如果被强制在档案页面且尝试离开档案页面，则阻止切换
+            if (window.isForcedProfile && pageId !== 'profile') {
+                alert('您的党员档案信息尚未完善，需要先完善档案才能使用其它功能噢！');
+                return;
+            }
+            
             // 移除所有菜单项的active类
             menuItems.forEach(i => i.classList.remove('active'));
             // 为当前点击的菜单项添加active类
             this.classList.add('active');
-            // 获取要显示的页面ID
-            const pageId = this.getAttribute('data-page');
             // 隐藏所有页面内容
             document.querySelectorAll('.page-content').forEach(page => {
                 page.classList.remove('active');

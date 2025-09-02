@@ -118,15 +118,11 @@ $(document).ready(function() {
             if (data.party_committee) {
                 // 先加载二级党组织
                 loadPartySubcommittees(data.party_committee);
-                
-                // 使用 setTimeout 确保二级党组织数据已加载
                 setTimeout(() => {
                     if (data.party_subcommittee) {
                         $('#party-subcommittee').val(data.party_subcommittee);
                         // 再加载基层党支部
                         loadPartyBranches(data.party_subcommittee);
-                        
-                        // 使用 setTimeout 确保基层党支部数据已加载并设置只读状态
                         setTimeout(() => {
                             if (data.party_branch) {
                                 $('#party-branch').val(data.party_branch);
@@ -287,8 +283,9 @@ $(document).ready(function() {
                 dataType: 'json',
                 success: function(resp) {
                     if (resp.code === 1000) {
-                        alert('保存成功');
+                        alert('保存成功！');
                         setFormReadOnly(true);
+                        checkProfileCompleteAfterSave();
                     } else {
                         alert('保存失败：' + (resp.msg || '未知错误'));
                     }
@@ -297,6 +294,27 @@ $(document).ready(function() {
                     alert('保存失败：无法连接至服务器，请稍后再试。');
                 }
             });
+        
+        // 保存后检查档案是否完整
+        function checkProfileCompleteAfterSave() {
+            $.ajax({
+                url: URL + '/user/check_profile_complete',
+                xhrFields: {withCredentials: true},
+                type: 'GET',
+                dataType: 'json',
+                success: function (resp) {
+                    if (resp.code === 1000 && resp.data.is_complete) {
+                        if (window.isForcedProfile !== undefined) {
+                            window.isForcedProfile = false;
+                            alert('您的党员档案信息已完善，现在可以浏览其他页面了。');
+                        }
+                    }
+                },
+                error: function () {
+                    console.log("检查档案完整性失败");
+                }
+            });
+        }
         }
         
         // 绑定事件监听

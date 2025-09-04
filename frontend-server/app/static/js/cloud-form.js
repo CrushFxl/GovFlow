@@ -232,8 +232,10 @@ const cloudFormModule = {
                         <input type="text" class="form-control control-label" value="${control.label || ''}" data-index="${index}">
                     </div>
                     <div class="form-group">
-                        <label>必填</label>
-                        <input type="checkbox" class="control-required" ${control.required ? 'checked' : ''} data-index="${index}">
+                        <label class="control-checkbox">
+                            必填
+                            <input type="checkbox" class="control-required" ${control.required ? 'checked' : ''} data-index="${index}">
+                        </label>
                     </div>
             `;
             

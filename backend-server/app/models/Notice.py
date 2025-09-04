@@ -11,5 +11,5 @@ class Notice(db.Model):
     organizations = db.Column('organizations', db.JSON, nullable=False)
     created_uid = db.Column('created_uid', db.Integer, nullable=False)
     created_time = db.Column('created_time', db.Text, nullable=False)
-    next_uid = db.Column('next_uid', db.Text, nullable=False)
+    next_uid = db.Column('next_uid', db.Integer, nullable=False)
     status = db.Column('status', db.Integer, nullable=False, default=0)

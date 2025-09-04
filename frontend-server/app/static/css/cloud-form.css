@@ -114,6 +114,20 @@
     color: #333;
 }
 
+/* 必填勾选框样式 - 使其与文字在同一行 */
+.control-required {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 6px;
+}
+
+/* 确保label内的勾选框样式正确 */
+.form-group label.control-checkbox {
+    display: inline-block;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
 .form-control {
     width: 100%;
     padding: 8px 12px;

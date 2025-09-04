@@ -66,6 +66,17 @@
             padding: 5px 10px;
             border-radius: 4px;
             transition: background-color 0.3s;
+            position: relative;
+        }
+
+        .nav-menu a .badge {
+            background-color: white;
+            color: var(--primary-red);
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
         }
 
         .nav-menu a:hover {
@@ -432,11 +443,9 @@
     <nav class="top-nav">
         <div class="logo">智慧党建系统</div>
         <ul class="nav-menu">
-            <li><a href="#">首页</a></li>
-            <li><a href="#">组织管理</a></li>
-            <li><a href="#">党员发展</a></li>
-            <li><a href="#">学习教育</a></li>
-            <li><a href="#">数据分析</a></li>
+            <li><a href="#">未读消息</a></li>
+            <li><a href="#">待办事项</a></li>
+            <li><a href="#">我发布的</a></li>
         </ul>
         <div class="user-info">
             <div class="user-avatar">党</div>
@@ -593,10 +602,6 @@
                                     <label for="party-committee">党总委</label>
                                     <select id="party-committee" name="party_committee">
                                         <option value="">请选择党总委</option>
-                                        <option value="committee1">信息工程学院党总委</option>
-                                        <option value="committee2">商学院党总委</option>
-                                        <option value="committee3">文学院党总委</option>
-                                        <option value="committee4">理学院党总委</option>
                                     </select>
                                 </div>
                                 
@@ -934,5 +939,6 @@
     <script src="../static/js/statistics.js" defer></script>
     <script src="../static/js/settings.js" defer></script>
     <script src="../static/js/cloud-form.js" defer></script>
+    <script src="../static/js/nav.js" defer></script>
 </body>
 </html>

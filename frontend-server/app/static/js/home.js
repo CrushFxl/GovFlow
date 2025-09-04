@@ -14,6 +14,7 @@ $(document).ready(function() {
                 $('#username').text(name);
                 // 获取解密后的uid
                 const uid = resp.data['uid'];
+                localStorage.setItem('uid', uid);
                 if (uid) {
                     // 更新iframe URL，添加编码后的uid参数
                     updateIframeWithUid(uid);
@@ -119,6 +120,7 @@ $(document).ready(function() {
             dataType: "json",
             success: function (resp) {
                 window.location.replace('/login');
+                localStorage.removeItem('uid');
             },
             error: function () {
                 alert("退出登陆失败：无法连接至服务器。");

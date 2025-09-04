@@ -47,7 +47,6 @@
     border-radius: 4px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     width: 90%;
-    max-width: 700px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
@@ -236,4 +235,23 @@
     padding: 4px 12px;
     font-size: 12px;
     margin-right: 4px;
+}
+
+/* 云表单专用圆角按钮样式 - 新增样式，不影响其他页面 */
+.cloud-form-btn,
+#cloud-form .btn,
+#cloud-form .btn-sm,
+#cloud-form .btn-outline,
+#cloud-form .tn {
+    border-radius: 6px !important;
+}
+
+/* 为云表单中特定的按钮组合添加圆角效果 */
+#cloud-form .btn.btn-sm,
+#cloud-form .btn.btn-outline,
+#cloud-form .btn-sm.btn-outline,
+#cloud-form .tn.btn-sm,
+#cloud-form .tn.btn-outline,
+#cloud-form .tn.btn-sm.btn-outline {
+    border-radius: 6px !important;
 }

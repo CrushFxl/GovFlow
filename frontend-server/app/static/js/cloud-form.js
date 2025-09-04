@@ -1,11 +1,60 @@
 // 云表单页面模块
+// 时间格式化函数，将时间字符串转换为 yyyy-mm-dd hh:mm 格式
+function formatDateTime(dateString) {
+    try {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+    } catch (error) {
+        console.error('时间格式化失败:', error);
+        return dateString; // 如果格式化失败，返回原始字符串
+    }
+}
+
+// 中文字符串截断函数，最多显示15个中文字，多余用...表示
+function truncateChinese(str, maxLength = 15) {
+    if (!str || typeof str !== 'string') {
+        return '-';
+    }
+    const chineseRegex = /[\u4e00-\u9fa5]/g;
+    const chineseMatches = str.match(chineseRegex);
+    if (chineseMatches && chineseMatches.length > maxLength) {
+        let chineseCount = 0;
+        let result = '';
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+            if (/[\u4e00-\u9fa5]/.test(char)) {
+                chineseCount++;
+                if (chineseCount > maxLength) {
+                    break;
+                }
+            }
+            result += char;
+        }
+        return result + '...';
+    } else if (str.length > maxLength * 2) {
+        return str.substring(0, maxLength * 2) + '...';
+    }
+    return str;
+}
+
 const cloudFormModule = {
     currentFormId: null,
     controls: [],
+    isSubmitting: false,
+    // 分页参数
+    itemsPerPage: 6,
+    currentPage: 1,
+    totalPages: 0,
+    allForms: [],
     
     init: function() {
         console.log('云表单页面初始化');
-        
         // 获取DOM元素
         this.$addFormBtn = document.getElementById('add-form-btn');
         this.$formModal = document.getElementById('form-modal');
@@ -18,10 +67,12 @@ const cloudFormModule = {
         this.$addTextControl = document.getElementById('add-text-control');
         this.$controlsContainer = document.getElementById('controls-container');
         this.$modalTitle = document.getElementById('modal-title');
-        
+        // 分页相关DOM元素
+        this.$prevPageBtn = document.getElementById('form-prev-page');
+        this.$nextPageBtn = document.getElementById('form-next-page');
+        this.$pageInfo = document.getElementById('form-page-info');
         // 绑定事件监听
         this.bindEvents();
-        
         // 加载表单列表
         this.loadFormList();
     },
@@ -29,47 +80,45 @@ const cloudFormModule = {
     bindEvents: function() {
         // 添加新表单按钮点击事件
         this.$addFormBtn.addEventListener('click', () => this.openAddFormModal());
-        
         // 关闭模态框事件
         this.$closeModal.addEventListener('click', () => this.closeFormModal());
         this.$cancelForm.addEventListener('click', () => this.closeFormModal());
-        
         // 保存表单事件
         this.$saveForm.addEventListener('click', () => this.saveForm());
-        
         // 添加控件按钮点击事件
         this.$addSelectControl.addEventListener('click', () => this.addControl('select'));
         this.$addRadioControl.addEventListener('click', () => this.addControl('radio'));
         this.$addTextControl.addEventListener('click', () => this.addControl('text'));
-        
-        // 点击模态框外部关闭模态框
-        this.$formModal.addEventListener('click', (e) => {
-            if (e.target === this.$formModal) {
-                this.closeFormModal();
-            }
-        });
+        // 分页按钮点击事件
+        this.$prevPageBtn.addEventListener('click', () => this.goToPrevPage());
+        this.$nextPageBtn.addEventListener('click', () => this.goToNextPage());
     },
     
     loadFormList: function() {
         // 发送API请求获取所有表单列表
-        fetch(`/api/form/list`, {
+        fetch(`${config.backendUrl}/form/list`, {
             method: 'GET',
             credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {
             if (data.code === 200 && data.data && data.data.length > 0) {
-                this.renderFormList(data.data);
+                this.allForms = data.data;
+                this.currentPage = 1;
+                this.renderPagination();
             } else {
+                this.allForms = [];
                 this.renderEmptyFormList();
             }
         })
         .catch(error => {
             console.error('加载表单列表失败:', error);
+            this.allForms = [];
             this.renderEmptyFormList('加载失败，请重试');
         });
     },
     
+    // 渲染表单列表，考虑分页
     renderFormList: function(forms) {
         this.$formListBody.innerHTML = '';
         
@@ -77,35 +126,74 @@ const cloudFormModule = {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${form.name}</td>
-                <td>${form.description || '-'}</td>
-                <td>用户${form.creator_id}</td>
-                <td>${form.created_at}</td>
-                <td>${form.updated_at}</td>
+                <td>${truncateChinese(form.description)}</td>
+                <td>${form.created_realname}</td>
+                <td>${formatDateTime(form.created_at)}</td>
+                <td>${formatDateTime(form.updated_at)}</td>
                 <td><span class="status-badge ${form.is_active ? 'active' : 'inactive'}">${form.is_active ? '启用' : '禁用'}</span></td>
                 <td>
-                    <button class="btn btn-sm btn-action edit-form" data-id="${form.id}">编辑</button>
-                    <button class="btn btn-sm btn-action delete-form" data-id="${form.id}">删除</button>
+                    ${form.is_protected === 1 ? '<span style="color: #666;">🔒表格受保护</span>' : `
+                        <button class="btn btn-sm btn-action edit-form" data-id="${form.id}">编辑</button>
+                        <button class="btn btn-sm btn-action delete-form" data-id="${form.id}">删除</button>
+                    `}
                 </td>
             `;
-            
             this.$formListBody.appendChild(tr);
         });
-        
         // 绑定编辑和删除按钮事件
-        // 这里可以根据实际需求添加权限控制，例如只允许编辑/删除自己创建的表单
         document.querySelectorAll('.edit-form').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const formId = parseInt(e.target.dataset.id);
                 this.openEditFormModal(formId);
             });
         });
-        
         document.querySelectorAll('.delete-form').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const formId = parseInt(e.target.dataset.id);
                 this.deleteForm(formId);
             });
         });
+    },
+    
+    // 渲染分页
+    renderPagination: function() {
+        // 重新计算总页数
+        this.totalPages = Math.ceil(this.allForms.length / this.itemsPerPage);
+        // 确保当前页不超过总页数
+        if (this.currentPage > this.totalPages && this.totalPages > 0) {
+            this.currentPage = this.totalPages;
+        }
+        // 计算当前页的数据范围
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, this.allForms.length);
+        const currentData = this.allForms.slice(startIndex, endIndex);
+        // 渲染当前页的数据
+        if (currentData.length > 0) {
+            this.renderFormList(currentData);
+        } else {
+            this.renderEmptyFormList();
+        }
+        // 更新分页信息
+        this.$pageInfo.textContent = `第 ${this.currentPage} 页 / 共 ${this.totalPages} 页`;
+        // 更新按钮状态
+        this.$prevPageBtn.disabled = this.currentPage === 1;
+        this.$nextPageBtn.disabled = this.currentPage === this.totalPages;
+    },
+    
+    // 上一页
+    goToPrevPage: function() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.renderPagination();
+        }
+    },
+    
+    // 下一页
+    goToNextPage: function() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.renderPagination();
+        }
     },
     
     renderEmptyFormList: function(message = '暂无表单数据') {
@@ -124,17 +212,15 @@ const cloudFormModule = {
         document.getElementById('form-name').value = '';
         document.getElementById('form-description').value = '';
         this.$controlsContainer.innerHTML = '';
-        
         // 设置模态框标题
         this.$modalTitle.textContent = '添加新表单';
-        
         // 显示模态框
         this.$formModal.style.display = 'flex';
     },
     
     openEditFormModal: function(formId) {
         // 发送API请求获取表单详情
-        fetch(`/api/form/detail/${formId}`, {
+        fetch(`${config.backendUrl}/form/detail/${formId}`, {
             method: 'GET',
             credentials: 'include'
         })
@@ -144,18 +230,10 @@ const cloudFormModule = {
                 const form = data.data;
                 this.currentFormId = form.id;
                 this.controls = form.controls || [];
-                
-                // 填充表单
                 document.getElementById('form-name').value = form.name;
                 document.getElementById('form-description').value = form.description || '';
-                
-                // 渲染控件
                 this.renderControls();
-                
-                // 设置模态框标题
                 this.$modalTitle.textContent = '编辑表单';
-                
-                // 显示模态框
                 this.$formModal.style.display = 'flex';
             } else {
                 alert('获取表单详情失败: ' + (data.msg || '未知错误'));
@@ -169,6 +247,12 @@ const cloudFormModule = {
     
     closeFormModal: function() {
         this.$formModal.style.display = 'none';
+        // 重置提交状态
+        this.isSubmitting = false;
+        if (this.$saveForm) {
+            this.$saveForm.disabled = false;
+            this.$saveForm.textContent = '保存';
+        }
     },
     
     addControl: function(type) {
@@ -209,7 +293,10 @@ const cloudFormModule = {
     },
     
     renderControls: function() {
-        this.$controlsContainer.innerHTML = '';
+        // 清除所有事件监听器，防止重复绑定
+        while (this.$controlsContainer.firstChild) {
+            this.$controlsContainer.removeChild(this.$controlsContainer.firstChild);
+        }
         
         this.controls.forEach((control, index) => {
             const controlEl = document.createElement('div');
@@ -219,7 +306,13 @@ const cloudFormModule = {
             // 生成控件HTML
             let controlHtml = `
                 <div class="control-header">
-                    <span class="control-type">${this.getControlTypeName(control.type)}</span>
+                    <span class="control-type">
+                        ${this.getControlTypeName(control.type)}
+                        <label class="control-checkbox" style="display:inline-flex; align-items:center; margin-left:15px; font-weight:normal; white-space:nowrap;">
+                            必填
+                            <input type="checkbox" class="control-required" ${control.required ? 'checked' : ''} data-index="${index}">
+                        </label>
+                    </span>
                     <div class="control-actions">
                         <button type="button" class="btn btn-xs btn-action move-up" data-index="${index}">↑</button>
                         <button type="button" class="btn btn-xs btn-action move-down" data-index="${index}">↓</button>
@@ -230,12 +323,6 @@ const cloudFormModule = {
                     <div class="form-group">
                         <label>标题</label>
                         <input type="text" class="form-control control-label" value="${control.label || ''}" data-index="${index}">
-                    </div>
-                    <div class="form-group">
-                        <label class="control-checkbox">
-                            必填
-                            <input type="checkbox" class="control-required" ${control.required ? 'checked' : ''} data-index="${index}">
-                        </label>
                     </div>
             `;
             
@@ -250,10 +337,12 @@ const cloudFormModule = {
             } else if (control.type === 'select' || control.type === 'radio') {
                 controlHtml += `
                     <div class="form-group">
-                        <label>选项</label>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label style="margin-bottom: 0;">选项</label>
+                            <button type="button" class="btn btn-sm btn-outline add-option" style="height: 24px; padding: 1px 5px; margin-right: 5px" data-index="${index}">添加选项</button>
+                        </div>
                         <div class="options-container" data-index="${index}">
                 `;
-                
                 control.options.forEach((option, optIndex) => {
                     controlHtml += `
                             <div class="option-item">
@@ -262,18 +351,14 @@ const cloudFormModule = {
                             </div>
                     `;
                 });
-                
                 controlHtml += `
-                            <button type="button" class="btn btn-sm btn-outline add-option" data-index="${index}">添加选项</button>
                         </div>
                     </div>
                 `;
             }
-            
             controlHtml += `
                 </div>
             `;
-            
             controlEl.innerHTML = controlHtml;
             this.$controlsContainer.appendChild(controlEl);
         });
@@ -378,25 +463,31 @@ const cloudFormModule = {
     },
     
     saveForm: function() {
+        // 防止重复提交
+        if (this.isSubmitting) {
+            return;
+        }
         const formName = document.getElementById('form-name').value.trim();
         const formDescription = document.getElementById('form-description').value.trim();
-        
         // 验证表单
         if (!formName) {
             alert('请输入表单名称');
+            this.isSubmitting = false;
             return;
         }
-        
+        this.isSubmitting = true;
+        this.$saveForm.disabled = true;
+        this.$saveForm.textContent = '提交中...';
         // 准备表单数据
         const formData = {
             name: formName,
             description: formDescription,
-            creator_id: 1, // 实际项目中应从登录信息中获取
+            created_uid: localStorage.getItem('uid'),
+            created_realname: $('#username').text(),
             controls: this.controls
         };
-        
         // 发送API请求
-        const url = this.currentFormId ? `/api/form/update/${this.currentFormId}` : '/api/form/create';
+        const url = this.currentFormId ? `${config.backendUrl}/form/update/${this.currentFormId}` : `${config.backendUrl}/form/create`;
         const method = this.currentFormId ? 'PUT' : 'POST';
         
         fetch(url, {
@@ -420,12 +511,18 @@ const cloudFormModule = {
         .catch(error => {
             console.error('保存表单失败:', error);
             alert('保存表单失败，请重试');
+        })
+        .finally(() => {
+            // 无论成功失败，都重置提交状态
+            this.isSubmitting = false;
+            this.$saveForm.disabled = false;
+            this.$saveForm.textContent = '保存';
         });
     },
     
     deleteForm: function(formId) {
         if (confirm('确定要删除这个表单吗？')) {
-            fetch(`/api/form/delete/${formId}`, {
+            fetch(`${config.backendUrl}/form/delete/${formId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             })
@@ -434,8 +531,6 @@ const cloudFormModule = {
                 if (data.code === 200) {
                     this.loadFormList();
                     alert('表单删除成功');
-                } else {
-                    alert('删除失败: ' + (data.msg || '未知错误'));
                 }
             })
             .catch(error => {

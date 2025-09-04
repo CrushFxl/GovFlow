@@ -8,18 +8,21 @@ class Form(db.Model):
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     name = db.Column('name', db.String(100), nullable=False)
     description = db.Column('description', db.Text, nullable=True)
-    creator_id = db.Column('creator_id', db.Integer, nullable=False)
+    created_uid = db.Column('created_uid', db.Integer, nullable=False)
+    created_realname = db.Column('created_realname', db.String(50), nullable=True)
     created_at = db.Column('created_at', db.DateTime, default=datetime.now)
     updated_at = db.Column('updated_at', db.DateTime, default=datetime.now, onupdate=datetime.now)
     is_active = db.Column('is_active', db.Boolean, default=True)
+    is_protected = db.Column('is_protected', db.Integer, default=0)
 
     # 与FormControl建立一对多关系
     controls = db.relationship('FormControl', backref='form', lazy=True, cascade='all, delete-orphan')
 
-    def __init__(self, name, description, creator_id):
+    def __init__(self, name, description, created_uid, created_realname=None):
         self.name = name
         self.description = description
-        self.creator_id = creator_id
+        self.created_uid = created_uid
+        self.created_realname = created_realname
 
 
 class FormControl(db.Model):

@@ -20,4 +20,4 @@ class Task(db.Model):
     status = db.Column('status', db.Integer, nullable=False, default=0)
 
     need_attachment = db.Column('need_attachment', db.Text, nullable=False, default='false')
-    attachment_uuid = db.Column('attachment_uuid', db.Text, nullable=True)
+    attachment_id = db.Column('attachment_id', db.Integer, nullable=True)

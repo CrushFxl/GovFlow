@@ -1,5 +1,5 @@
-from . import db
 from datetime import datetime
+from . import db
 
 
 class Form(db.Model):
@@ -47,3 +47,24 @@ class FormControl(db.Model):
         self.options = options
         self.order = order
         self.default_value = default_value
+
+
+class FormSubmission(db.Model):
+    __tablename__ = 'form_submissions'
+    
+    id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
+    form_id = db.Column('form_id', db.Integer, db.ForeignKey('forms.id'), nullable=False)
+    user_id = db.Column('user_id', db.Integer, nullable=False)
+    user_realname = db.Column('user_realname', db.String(50), nullable=True)
+    data = db.Column('data', db.Text, nullable=False)  # JSON格式存储表单数据
+    created_at = db.Column('created_at', db.DateTime, default=datetime.now)
+    
+    # 与Form建立多对一关系
+    form = db.relationship('Form', backref='submissions', lazy=True)
+    
+    def __init__(self, form_id, user_id, data, user_realname=None, status=0):
+        self.form_id = form_id
+        self.user_id = user_id
+        self.data = data
+        self.user_realname = user_realname
+        self.status = status

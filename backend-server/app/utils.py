@@ -3,6 +3,7 @@ from .models.Task import Task
 from .models.Todo import Todo
 from .models.Profile import Profile
 from .models.Branch import Branch
+from .models.Form import Form
 from app.models import db
 import uuid as Uuid
 
@@ -30,7 +31,8 @@ def create_task_prompt(uuid):
         prompt += f"- 【参与党员】{p if p else '无'}\n"
         prompt += f"- 【附件要求】{'无' if todo.need_attachment == 'false' else '**有**'}\n"
         if todo.need_attachment == 'true':
-            attachment_name = '测试用登记表(SNUF14-EWMI2B-C4H2B6)'
+            form = Form.query.filter_by(id=todo.attachment_id).first()
+            attachment_name = f'{form.name} (ID: {form.id})'
             prompt += f"  - **关联表单**：{attachment_name}\n"
     prompt += "\n---\n\n"
     return prompt

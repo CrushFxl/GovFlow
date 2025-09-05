@@ -62,9 +62,10 @@ const cloudFormModule = {
         this.$cancelForm = document.getElementById('cancel-form');
         this.$saveForm = document.getElementById('save-form');
         this.$formListBody = document.getElementById('form-list-body');
-        this.$addSelectControl = document.getElementById('add-select-control');
         this.$addRadioControl = document.getElementById('add-radio-control');
+        this.$addCheckboxControl = document.getElementById('add-checkbox-control');
         this.$addTextControl = document.getElementById('add-text-control');
+        this.$addTextareaControl = document.getElementById('add-textarea-control');
         this.$controlsContainer = document.getElementById('controls-container');
         this.$modalTitle = document.getElementById('modal-title');
         // 分页相关DOM元素
@@ -86,9 +87,10 @@ const cloudFormModule = {
         // 保存表单事件
         this.$saveForm.addEventListener('click', () => this.saveForm());
         // 添加控件按钮点击事件
-        this.$addSelectControl.addEventListener('click', () => this.addControl('select'));
         this.$addRadioControl.addEventListener('click', () => this.addControl('radio'));
+        this.$addCheckboxControl.addEventListener('click', () => this.addControl('checkbox'));
         this.$addTextControl.addEventListener('click', () => this.addControl('text'));
+        this.$addTextareaControl.addEventListener('click', () => this.addControl('textarea'));
         // 分页按钮点击事件
         this.$prevPageBtn.addEventListener('click', () => this.goToPrevPage());
         this.$nextPageBtn.addEventListener('click', () => this.goToNextPage());
@@ -273,9 +275,10 @@ const cloudFormModule = {
     
     getControlDefaultLabel: function(type) {
         const typeNames = {
-            'select': '选择题',
-            'radio': '判断题',
-            'text': '填空题'
+            'radio': '单选题',
+            'checkbox': '多选题',
+            'text': '填空题',
+            'textarea': '文本题'
         };
         
         const count = this.controls.filter(c => c.type === type).length + 1;
@@ -284,9 +287,10 @@ const cloudFormModule = {
     
     getControlDefaultPlaceholder: function(type) {
         const placeholders = {
-            'select': '请选择',
             'radio': '',
-            'text': '请输入'
+            'checkbox': '',
+            'text': '请输入',
+            'textarea': '请输入详细内容'
         };
         
         return placeholders[type] || '';
@@ -327,14 +331,14 @@ const cloudFormModule = {
             `;
             
             // 添加特定类型的控件设置
-            if (control.type === 'text') {
+            if (control.type === 'text' || control.type === 'textarea') {
                 controlHtml += `
                     <div class="form-group">
                         <label>提示文字</label>
                         <input type="text" class="form-control control-placeholder" value="${control.placeholder || ''}" data-index="${index}">
                     </div>
                 `;
-            } else if (control.type === 'select' || control.type === 'radio') {
+            } else if (control.type === 'radio' || control.type === 'checkbox') {
                 controlHtml += `
                     <div class="form-group">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -369,9 +373,10 @@ const cloudFormModule = {
     
     getControlTypeName: function(type) {
         const typeNames = {
-            'select': '选择题',
-            'radio': '判断题',
-            'text': '填空题'
+            'radio': '单选题',
+            'checkbox': '多选题',
+            'text': '填空题',
+            'textarea': '文本题'
         };
         
         return typeNames[type] || type;

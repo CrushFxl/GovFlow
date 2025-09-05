@@ -2,7 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-
 def to_json(model_list):
     if isinstance(model_list, list):  # 如果传入的参数是一个list类型的，说明是使用的all()的方式查询的
         if isinstance(model_list[0], db.Model):  # 这种方式是获得的整个对象  相当于 select * from table

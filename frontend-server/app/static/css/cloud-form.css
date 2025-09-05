@@ -136,6 +136,12 @@
     transition: border-color 0.3s;
 }
 
+/* 文本题控件样式 */
+.control-content textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
 .form-control:focus {
     outline: none;
     border-color: #409eff;

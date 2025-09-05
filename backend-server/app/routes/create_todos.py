@@ -4,11 +4,11 @@ import json
 from flask import Blueprint, request
 import uuid as Uuid
 from app.models import db
-from app.models.Branch import Branch
 from app.models.Profile import Profile
 from app.models.Todo import Todo
 from app.models.Notice import Notice
 from app.models.Task import Task
+from app.models.Form import Form
 
 from app.utils import create_task_prompt, add_todo_for_all_users
 
@@ -49,6 +49,7 @@ def create_notice():
 def create_task():
     prompt = "**您正在发布一个日程任务，以下是任务详情。**"
     uid = int(request.args.get('uid'))
+    form_id = int(request.args.get('form_id'))
     data = json.loads(request.args.get('data'))
     organizations = json.loads(request.args.get('organizations'))
     partners = json.loads(request.args.get('partners'))
@@ -64,6 +65,10 @@ def create_task():
     my_branch = my_profile.party_branch
     admin = Profile.query.filter_by(admin_status=1, party_branch=my_branch).first()
     data['next_uid'] = uid if my_profile.admin_status else admin.uid
+    # 确定关联表
+    data['need_attachment'] = 'true'        # 假设所有task类型都需要附件提交
+    data['attachment_id'] = form_id
+    form_name = Form.query.filter_by(id=form_id).first().name
     # 向Task表添加对象
     task = Task(**data)
     db.session.add(task)

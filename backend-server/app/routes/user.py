@@ -49,13 +49,9 @@ def check_profile_complete():
 
 @user_bk.route('/get_dashboard_counts', methods=['GET'])
 def get_dashboard_counts():
-    """
-    获取待办事项、未读消息和我发布的记录数量及详细信息
-    """
     uid = session.get('uid')
-    
-    # 未读消息：Todo表中type为notice并且status为2
-    unread_notices = Todo.query.filter_by(uid=uid, type='notice', status=2).all()
+    # 未读消息：Todo表中type为notice并且status为0
+    unread_notices = Todo.query.filter_by(uid=uid, type='notice', status=0).all()
     unread_count = len(unread_notices)
     unread_list = []
     for todo in unread_notices:
@@ -69,8 +65,8 @@ def get_dashboard_counts():
                 'created_time': notice.created_time
             })
     
-    # 待办事项：Todo表中type为review或task，并且status为2
-    todo_items = Todo.query.filter(Todo.uid == uid, Todo.type.in_(['review', 'task']), Todo.status == 2).all()
+    # 待办事项：Todo表中type为review或task，并且status为0
+    todo_items = Todo.query.filter(Todo.uid == uid, Todo.type.in_(['review', 'task']), Todo.status == 0).all()
     todo_count = len(todo_items)
     todo_list = []
     for todo in todo_items:

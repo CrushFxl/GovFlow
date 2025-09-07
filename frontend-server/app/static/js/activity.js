@@ -256,7 +256,7 @@ $(document).ready(function() {
         // 从表单中获取用户修改后的数据
         const formData = {
             title: document.getElementById('form-title').value,
-            description: document.getElementById('form-description').value,
+            description: document.getElementById('activity-form-description').value,
             organizations: document.getElementById('form-organizations').value.split(',').map(item => item.trim()).filter(item => item),
             partners: document.getElementById('form-partners').value.split(',').map(item => item.trim()).filter(item => item),
             initiator: document.getElementById('form-initiator').value,
@@ -302,7 +302,7 @@ $(document).ready(function() {
         const confirmBtn = document.getElementById('confirm-btn');
         // 填充表单数据
         document.getElementById('form-title').value = activityData.title || '';
-        document.getElementById('form-description').value = activityData.description || '';
+        document.getElementById('activity-form-description').value = activityData.description || '';
         document.getElementById('form-date').value = activityData.start_date || '';
         document.getElementById('form-start-time').value = activityData.start_time || '';
         document.getElementById('form-end-time').value = activityData.end_time || '';

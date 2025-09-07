@@ -4,7 +4,7 @@ from . import db
 
 class Form(db.Model):
     __tablename__ = 'forms'
-    
+
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     name = db.Column('name', db.String(100), nullable=False)
     description = db.Column('description', db.Text, nullable=True)
@@ -18,16 +18,10 @@ class Form(db.Model):
     # 与FormControl建立一对多关系
     controls = db.relationship('FormControl', backref='form', lazy=True, cascade='all, delete-orphan')
 
-    def __init__(self, name, description, created_uid, created_realname=None):
-        self.name = name
-        self.description = description
-        self.created_uid = created_uid
-        self.created_realname = created_realname
-
 
 class FormControl(db.Model):
     __tablename__ = 'form_controls'
-    
+
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     form_id = db.Column('form_id', db.Integer, db.ForeignKey('forms.id'), nullable=False)
     type = db.Column('type', db.String(50), nullable=False)  # select, radio, text, etc.
@@ -38,33 +32,36 @@ class FormControl(db.Model):
     order = db.Column('order', db.Integer, nullable=False, default=0)
     default_value = db.Column('default_value', db.Text, nullable=True)
 
-    def __init__(self, form_id, type, label, order, placeholder=None, required=False, options=None, default_value=None):
-        self.form_id = form_id
-        self.type = type
-        self.label = label
-        self.placeholder = placeholder
-        self.required = required
-        self.options = options
-        self.order = order
-        self.default_value = default_value
-
 
 class FormSubmission(db.Model):
     __tablename__ = 'form_submissions'
-    
+
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     form_id = db.Column('form_id', db.Integer, db.ForeignKey('forms.id'), nullable=False)
     user_id = db.Column('user_id', db.Integer, nullable=False)
-    user_realname = db.Column('user_realname', db.String(50), nullable=True)
     data = db.Column('data', db.Text, nullable=False)  # JSON格式存储表单数据
-    created_at = db.Column('created_at', db.DateTime, default=datetime.now)
-    
+
     # 与Form建立多对一关系
     form = db.relationship('Form', backref='submissions', lazy=True)
-    
-    def __init__(self, form_id, user_id, data, user_realname=None, status=0):
-        self.form_id = form_id
-        self.user_id = user_id
-        self.data = data
-        self.user_realname = user_realname
-        self.status = status
+
+
+def init_forms():
+    if not Form.query.first():
+        default_forms = [
+            Form(name='党员发展申请表', description='用于入党积极分子、发展对象和预备党员的培养。',
+                 created_uid=101, created_realname='系统管理员', is_protected=1),
+        ]
+        default_controls = [
+            FormControl(form_id=1, type='text', label='培养人姓名',
+                        placeholder='例如：冯洋一', required=1, order=0),
+            FormControl(form_id=1, type='text', label='培养人学号',
+                        placeholder='例如：6401230103', required=1, order=1),
+            FormControl(form_id=1, type='radio', label='申请发展的政治面貌',
+                        required=1, order=2, options='["入党积极分子", "发展对象", "预备党员", "普通正式党员"]'),
+            FormControl(form_id=1, type='textarea', label='附件或材料说明',
+                        placeholder='须详细描述培养人的基本情况、动机、组织谈话，以及必要的审批材料附件、审批意见。', required=1, order=3)
+        ]
+        db.session.bulk_save_objects(default_forms)
+        db.session.bulk_save_objects(default_controls)
+        db.session.commit()
+        print("初始化测试表格完成.")

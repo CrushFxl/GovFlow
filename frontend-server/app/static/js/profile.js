@@ -108,6 +108,7 @@ $(document).ready(function() {
             $('#native-place').val(data.native_place || '');
             $('#education').val(data.education || 'bachelor');
             $('#position').val(data.position || '');
+            $('#student-id').val(data.student_id || ''); // 学工号字段
             $('#contact').val(data.contact || '');
             $('#address').val(data.address || ''); // 备注字段
             
@@ -261,6 +262,7 @@ $(document).ready(function() {
                 birth_date: birthDate,
                 native_place: nativePlace,
                 education: $('#education').val(),
+                student_id: $('#student-id').val() ? parseInt($('#student-id').val()) : null, // 学工号字段，转换为整数
                 position: $('#position').val().trim(),
                 contact: $('#contact').val().trim(),
                 address: $('#address').val().trim(),

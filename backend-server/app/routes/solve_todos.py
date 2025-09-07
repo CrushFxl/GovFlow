@@ -3,7 +3,7 @@ from app.models.Profile import Profile
 from app.models.Todo import Todo
 from app.models.Task import Task
 from app.models.Notice import Notice
-from app.models.Form import Form, FormControl
+from app.models.Form import Form, FormControl, FormSubmission
 from app.models import db
 import json
 
@@ -31,10 +31,14 @@ def number_to_uuid(uid, number):
 def get_todo_info():
     uid = request.args.get('uid')
     choose_num = int(request.args.get('choose_num'))
-    uuid, todo_type = number_to_uuid(uid, choose_num)
+    try:
+        uuid, todo_type = number_to_uuid(uid, choose_num)
+    except TypeError:
+        prompt = '您输入的序号所对应的待办事项不存在，是不是输错了呢？'
+        # 返回类型为notice时，dify可直接结束待办流程
+        return {'data': {'todo_type': 'notice', 'prompt': prompt}}
     todo = Todo.query.filter_by(uuid=uuid).first()
     prompt = ""
-
     if todo_type == 'review':
         inner_todo = Task.query.filter_by(uuid=todo.related_uuid).first()
         if not inner_todo:
@@ -47,7 +51,6 @@ def get_todo_info():
             prompt += f"**党员用户【{created_username}】请求发布任务，需要您审核**，以下是任务内容。"
         prompt += create_task_prompt(inner_todo.uuid)
         prompt += f'审核发起时间：{inner_todo.created_time}\n请决定是否审核通过，输入**同意**或**拒绝**来完成该审核，可附加理由。'
-
     elif todo_type == 'notice':
         notice = Notice.query.filter_by(uuid=todo.related_uuid).first()
         created_username = Profile.query.filter_by(uid=notice.created_uid).first().real_name
@@ -63,7 +66,6 @@ def get_todo_info():
             prompt += "输入括号内对应的数字，以继续处理待办。"
         else:
             prompt += '\n\n**好耶！您已完成所有待办事项！**'
-
     elif todo_type == 'task':
         task = Task.query.filter_by(uuid=todo.related_uuid).first()
         created_username = Profile.query.filter_by(uid=task.created_uid).first().real_name
@@ -160,7 +162,7 @@ def accept_solve():
         if inner_todo.need_attachment == 'false':
             todo.status = 1
             db.session.commit()
-            prompt = '您已将**此任务标记为完成**。\n\n'
+            prompt = f'您已将**此任务【{inner_todo.title}】标记为完成**。\n\n'
             todo_list_prompt, count = get_user_todos_list_prompt(uid)
             if count:
                 prompt += '接下来您还可以继续处理：'
@@ -174,3 +176,33 @@ def accept_solve():
             form = Form.query.filter_by(id=inner_todo.attachment_id).first()
             form_html = form2html(form.id)
             return {'data': {'prompt': prompt, 'todo_type': 'task', 'form_html': form_html}}
+
+
+@solve_todos_bk.route('/commit_form', methods=['GET'])
+def commit_form():
+    uid = int(request.args.get('uid'))
+    form_data = json.loads(request.args.get('form_data'))
+    choose_number = int(request.args.get('choose_number'))
+    try:
+        todo_uuid, todo_type = number_to_uuid(uid, choose_number)
+    except TypeError:
+        prompt = '此表格已填写完毕，请勿重复提交表单！'
+        return {'code': 2000, 'data': {'prompt': prompt}}
+    else:
+        todo = Todo.query.filter_by(uuid=todo_uuid).first()
+        todo.status = 1
+        task = Task.query.filter_by(uuid=todo.related_uuid).first()
+        form_id = task.attachment_id
+        submission = FormSubmission(form_id=form_id, user_id=uid, data=json.dumps(form_data))
+        todo.form_submit_id = submission.id
+        db.session.add(submission)
+        db.session.commit()
+        prompt = f'**表格提交成功**，此待办事项【{task.title}】已完成。\n\n'
+        list_prompt, count = get_user_todos_list_prompt(uid)
+        if count:
+            prompt += '接下来您还可以继续处理：' + list_prompt
+            prompt += '输入对应的数字，以继续处理待办事项。'
+        else:
+            prompt += '好耶！**您已完成所有待办事项**，没有什么需要做的啦！'
+        return {'code': 1000, 'data': {'prompt': prompt}}
+

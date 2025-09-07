@@ -131,10 +131,9 @@ const cloudFormModule = {
                 <td>${truncateChinese(form.description)}</td>
                 <td>${form.created_realname}</td>
                 <td>${formatDateTime(form.created_at)}</td>
-                <td>${formatDateTime(form.updated_at)}</td>
                 <td><span class="status-badge ${form.is_active ? 'active' : 'inactive'}">${form.is_active ? '启用' : '禁用'}</span></td>
                 <td>
-                    ${form.is_protected === 1 ? '<span style="color: #666;">🔒表格受保护</span>' : `
+                    ${form.is_protected === 1 ? '<span style="color: #666;">🔒表格受保护</span><button class="btn btn-sm btn-action preview-form" data-id="${form.id}">预览</button>' : `
                         <button class="btn btn-sm btn-action edit-form" data-id="${form.id}">编辑</button>
                         <button class="btn btn-sm btn-action delete-form" data-id="${form.id}">删除</button>
                     `}
@@ -153,6 +152,14 @@ const cloudFormModule = {
             btn.addEventListener('click', (e) => {
                 const formId = parseInt(e.target.dataset.id);
                 this.deleteForm(formId);
+            });
+        });
+        
+        // 绑定预览按钮点击事件
+        document.querySelectorAll('.preview-form').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const formId = parseInt(e.target.dataset.id);
+                this.openPreviewFormModal(formId);
             });
         });
     },
@@ -212,7 +219,7 @@ const cloudFormModule = {
         
         // 重置表单
         document.getElementById('form-name').value = '';
-        document.getElementById('form-description').value = '';
+        document.getElementById('cloud-form-description').value = '';
         this.$controlsContainer.innerHTML = '';
         // 设置模态框标题
         this.$modalTitle.textContent = '添加新表单';
@@ -233,7 +240,7 @@ const cloudFormModule = {
                 this.currentFormId = form.id;
                 this.controls = form.controls || [];
                 document.getElementById('form-name').value = form.name;
-                document.getElementById('form-description').value = form.description || '';
+                document.getElementById('cloud-form-description').value = form.description || '';
                 this.renderControls();
                 this.$modalTitle.textContent = '编辑表单';
                 this.$formModal.style.display = 'flex';
@@ -473,7 +480,7 @@ const cloudFormModule = {
             return;
         }
         const formName = document.getElementById('form-name').value.trim();
-        const formDescription = document.getElementById('form-description').value.trim();
+        const formDescription = document.getElementById('cloud-form-description').value.trim();
         // 验证表单
         if (!formName) {
             alert('请输入表单名称');
@@ -543,6 +550,101 @@ const cloudFormModule = {
                 alert('删除表单失败，请重试');
             });
         }
+    },
+    
+    // 打开表单预览模态框
+    openPreviewFormModal: function(formId) {
+        // 发送API请求获取表单详情
+        fetch(`${config.backendUrl}/form/detail/${formId}`, {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200 && data.data) {
+                const form = data.data;
+                
+                // 创建预览模态框
+                const previewModal = document.createElement('div');
+                previewModal.className = 'modal';
+                previewModal.style.display = 'flex';
+                previewModal.id = 'preview-modal';
+                
+                // 生成预览内容，所有控件都是禁用状态
+                let previewHtml = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>表单预览 - ${form.name}</h3>
+                            <button class="close-modal">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-preview">
+                                <h4>${form.name}</h4>
+                                <p>${form.description || '无描述'}</p>
+                                <div class="controls-preview">`;
+                
+                // 添加表单控件预览
+                if (form.controls && form.controls.length > 0) {
+                    form.controls.forEach(control => {
+                        previewHtml += `<div class="control-item">
+                            <label>${control.label} ${control.required ? '<span style="color: red;">*</span>' : ''}</label>`;
+                        
+                        switch(control.type) {
+                            case 'text':
+                                previewHtml += `<input type="text" disabled placeholder="${control.placeholder || ''}">`;
+                                break;
+                            case 'textarea':
+                                previewHtml += `<textarea disabled placeholder="${control.placeholder || ''}"></textarea>`;
+                                break;
+                            case 'radio':
+                                previewHtml += `<div class="radio-group">`;
+                                control.options.forEach(option => {
+                                    previewHtml += `<label class="radio-label">
+                                        <input type="radio" disabled>${option}
+                                    </label>`;
+                                });
+                                previewHtml += `</div>`;
+                                break;
+                            case 'checkbox':
+                                previewHtml += `<div class="checkbox-group">`;
+                                control.options.forEach(option => {
+                                    previewHtml += `<label class="checkbox-label">
+                                        <input type="checkbox" disabled>${option}
+                                    </label>`;
+                                });
+                                previewHtml += `</div>`;
+                                break;
+                            default:
+                                previewHtml += `<input type="text" disabled placeholder="${control.placeholder || ''}">`;
+                        }
+                        
+                        previewHtml += `</div>`;
+                    });
+                }
+                
+                previewHtml += `</div></div></div></div>`;
+                previewModal.innerHTML = previewHtml;
+                document.body.appendChild(previewModal);
+                
+                // 绑定关闭事件
+                previewModal.querySelector('.close-modal').addEventListener('click', function() {
+                    document.body.removeChild(previewModal);
+                });
+                
+                // 点击模态框外部关闭
+                previewModal.addEventListener('click', function(e) {
+                    if (e.target === previewModal) {
+                        document.body.removeChild(previewModal);
+                    }
+                });
+            } else {
+                alert('获取表单详情失败: ' + (data.msg || '未知错误'));
+            }
+        })
+        .catch(error => {
+            console.error('获取表单详情失败:', error);
+            alert('获取表单详情失败，请重试');
+        });
     }
 };
 

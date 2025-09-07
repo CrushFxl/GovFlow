@@ -9,9 +9,6 @@ from .excel import excel_bk
 from .create_todos import create_todos_bk
 from .solve_todos import solve_todos_bk
 
-from ..models.Notice import Notice
-from ..models.Task import Task
-
 routes = [
     auth_bk,
     user_bk,

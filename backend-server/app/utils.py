@@ -4,8 +4,10 @@ from .models.Todo import Todo
 from .models.Profile import Profile
 from .models.Branch import Branch
 from .models.Form import Form
+from .models.System import System
 from app.models import db
 import uuid as Uuid
+import requests
 
 
 def create_task_prompt(uuid):
@@ -69,6 +71,7 @@ def add_todo_for_all_users(uuid):
         todo = Task.query.filter_by(uuid=uuid).first()
         todo_type = 'task'
     users_uid = set()
+    users_student_id = set()
     profiles = Profile.query.all()
     # 收集所有目标用户
     for p in profiles:
@@ -78,10 +81,12 @@ def add_todo_for_all_users(uuid):
         for party in todo.organizations:
             if party in parties:
                 users_uid.add(p.uid)
+                users_student_id.add(p.student_id)
                 break
         for name in todo.partners:
             if name == real_name:
                 users_uid.add(p.uid)
+                users_student_id.add(p.student_id)
                 break
     # 向所有目标用户添加待办事项
     for uid in users_uid:
@@ -89,5 +94,46 @@ def add_todo_for_all_users(uuid):
         new_todo = Todo(uuid=new_uuid, type=todo_type, related_uuid=uuid, uid=uid)
         db.session.add(new_todo)
     db.session.commit()
+    # 向所有用户发送钉钉数据中台消息
+    title = '【GovFlow智慧党建】您有一个新待办'
+    content = create_task_prompt(uuid)
+    send_dingtalk_msg([str(i) for i in users_student_id], title, content)
+
+
+def _get_access_token(app_key, app_secret):
+    base_url = System.query.filter_by(key='dingtalk_url').first().value
+    url = f"{base_url}:9088/accessSystem/getAccessToken"
+    params = {
+        "appKey": app_key,
+        "appSecret": app_secret
+    }
+    response = requests.post(url, params=params)
+    res = response.json()
+    return res["data"]["accessToken"]
+
+
+def send_dingtalk_msg(user_ids, title, content):
+    # 向user_ids学工号列表中的所有用户发送title:content钉钉消息
+    base_url = System.query.filter_by(key='dingtalk_url').first().value
+    app_key = System.query.filter_by(key='dingtalk_appkey').first().value
+    app_secret = System.query.filter_by(key='dingtalk_appsecret').first().value
+    access_token = _get_access_token(app_key, app_secret)
+    url = f"{base_url[:4] + 's'+ base_url[4:]}/msgInfo/pushMsgInfo"
+    headers = {
+        "token": access_token,
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "channel": "DingTalk",
+        "objScope": 1,
+        "objIds": ",".join(user_ids),
+        "mtype": 1,
+        "sendStatus": 1,
+        "title": title,
+        "content": content
+    }
+    response = requests.post(url, headers=headers, json=payload, verify=False)
+    result = response.json()
+    return result
 
 

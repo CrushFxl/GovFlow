@@ -131,9 +131,13 @@ const cloudFormModule = {
                 <td>${truncateChinese(form.description)}</td>
                 <td>${form.created_realname}</td>
                 <td>${formatDateTime(form.created_at)}</td>
+                <td>${formatDateTime(form.updated_at)}</td>
                 <td><span class="status-badge ${form.is_active ? 'active' : 'inactive'}">${form.is_active ? '启用' : '禁用'}</span></td>
                 <td>
-                    ${form.is_protected === 1 ? '<span style="color: #666;">🔒表格受保护</span><button class="btn btn-sm btn-action preview-form" data-id="${form.id}">预览</button>' : `
+                    ${form.is_protected === 1 ? `
+                        <button class="btn btn-sm btn-action preview-form" data-id="${form.id}">预览</button>
+                        <span style="color: #666;">🔒表格受保护</span>
+                    ` : `
                         <button class="btn btn-sm btn-action edit-form" data-id="${form.id}">编辑</button>
                         <button class="btn btn-sm btn-action delete-form" data-id="${form.id}">删除</button>
                     `}
@@ -154,12 +158,11 @@ const cloudFormModule = {
                 this.deleteForm(formId);
             });
         });
-        
-        // 绑定预览按钮点击事件
+        // 绑定预览按钮事件
         document.querySelectorAll('.preview-form').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const formId = parseInt(e.target.dataset.id);
-                this.openPreviewFormModal(formId);
+                this.openFormPreviewModal(formId);
             });
         });
     },
@@ -211,6 +214,125 @@ const cloudFormModule = {
                 <td colspan="6" class="text-center">${message}</td>
             </tr>
         `;
+    },
+    
+    // 打开表单预览模态框
+    openFormPreviewModal: function(formId) {
+        // 发送API请求获取表单预览数据
+        fetch(`${config.backendUrl}/form_preview/${formId}`, {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 0 && data.data) {
+                const form = data.data;
+                this.renderFormPreview(form);
+            } else {
+                alert('获取表单预览数据失败: ' + (data.message || '未知错误'));
+            }
+        })
+        .catch(error => {
+            console.error('获取表单预览数据失败:', error);
+            alert('获取表单预览数据失败，请重试');
+        });
+    },
+    
+    // 渲染表单预览
+    renderFormPreview: function(form) {
+        // 创建预览模态框
+        const modal = document.createElement('div');
+        modal.className = 'modal cloud-form-preview-modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content" style="margin: auto; width: 80%; max-width: 800px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">表单预览 - ${form.name}</h3>
+                    <button class="close-btn">×</button>
+                </div>
+                <div class="modal-body">
+                    <p class="cloud-form-preview-description">${form.description || '无描述'}</p>
+                    <div class="cloud-form-preview-container">
+                        <!-- 预览内容将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary cloud-form-close-preview">关闭</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // 获取预览容器
+        const previewContainer = modal.querySelector('.cloud-form-preview-container');
+        
+        // 渲染表单控件（禁用状态）
+        form.controls.forEach(control => {
+            const controlEl = document.createElement('div');
+            controlEl.className = 'form-group';
+            
+            let controlHtml = `<label>${control.label} ${control.required ? '<span class="required">*</span>' : ''}</label>`;
+            
+            switch(control.type) {
+                case 'text':
+                    controlHtml += `
+                        <input type="text" class="form-control" placeholder="${control.placeholder || ''}" value="${control.default_value || ''}" disabled>
+                    `;
+                    break;
+                case 'textarea':
+                    controlHtml += `
+                        <textarea class="form-control" rows="4" placeholder="${control.placeholder || ''}" disabled>${control.default_value || ''}</textarea>
+                    `;
+                    break;
+                case 'radio':
+                    controlHtml += `<div class="cloud-form-preview-radio-group">`;
+                    if (control.options && control.options.length > 0) {
+                        control.options.forEach((option, index) => {
+                            const isChecked = control.default_value === option;
+                            controlHtml += `
+                                <label class="cloud-form-preview-radio-label">
+                                    <input type="radio" name="preview-radio-${control.id}" value="${option}" ${isChecked ? 'checked' : ''} disabled>
+                                    ${option}
+                                </label>
+                            `;
+                        });
+                    }
+                    controlHtml += `</div>`;
+                    break;
+                case 'checkbox':
+                    controlHtml += `<div class="cloud-form-preview-checkbox-group">`;
+                    if (control.options && control.options.length > 0) {
+                        control.options.forEach((option, index) => {
+                            const isChecked = control.default_value && control.default_value.includes(option);
+                            controlHtml += `
+                                <label class="cloud-form-preview-checkbox-label">
+                                    <input type="checkbox" name="preview-checkbox-${control.id}" value="${option}" ${isChecked ? 'checked' : ''} disabled>
+                                    ${option}
+                                </label>
+                            `;
+                        });
+                    }
+                    controlHtml += `</div>`;
+                    break;
+                default:
+                    controlHtml += `
+                        <div class="form-control disabled">
+                            不支持的控件类型: ${control.type}
+                        </div>
+                    `;
+            }
+            
+            controlEl.innerHTML = controlHtml;
+            previewContainer.appendChild(controlEl);
+        });
+        
+        // 绑定关闭事件
+        modal.querySelector('.close-btn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        modal.querySelector('.cloud-form-close-preview').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
     },
     
     openAddFormModal: function() {
@@ -550,101 +672,6 @@ const cloudFormModule = {
                 alert('删除表单失败，请重试');
             });
         }
-    },
-    
-    // 打开表单预览模态框
-    openPreviewFormModal: function(formId) {
-        // 发送API请求获取表单详情
-        fetch(`${config.backendUrl}/form/detail/${formId}`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.code === 200 && data.data) {
-                const form = data.data;
-                
-                // 创建预览模态框
-                const previewModal = document.createElement('div');
-                previewModal.className = 'modal';
-                previewModal.style.display = 'flex';
-                previewModal.id = 'preview-modal';
-                
-                // 生成预览内容，所有控件都是禁用状态
-                let previewHtml = `
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>表单预览 - ${form.name}</h3>
-                            <button class="close-modal">×</button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-preview">
-                                <h4>${form.name}</h4>
-                                <p>${form.description || '无描述'}</p>
-                                <div class="controls-preview">`;
-                
-                // 添加表单控件预览
-                if (form.controls && form.controls.length > 0) {
-                    form.controls.forEach(control => {
-                        previewHtml += `<div class="control-item">
-                            <label>${control.label} ${control.required ? '<span style="color: red;">*</span>' : ''}</label>`;
-                        
-                        switch(control.type) {
-                            case 'text':
-                                previewHtml += `<input type="text" disabled placeholder="${control.placeholder || ''}">`;
-                                break;
-                            case 'textarea':
-                                previewHtml += `<textarea disabled placeholder="${control.placeholder || ''}"></textarea>`;
-                                break;
-                            case 'radio':
-                                previewHtml += `<div class="radio-group">`;
-                                control.options.forEach(option => {
-                                    previewHtml += `<label class="radio-label">
-                                        <input type="radio" disabled>${option}
-                                    </label>`;
-                                });
-                                previewHtml += `</div>`;
-                                break;
-                            case 'checkbox':
-                                previewHtml += `<div class="checkbox-group">`;
-                                control.options.forEach(option => {
-                                    previewHtml += `<label class="checkbox-label">
-                                        <input type="checkbox" disabled>${option}
-                                    </label>`;
-                                });
-                                previewHtml += `</div>`;
-                                break;
-                            default:
-                                previewHtml += `<input type="text" disabled placeholder="${control.placeholder || ''}">`;
-                        }
-                        
-                        previewHtml += `</div>`;
-                    });
-                }
-                
-                previewHtml += `</div></div></div></div>`;
-                previewModal.innerHTML = previewHtml;
-                document.body.appendChild(previewModal);
-                
-                // 绑定关闭事件
-                previewModal.querySelector('.close-modal').addEventListener('click', function() {
-                    document.body.removeChild(previewModal);
-                });
-                
-                // 点击模态框外部关闭
-                previewModal.addEventListener('click', function(e) {
-                    if (e.target === previewModal) {
-                        document.body.removeChild(previewModal);
-                    }
-                });
-            } else {
-                alert('获取表单详情失败: ' + (data.msg || '未知错误'));
-            }
-        })
-        .catch(error => {
-            console.error('获取表单详情失败:', error);
-            alert('获取表单详情失败，请重试');
-        });
     }
 };
 

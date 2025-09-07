@@ -261,3 +261,84 @@
 #cloud-form .tn.btn-sm.btn-outline {
     border-radius: 6px !important;
 }
+
+/* 表单预览样式 */
+.cloud-form-preview-description {
+    font-size: 14px;
+    color: #606266;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f5f7fa;
+    border-radius: 4px;
+}
+
+.cloud-form-preview-container {
+    margin-top: 20px;
+}
+
+/* 单选框组样式 */
+.cloud-form-preview-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cloud-form-preview-radio-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: not-allowed;
+    padding: 8px 0;
+}
+
+.cloud-form-preview-radio-label input[type="radio"] {
+    margin-right: 8px;
+    cursor: not-allowed;
+    width: 10px
+}
+
+/* 复选框组样式 */
+.cloud-form-preview-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cloud-form-preview-checkbox-label {
+    display: flex;
+    flex-direction: row;
+    cursor: not-allowed;
+    width: 10px;
+    padding: 8px 0;
+}
+
+.cloud-form-preview-checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: not-allowed;
+}
+
+/* 禁用的表单控件样式增强 */
+.cloud-form-preview-modal .form-control:disabled,
+.cloud-form-preview-modal .form-control[disabled] {
+    background-color: #f5f7fa;
+    border-color: #dcdfe6;
+    color: #909399;
+    cursor: not-allowed;
+}
+
+/* 预览模态框特定样式 */
+.cloud-form-preview-modal .form-group label {
+    font-weight: 600;
+    color: #303133;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: start;
+    justify-items: left;
+    padding: 2px 0;
+}
+
+/* 预览模态框的按钮样式 */
+.cloud-form-close-preview {
+    min-width: 80px;
+}

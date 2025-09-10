@@ -10,7 +10,7 @@ home_ft = Blueprint('home', __name__)
 @login_required
 def home():
     # 获取当前环境配置
-    env = current_app.config.get('ENV', 'development')
+    env = current_app.config.get('ENV', 'production')
     current_config = config[env]
     # 传递iframe URL参数给模板
     return render_template("home.html", iframe_url_param=current_config.IFRAME_URL_PARAM)

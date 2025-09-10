@@ -14,8 +14,7 @@ $(document).ready(function() {
     const pageInfo = document.querySelector('#activity .pagination .page-info');
 
     // 初始化日程模块
-    function initActivity() {    
-        $('.page-title').text('任务管理');
+    function initActivity() {        
         fetchScheduleData();
     }
 

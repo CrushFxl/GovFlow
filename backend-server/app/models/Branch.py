@@ -20,17 +20,10 @@ class Branch(db.Model):
 def init_branches():
     if Branch.query.count() == 0:
         committees = [
-            Branch(name='杭州医学院党总委', parent_id=None, level=1, value='committee1'),
-            Branch(name='信息工程学院党组织', parent_id=1, level=2, value='subcommittee11'),
-            Branch(name='公共卫生学院党组织', parent_id=1, level=2, value='subcommittee12'),
-            Branch(name='护理学院党组织', parent_id=1, level=2, value='subcommittee13'),
-            Branch(name='临床医学院党组织', parent_id=1, level=2, value='subcommittee14'),
-            Branch(name='第一教师党支部', parent_id=2, level=3, value='branch111'),
-            Branch(name='第一学生党支部', parent_id=2, level=3, value='branch112'),
-            Branch(name='第二学生党支部', parent_id=2, level=3, value='branch113'),
-            Branch(name='第一教师党支部', parent_id=3, level=3, value='branch121'),
-            Branch(name='第一教师党支部', parent_id=4, level=3, value='branch131'),
-            Branch(name='第一教师党支部', parent_id=5, level=3, value='branch141')
+            Branch(name='杭州医学院党委', parent_id=None, level=1, value='committee1'),
+            Branch(name='信息工程学院、信息与教育技术中心党总支部', parent_id=1, level=2, value='subcommittee11'),
+            Branch(name='信息工程学院、信息与教育技术中心教工党支部', parent_id=2, level=3, value='branch111'),
+            Branch(name='信息工程学院、信息与教育技术中心学生党支部', parent_id=2, level=3, value='branch112')
         ]
         db.session.add_all(committees)
         db.session.commit()

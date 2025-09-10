@@ -4,6 +4,8 @@ from .models import db
 from .models.User import init_users
 from .models.Profile import init_profiles
 from .models.Branch import init_branches
+from .models.System import init_system_settings
+from .models.Form import init_forms
 
 from flask import Flask
 from flask_cors import CORS
@@ -24,7 +26,8 @@ def create_app(config_name):
         init_branches()
         init_users()
         init_profiles()
-
+        init_system_settings()
+        init_forms()
 
     for route in routes:
         app.register_blueprint(route)

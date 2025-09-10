@@ -17,7 +17,7 @@ class ProductionConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
     SECRET_KEY = os.getenv('SECRET_KEY')
     SQLALCHEMY_ECHO = False
-
+    DINGTALK_APPSECRET = os.getenv('DINGTALK_APPSECRET')
 
 
 class DevelopmentConfig(BaseConfig):
@@ -30,6 +30,7 @@ class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = "sqlite:///./gov.db"
     SECRET_KEY = 'WeactiveKey2023'
     SQLALCHEMY_ECHO = False
+    DINGTALK_APPSECRET = os.getenv('DINGTALK_APPSECRET')
 
 
 config = {

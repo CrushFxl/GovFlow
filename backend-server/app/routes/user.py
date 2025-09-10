@@ -49,11 +49,7 @@ def check_profile_complete():
 
 @user_bk.route('/get_dashboard_counts', methods=['GET'])
 def get_dashboard_counts():
-    """
-    获取待办事项、未读消息和我发布的记录数量及详细信息
-    """
     uid = session.get('uid')
-    
     # 未读消息：Todo表中type为notice并且status为0
     unread_notices = Todo.query.filter_by(uid=uid, type='notice', status=0).all()
     unread_count = len(unread_notices)

@@ -62,9 +62,10 @@ const cloudFormModule = {
         this.$cancelForm = document.getElementById('cancel-form');
         this.$saveForm = document.getElementById('save-form');
         this.$formListBody = document.getElementById('form-list-body');
-        this.$addSelectControl = document.getElementById('add-select-control');
         this.$addRadioControl = document.getElementById('add-radio-control');
+        this.$addCheckboxControl = document.getElementById('add-checkbox-control');
         this.$addTextControl = document.getElementById('add-text-control');
+        this.$addTextareaControl = document.getElementById('add-textarea-control');
         this.$controlsContainer = document.getElementById('controls-container');
         this.$modalTitle = document.getElementById('modal-title');
         // 分页相关DOM元素
@@ -86,9 +87,10 @@ const cloudFormModule = {
         // 保存表单事件
         this.$saveForm.addEventListener('click', () => this.saveForm());
         // 添加控件按钮点击事件
-        this.$addSelectControl.addEventListener('click', () => this.addControl('select'));
         this.$addRadioControl.addEventListener('click', () => this.addControl('radio'));
+        this.$addCheckboxControl.addEventListener('click', () => this.addControl('checkbox'));
         this.$addTextControl.addEventListener('click', () => this.addControl('text'));
+        this.$addTextareaControl.addEventListener('click', () => this.addControl('textarea'));
         // 分页按钮点击事件
         this.$prevPageBtn.addEventListener('click', () => this.goToPrevPage());
         this.$nextPageBtn.addEventListener('click', () => this.goToNextPage());
@@ -132,7 +134,10 @@ const cloudFormModule = {
                 <td>${formatDateTime(form.updated_at)}</td>
                 <td><span class="status-badge ${form.is_active ? 'active' : 'inactive'}">${form.is_active ? '启用' : '禁用'}</span></td>
                 <td>
-                    ${form.is_protected === 1 ? '<span style="color: #666;">🔒表格受保护</span>' : `
+                    ${form.is_protected === 1 ? `
+                        <button class="btn btn-sm btn-action preview-form" data-id="${form.id}">预览</button>
+                        <span style="color: #666;">🔒表格受保护</span>
+                    ` : `
                         <button class="btn btn-sm btn-action edit-form" data-id="${form.id}">编辑</button>
                         <button class="btn btn-sm btn-action delete-form" data-id="${form.id}">删除</button>
                     `}
@@ -151,6 +156,13 @@ const cloudFormModule = {
             btn.addEventListener('click', (e) => {
                 const formId = parseInt(e.target.dataset.id);
                 this.deleteForm(formId);
+            });
+        });
+        // 绑定预览按钮事件
+        document.querySelectorAll('.preview-form').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const formId = parseInt(e.target.dataset.id);
+                this.openFormPreviewModal(formId);
             });
         });
     },
@@ -204,13 +216,132 @@ const cloudFormModule = {
         `;
     },
     
+    // 打开表单预览模态框
+    openFormPreviewModal: function(formId) {
+        // 发送API请求获取表单预览数据
+        fetch(`${config.backendUrl}/form_preview/${formId}`, {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 0 && data.data) {
+                const form = data.data;
+                this.renderFormPreview(form);
+            } else {
+                alert('获取表单预览数据失败: ' + (data.message || '未知错误'));
+            }
+        })
+        .catch(error => {
+            console.error('获取表单预览数据失败:', error);
+            alert('获取表单预览数据失败，请重试');
+        });
+    },
+    
+    // 渲染表单预览
+    renderFormPreview: function(form) {
+        // 创建预览模态框
+        const modal = document.createElement('div');
+        modal.className = 'modal cloud-form-preview-modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content" style="margin: auto; width: 80%; max-width: 800px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">表单预览 - ${form.name}</h3>
+                    <button class="close-btn">×</button>
+                </div>
+                <div class="modal-body">
+                    <p class="cloud-form-preview-description">${form.description || '无描述'}</p>
+                    <div class="cloud-form-preview-container">
+                        <!-- 预览内容将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary cloud-form-close-preview">关闭</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // 获取预览容器
+        const previewContainer = modal.querySelector('.cloud-form-preview-container');
+        
+        // 渲染表单控件（禁用状态）
+        form.controls.forEach(control => {
+            const controlEl = document.createElement('div');
+            controlEl.className = 'form-group';
+            
+            let controlHtml = `<label>${control.label} ${control.required ? '<span class="required">*</span>' : ''}</label>`;
+            
+            switch(control.type) {
+                case 'text':
+                    controlHtml += `
+                        <input type="text" class="form-control" placeholder="${control.placeholder || ''}" value="${control.default_value || ''}" disabled>
+                    `;
+                    break;
+                case 'textarea':
+                    controlHtml += `
+                        <textarea class="form-control" rows="4" placeholder="${control.placeholder || ''}" disabled>${control.default_value || ''}</textarea>
+                    `;
+                    break;
+                case 'radio':
+                    controlHtml += `<div class="cloud-form-preview-radio-group">`;
+                    if (control.options && control.options.length > 0) {
+                        control.options.forEach((option, index) => {
+                            const isChecked = control.default_value === option;
+                            controlHtml += `
+                                <label class="cloud-form-preview-radio-label">
+                                    <input type="radio" name="preview-radio-${control.id}" value="${option}" ${isChecked ? 'checked' : ''} disabled>
+                                    ${option}
+                                </label>
+                            `;
+                        });
+                    }
+                    controlHtml += `</div>`;
+                    break;
+                case 'checkbox':
+                    controlHtml += `<div class="cloud-form-preview-checkbox-group">`;
+                    if (control.options && control.options.length > 0) {
+                        control.options.forEach((option, index) => {
+                            const isChecked = control.default_value && control.default_value.includes(option);
+                            controlHtml += `
+                                <label class="cloud-form-preview-checkbox-label">
+                                    <input type="checkbox" name="preview-checkbox-${control.id}" value="${option}" ${isChecked ? 'checked' : ''} disabled>
+                                    ${option}
+                                </label>
+                            `;
+                        });
+                    }
+                    controlHtml += `</div>`;
+                    break;
+                default:
+                    controlHtml += `
+                        <div class="form-control disabled">
+                            不支持的控件类型: ${control.type}
+                        </div>
+                    `;
+            }
+            
+            controlEl.innerHTML = controlHtml;
+            previewContainer.appendChild(controlEl);
+        });
+        
+        // 绑定关闭事件
+        modal.querySelector('.close-btn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        modal.querySelector('.cloud-form-close-preview').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+    },
+    
     openAddFormModal: function() {
         this.currentFormId = null;
         this.controls = [];
         
         // 重置表单
         document.getElementById('form-name').value = '';
-        document.getElementById('form-description').value = '';
+        document.getElementById('cloud-form-description').value = '';
         this.$controlsContainer.innerHTML = '';
         // 设置模态框标题
         this.$modalTitle.textContent = '添加新表单';
@@ -231,7 +362,7 @@ const cloudFormModule = {
                 this.currentFormId = form.id;
                 this.controls = form.controls || [];
                 document.getElementById('form-name').value = form.name;
-                document.getElementById('form-description').value = form.description || '';
+                document.getElementById('cloud-form-description').value = form.description || '';
                 this.renderControls();
                 this.$modalTitle.textContent = '编辑表单';
                 this.$formModal.style.display = 'flex';
@@ -273,9 +404,10 @@ const cloudFormModule = {
     
     getControlDefaultLabel: function(type) {
         const typeNames = {
-            'select': '选择题',
-            'radio': '判断题',
-            'text': '填空题'
+            'radio': '单选题',
+            'checkbox': '多选题',
+            'text': '填空题',
+            'textarea': '文本题'
         };
         
         const count = this.controls.filter(c => c.type === type).length + 1;
@@ -284,9 +416,10 @@ const cloudFormModule = {
     
     getControlDefaultPlaceholder: function(type) {
         const placeholders = {
-            'select': '请选择',
             'radio': '',
-            'text': '请输入'
+            'checkbox': '',
+            'text': '请输入',
+            'textarea': '请输入详细内容'
         };
         
         return placeholders[type] || '';
@@ -327,14 +460,14 @@ const cloudFormModule = {
             `;
             
             // 添加特定类型的控件设置
-            if (control.type === 'text') {
+            if (control.type === 'text' || control.type === 'textarea') {
                 controlHtml += `
                     <div class="form-group">
                         <label>提示文字</label>
                         <input type="text" class="form-control control-placeholder" value="${control.placeholder || ''}" data-index="${index}">
                     </div>
                 `;
-            } else if (control.type === 'select' || control.type === 'radio') {
+            } else if (control.type === 'radio' || control.type === 'checkbox') {
                 controlHtml += `
                     <div class="form-group">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -369,9 +502,10 @@ const cloudFormModule = {
     
     getControlTypeName: function(type) {
         const typeNames = {
-            'select': '选择题',
-            'radio': '判断题',
-            'text': '填空题'
+            'radio': '单选题',
+            'checkbox': '多选题',
+            'text': '填空题',
+            'textarea': '文本题'
         };
         
         return typeNames[type] || type;
@@ -468,7 +602,7 @@ const cloudFormModule = {
             return;
         }
         const formName = document.getElementById('form-name').value.trim();
-        const formDescription = document.getElementById('form-description').value.trim();
+        const formDescription = document.getElementById('cloud-form-description').value.trim();
         // 验证表单
         if (!formName) {
             alert('请输入表单名称');

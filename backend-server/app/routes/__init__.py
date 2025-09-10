@@ -8,9 +8,7 @@ from .form import form_bk
 from .excel import excel_bk
 from .create_todos import create_todos_bk
 from .solve_todos import solve_todos_bk
-
-from ..models.Notice import Notice
-from ..models.Task import Task
+from .development import development_bk
 
 routes = [
     auth_bk,
@@ -22,5 +20,6 @@ routes = [
     form_bk,
     excel_bk,
     create_todos_bk,
-    solve_todos_bk
+    solve_todos_bk,
+    development_bk
 ]

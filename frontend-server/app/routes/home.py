@@ -13,7 +13,12 @@ def home():
     env = current_app.config.get('ENV', 'production')
     current_config = config[env]
     # 传递iframe URL参数给模板
-    return render_template("home.html", iframe_url_param=current_config.IFRAME_URL_PARAM)
+    if env == 'production':
+        iframe_url = 'http://127.0.0.1/chatbot/' + current_config.IFRAME_URL_PARAM
+    else:
+        domain = current_config.BACKEND_SERVER_DOMAIN[:-6] + '/chatbot/'
+        iframe_url = domain + current_config.IFRAME_URL_PARAM
+    return render_template("home.html", iframe_url_param=iframe_url)
 
 
 @home_ft.get('/login/')

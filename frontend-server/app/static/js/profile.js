@@ -458,7 +458,6 @@ $(document).ready(function() {
         console.log('初始化党员列表');
         // 获取所有党员数据
         function fetchAllPartyMembers() {
-            showLoadingState();
             $.ajax({
                 url: URL + '/get_all_party_members',
                 xhrFields: {withCredentials: true},
@@ -471,7 +470,6 @@ $(document).ready(function() {
                     console.log('计算得到的总页数:', totalPages);
                     renderMembersList();
                     renderPagination();
-                    hideLoadingState();
                 } 
             });
         }
@@ -506,23 +504,10 @@ $(document).ready(function() {
 
         // 渲染分页控件
         function renderPagination() {
-            // 清空并完全控制分页容器
             const paginationContainer = $('.pf_pagination');
             paginationContainer.empty();
-            
-            // 首页按钮
-            const firstPageBtn = $(`<button class="pf_pagination-btn ${currentPage === 1 ? 'pf_disabled' : ''}" data-page="1">首页</button>`);
-            firstPageBtn.on('click', function() {
-                if (currentPage !== 1) {
-                    currentPage = 1;
-                    renderMembersList();
-                    renderPagination();
-                }
-            });
-            paginationContainer.append(firstPageBtn);
-            
             // 上一页按钮
-            const prevPageBtn = $(`<button id="pf_prev_page" class="pf_pagination-btn ${currentPage === 1 ? 'pf_disabled' : ''}" data-page="${currentPage - 1}">上一页</button>`);
+            const prevPageBtn = $(`<button id="pf_prev_page" class="btn-outline pf_pagination-btn ${currentPage === 1 ? 'pf_disabled' : ''}" data-page="${currentPage - 1}">上一页</button>`);
             prevPageBtn.on('click', function() {
                 if (currentPage > 1) {
                     currentPage--;
@@ -531,24 +516,11 @@ $(document).ready(function() {
                 }
             });
             paginationContainer.append(prevPageBtn);
-            
-            // 页码按钮 - 只显示当前页附近的页码
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, startPage + 4);
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = $(`<button class="pf_pagination-btn ${i === currentPage ? 'pf_active' : ''}" data-page="${i}">${i}</button>`);
-                pageBtn.on('click', function() {
-                    if (i !== currentPage) {
-                        currentPage = i;
-                        renderMembersList();
-                        renderPagination();
-                    }
-                });
-                paginationContainer.append(pageBtn);
-            }
-            
+            // 页码信息
+            const pageInfo = $(`<span id="pf_page_info" class="pf_page-info">第 ${currentPage} / ${totalPages} 页</span>`);
+            paginationContainer.append(pageInfo);
             // 下一页按钮
-            const nextPageBtn = $(`<button id="pf_next_page" class="pf_pagination-btn ${currentPage === totalPages ? 'pf_disabled' : ''}" data-page="${currentPage + 1}">下一页</button>`);
+            const nextPageBtn = $(`<button id="pf_next_page" class="btn-outline pf_pagination-btn ${currentPage === totalPages ? 'pf_disabled' : ''}" data-page="${currentPage + 1}">下一页</button>`);
             nextPageBtn.on('click', function() {
                 if (currentPage < totalPages) {
                     currentPage++;
@@ -557,34 +529,7 @@ $(document).ready(function() {
                 }
             });
             paginationContainer.append(nextPageBtn);
-            
-            // 末页按钮
-            const lastPageBtn = $(`<button class="pf_pagination-btn ${currentPage === totalPages ? 'pf_disabled' : ''}" data-page="${totalPages}">末页</button>`);
-            lastPageBtn.on('click', function() {
-                if (currentPage !== totalPages) {
-                    currentPage = totalPages;
-                    renderMembersList();
-                    renderPagination();
-                }
-            });
-            paginationContainer.append(lastPageBtn);
-            
-            // 页码信息
-            const pageInfo = $(`<span id="pf_page_info" class="pf_page-info">第 ${currentPage}/${totalPages} 页，共 ${allMembersData.length} 条记录</span>`);
-            paginationContainer.append(pageInfo);
-            
-            console.log('分页渲染完成: 当前页=' + currentPage + ', 总页数=' + totalPages + ', 总条数=' + allMembersData.length);
-        }
 
-        // 显示加载状态
-        function showLoadingState() {
-            $('#pf_loading-indicator').show();
-            $('#pf_members-table-container').hide();
-        }
-        // 隐藏加载状态
-        function hideLoadingState() {
-            $('#pf_loading-indicator').hide();
-            $('#pf_members-table-container').show();
         }
         
         // 查看党员详情

@@ -16,7 +16,7 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     app.config['SESSION_TYPE'] = 'filesystem'
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    app.config['SESSION_COOKIE_SECURE'] = False if config_name == 'development' else True
+    app.config['SESSION_COOKIE_SECURE'] = False if config_name == 'production' else True
     CORS(app, supports_credentials=True)
     db.init_app(app)
 

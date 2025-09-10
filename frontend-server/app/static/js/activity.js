@@ -14,7 +14,8 @@ $(document).ready(function() {
     const pageInfo = document.querySelector('#activity .pagination .page-info');
 
     // 初始化日程模块
-    function initActivity() {        
+    function initActivity() {    
+        $('.page-title').text('任务管理');
         fetchScheduleData();
     }
 
@@ -86,19 +87,17 @@ $(document).ready(function() {
                     break;
             }
             
-            // 构建操作按钮
+            // 构建详情和删除按钮
             let actionButtons = `
                 <button class="btn-action btn-detail" data-id="${item.id}" data-type="${item.type}">详情</button>
             `;
-            
+            actionButtons += `
+                <button class="btn-action btn-delete" data-id="${item.id}" data-type="${item.type}">删除</button>`;
             // 待完成状态才显示标记完成按钮
             if (item.status === 2) {
                 actionButtons += `
                 <button class="btn-action btn-complete" data-id="${item.id}" data-type="${item.type}">标记完成</button>`;
             }
-            
-            actionButtons += `
-                <button class="btn-action btn-delete" data-id="${item.id}" data-type="${item.type}">删除</button>`;
             
             const row = document.createElement('tr');
             row.innerHTML = `

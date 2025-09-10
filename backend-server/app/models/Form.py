@@ -40,6 +40,7 @@ class FormSubmission(db.Model):
     form_id = db.Column('form_id', db.Integer, db.ForeignKey('forms.id'), nullable=False)
     user_id = db.Column('user_id', db.Integer, nullable=False)
     data = db.Column('data', db.Text, nullable=False)  # JSON格式存储表单数据
+    status = db.Column('status', db.Integer, default=0)  # 0: 待处理, 1: 已同意, 2: 已拒绝
 
     # 与Form建立多对一关系
     form = db.relationship('Form', backref='submissions', lazy=True)

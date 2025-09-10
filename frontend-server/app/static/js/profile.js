@@ -1,5 +1,8 @@
 // 党员档案模块逻辑
 $(document).ready(function() {
+    // 初始化切换按钮功能
+    initToggleButtons();
+    const URL = $('#URL').text();
     // 初始化党员档案页面
     function initProfile() {
         console.log('党员档案页面初始化');
@@ -410,18 +413,278 @@ $(document).ready(function() {
                     setFormReadOnly(isReadOnly);
                     bindEvents();
                 },
-                error: function() {
-                    alert('获取档案数据失败：无法连接至服务器，请稍后再试。');
-                    // 渲染空表单
-                    populateForm({});
-                    // 错误时默认为可编辑状态
-                    setFormReadOnly(false);
-                    bindEvents();
-                }
             });
         });
     }
 
+    // 初始化切换按钮功能
+    function initToggleButtons() {
+        const toggleProfileBtn = $('#toggle-profile-btn');
+        const toggleMembersBtn = $('#toggle-members-btn');
+        const profileContentArea = $('#profile-content-area');
+        const membersSectionArea = $('#members-section-area');
+        // 个人信息按钮点击事件
+        toggleProfileBtn.on('click', function() {
+            // 显示个人信息区域，隐藏党员列表区域
+            profileContentArea.show();
+            membersSectionArea.hide();
+            // 更新按钮激活状态
+            toggleProfileBtn.addClass('active');
+            toggleMembersBtn.removeClass('active');
+            // 更新页面标题
+            $('.page_title').text('党员信息');
+        });
+        
+        // 党员列表按钮点击事件
+        toggleMembersBtn.on('click', function() {
+            // 隐藏个人信息区域，显示党员列表区域
+            profileContentArea.hide();
+            membersSectionArea.show();            
+            // 更新按钮激活状态
+            toggleMembersBtn.addClass('active');
+            toggleProfileBtn.removeClass('active');
+            // 更新页面标题
+            $('.page_title').text('党员列表');
+        });
+    }
+
+    // 初始化党员列表
+    let currentPage = 1;
+    const pageSize = 7;
+    let totalPages = 1;
+    let allMembersData = [];
+
+    function initPartyMembersList() {
+        console.log('初始化党员列表');
+        // 获取所有党员数据
+        function fetchAllPartyMembers() {
+            showLoadingState();
+            $.ajax({
+                url: URL + '/get_all_party_members',
+                xhrFields: {withCredentials: true},
+                type: 'GET',
+                dataType: 'json',
+                success: function(resp) {
+                    allMembersData = resp.data || [];
+                    console.log('党员数据总数:', allMembersData.length, '每页显示:', pageSize);
+                    totalPages = Math.ceil(allMembersData.length / pageSize);
+                    console.log('计算得到的总页数:', totalPages);
+                    renderMembersList();
+                    renderPagination();
+                    hideLoadingState();
+                } 
+            });
+        }
+        
+        // 渲染党员列表
+        function renderMembersList() {
+            const tableBody = $('#pf_members_table_body');
+            tableBody.empty();
+            // 计算当前页的数据范围
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, allMembersData.length);
+            const currentPageData = allMembersData.slice(startIndex, endIndex);
+            // 渲染表格内容
+            if (currentPageData.length === 0) {
+                const emptyRow = $('<tr class="no-data"><td colspan="8">暂无党员数据</td></tr>');
+                tableBody.append(emptyRow);
+            } else {
+                currentPageData.forEach((member, index) => {
+                    let row = $('<tr>');
+                    row.append(`<td>${startIndex + index + 1}</td>`);
+                    row.append(`<td>${member.real_name || '-'}</td>`);
+                    row.append(`<td>${member.gender || '-'}</td>`);
+                    row.append(`<td>${member.party_status || '-'}</td>`);
+                    row.append(`<td>${member.position || '-'}</td>`);
+                    row.append(`<td>${member.contact || '-'}</td>`);
+                    row.append(`<td>${member.party_branch || '-'}</td>`);
+                    row.append(`<td><button class="pf_detail-btn btn btn-action " data-id="${member.id}">详情</button></td>`);
+                    tableBody.append(row);
+                });
+            }
+        }
+
+        // 渲染分页控件
+        function renderPagination() {
+            // 清空并完全控制分页容器
+            const paginationContainer = $('.pf_pagination');
+            paginationContainer.empty();
+            
+            // 首页按钮
+            const firstPageBtn = $(`<button class="pf_pagination-btn ${currentPage === 1 ? 'pf_disabled' : ''}" data-page="1">首页</button>`);
+            firstPageBtn.on('click', function() {
+                if (currentPage !== 1) {
+                    currentPage = 1;
+                    renderMembersList();
+                    renderPagination();
+                }
+            });
+            paginationContainer.append(firstPageBtn);
+            
+            // 上一页按钮
+            const prevPageBtn = $(`<button id="pf_prev_page" class="pf_pagination-btn ${currentPage === 1 ? 'pf_disabled' : ''}" data-page="${currentPage - 1}">上一页</button>`);
+            prevPageBtn.on('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderMembersList();
+                    renderPagination();
+                }
+            });
+            paginationContainer.append(prevPageBtn);
+            
+            // 页码按钮 - 只显示当前页附近的页码
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = $(`<button class="pf_pagination-btn ${i === currentPage ? 'pf_active' : ''}" data-page="${i}">${i}</button>`);
+                pageBtn.on('click', function() {
+                    if (i !== currentPage) {
+                        currentPage = i;
+                        renderMembersList();
+                        renderPagination();
+                    }
+                });
+                paginationContainer.append(pageBtn);
+            }
+            
+            // 下一页按钮
+            const nextPageBtn = $(`<button id="pf_next_page" class="pf_pagination-btn ${currentPage === totalPages ? 'pf_disabled' : ''}" data-page="${currentPage + 1}">下一页</button>`);
+            nextPageBtn.on('click', function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderMembersList();
+                    renderPagination();
+                }
+            });
+            paginationContainer.append(nextPageBtn);
+            
+            // 末页按钮
+            const lastPageBtn = $(`<button class="pf_pagination-btn ${currentPage === totalPages ? 'pf_disabled' : ''}" data-page="${totalPages}">末页</button>`);
+            lastPageBtn.on('click', function() {
+                if (currentPage !== totalPages) {
+                    currentPage = totalPages;
+                    renderMembersList();
+                    renderPagination();
+                }
+            });
+            paginationContainer.append(lastPageBtn);
+            
+            // 页码信息
+            const pageInfo = $(`<span id="pf_page_info" class="pf_page-info">第 ${currentPage}/${totalPages} 页，共 ${allMembersData.length} 条记录</span>`);
+            paginationContainer.append(pageInfo);
+            
+            console.log('分页渲染完成: 当前页=' + currentPage + ', 总页数=' + totalPages + ', 总条数=' + allMembersData.length);
+        }
+
+        // 显示加载状态
+        function showLoadingState() {
+            $('#pf_loading-indicator').show();
+            $('#pf_members-table-container').hide();
+        }
+        // 隐藏加载状态
+        function hideLoadingState() {
+            $('#pf_loading-indicator').hide();
+            $('#pf_members-table-container').show();
+        }
+        
+        // 查看党员详情
+        function viewMemberDetail(memberId) {
+            const modal = $('#pf_member-detail-modal');
+            const loadingState = $('#pf_loading-state');
+            const detailsContainer = $('#pf_member-details');
+            const errorState = $('#pf_error-state');
+            
+            // 显示弹窗和加载状态
+            modal.show();
+            loadingState.show();
+            detailsContainer.hide();
+            errorState.hide();
+            
+            // 从服务器获取党员详细信息
+            $.ajax({
+                url: URL + '/get_party_member_detail/' + memberId,
+                xhrFields: {withCredentials: true},
+                type: 'GET',
+                dataType: 'json',
+                success: function(resp) {
+                    if (resp.code === 1000) {
+                        const memberData = resp.data || {};
+                        // 填充详情数据
+                        $('#pf_member-name').text(memberData.name || '-');
+                        $('#pf_member-gender').text(memberData.gender || '-');
+                        $('#pf_member-hometown').text(memberData.native_place || '-');
+                        $('#pf_member-education').text(getEducationText(memberData.education) || '-');
+                        $('#pf_member-political').text(memberData.party_status || '-');
+                        $('#pf_member-join-date').text(memberData.join_date || '-');
+                        $('#pf_member-phone').text(memberData.contact || '-');
+                        $('#pf_member-organization_1').text(memberData.party_committee);
+                        $('#pf_member-organization_2').text(memberData.party_subcommittee);
+                        $('#pf_member-organization_3').text(memberData.party_branch);
+                        $('#pf_member-position').text(memberData.position || '-');
+                        $('#pf_member-birth').text(memberData.birth_date || '-');
+                        $('#pf_member-address').text(memberData.address || '-');
+                        $('#pf_member-student-id').text(memberData.student_id || '-');
+                        // 显示详情内容，隐藏加载状态
+                        loadingState.hide();
+                        detailsContainer.show();
+                    } else {
+                        console.error('获取党员详情失败:', resp.message || '未知错误');
+                        loadingState.hide();
+                        errorState.text(resp.message || '获取党员详情失败，请稍后再试');
+                        errorState.show();
+                    }
+                },
+                error: function() {
+                    console.error('获取党员详情请求失败');
+                    loadingState.hide();
+                    errorState.text('无法连接至服务器，请检查网络连接后重试');
+                    errorState.show();
+                }
+            });
+        }
+        
+        // 获取学历文本
+        function getEducationText(educationValue) {
+            const educationMap = {
+                'high_school': '高中',
+                'college': '专科',
+                'bachelor': '本科',
+                'master': '硕士',
+                'doctor': '博士'
+            };
+            return educationMap[educationValue] || educationValue;
+        }
+        // 关闭详情弹窗
+        function closeMemberDetailModal() {
+            $('#pf_member-detail-modal').hide();
+        }
+        // 绑定党员列表相关事件
+        function bindMembersListEvents() {
+            // 委托绑定详情按钮点击事件
+            $('#pf_members_table_body').on('click', '.pf_detail-btn', function() {
+                const memberId = $(this).data('id');
+                viewMemberDetail(memberId);
+            });
+            // 关闭详情弹窗事件
+            $('#pf_close-modal, #pf_close-btn').on('click', closeMemberDetailModal);
+        }
+        // 初始化党员列表 - 确保在DOM加载完成后再执行
+        function init() {
+            fetchAllPartyMembers();
+            bindMembersListEvents();
+        }
+        
+        // 确保DOM完全加载后再初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    }
+    
+    $('#pf_members-section').addClass('initialized');
+    initPartyMembersList();
+    
     // 暴露初始化函数供home.js调用
     window.profileModule = {
         init: initProfile

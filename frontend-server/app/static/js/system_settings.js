@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const settingsMessage = document.getElementById('settings-message');
     const passwordUpdateForm = document.getElementById('password-update-form');
     const passwordUpdateMessage = document.getElementById('password-update-message');
+    $('.page-title').text('系统设置');
     
     // 验证密码表单提交
     passwordVerifyForm.addEventListener('submit', function(e) {

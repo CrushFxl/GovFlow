@@ -133,57 +133,68 @@ $(document).ready(function() {
         switch(pageId) {
             case 'dashboard':
                 if (window.dashboardModule && window.dashboardModule.init) {
+                    $('.page-title').text('工作台');
                     dashboardModule.init();
                 }
                 break;
             case 'profile':
                 if (window.profileModule && window.profileModule.init) {
+                    $('.page-title').text('党员档案');
                     profileModule.init();
                 }
                 break;
             case 'cloud-form':
                 // 云表单页面初始化
                 if (window.cloudFormModule && window.cloudFormModule.init) {
+                    $('.page-title').text('云表单');
                     cloudFormModule.init();
                 }
                 break;
             case 'activity':
                 if (window.activityModule && window.activityModule.init) {
+                    $('.page-title').text('任务管理');
                     activityModule.init();
                 }
                 break;
             case 'meeting':
                 if (window.meetingModule && window.meetingModule.init) {
+                    $('.page-title').text('三会一课');
                     meetingModule.init();
                 }
                 break;
             case 'fee':
                 if (window.feeModule && window.feeModule.init) {
+                    $('.page-title').text('党费管理');
                     feeModule.init();
                 }
                 break;
             case 'development':
                 if (window.developmentModule && window.developmentModule.init) {
+                    $('.page-title').text('党员发展');
                     developmentModule.init();
                 }
                 break;
             case 'study':
                 if (window.studyModule && window.studyModule.init) {
+                    $('.page-title').text('学习教育');
                     studyModule.init();
                 }
                 break;
             case 'review':
                 if (window.reviewModule && window.reviewModule.init) {
+                    $('.page-title').text('民主评议');
                     reviewModule.init();
                 }
                 break;
             case 'statistics':
                 if (window.statisticsModule && window.statisticsModule.init) {
+                    $('.page-title').text('统计分析');
                     statisticsModule.init();
                 }
                 break;
             case 'settings':
                 if (window.settingsModule && window.settingsModule.init) {
+                    $('.page-title').text('系统设置');
                     settingsModule.init();
                 }
                 break;

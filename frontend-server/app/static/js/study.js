@@ -4,6 +4,7 @@ $(document).ready(function() {
     function initStudy() {
         // 可以添加学习教育页面的初始化逻辑
         console.log('学习教育页面初始化');
+        $('.page-title').text('学习教育');
         // 未来可以添加学习资源管理、学习记录等功能
     }
 

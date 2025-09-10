@@ -9,13 +9,10 @@
     <link rel="stylesheet" href="../static/css/profile.css">
     <link rel="stylesheet" href="../static/css/cloud-form.css">
     <link rel="stylesheet" href="../static/css/home.css">
+    <link rel="stylesheet" href="../static/css/development.css">
 
     <!-- 后端服务器地址配置 -->
-    <script>
-        const config = {
-            backendUrl: '{{ URL }}'
-        };
-    </script>
+    <script>const config = {backendUrl: '{{ URL }}'};</script>
 
     <style>
         :root {
@@ -519,13 +516,50 @@
 
             <!-- 党员档案页面 -->
             <div id="profile" class="page-content profile-page">
+                <style>
+                    .page-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .view-toggle {
+                        display: flex;
+                    }
+                    
+                    .view-toggle .btn-outline {
+                        padding: 8px 16px;
+                        border: 1px solid #ddd;
+                        background-color: #fff;
+                        color: #333;
+                        cursor: pointer;
+                        border-radius: 4px;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .view-toggle .btn-outline:hover {
+                        color: #c12c1f;
+                    }
+                    
+                    .view-toggle .btn-outline.active {
+                        background-color: #c12c1f;
+                        color: #fff;
+                    }
+                </style>
                 <div class="page-header">
-                    <h1 class="page-title">党员档案</h1>
+                    <h1 class="page-title">个人党员档案</h1>
+                    <!-- 切换按钮 -->
+                    <div class="view-toggle">
+                        <button id="toggle-profile-btn" class="btn-outline active" style="border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 0;">个人信息</button>
+                        <button id="toggle-members-btn" class="btn-outline" style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 0;">党员列表</button>
+                    </div>
                     <div class="breadcrumb">首页 / 党员档案</div>
                 </div>
                 
                 <!-- 个人信息和组织关系区域 -->
-                <div class="profile-content">
+                <div id="profile-content-area" class="profile-content">
                     <!-- 个人基本信息卡片 -->
                     <div class="card">
                         <div class="card-header">
@@ -603,7 +637,6 @@
                             </form>
                         </div>
                     </div>
-                    
                     <!-- 组织关系信息卡片 -->
                     <div class="card">
                         <div class="card-header">
@@ -659,6 +692,44 @@
                                     <button type="button" id="cancel-btn" class="btn-outline" style="display: none;">取消</button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其他党员信息列表 -->
+                <div id="members-section-area" class="pf_members-section" style="display: none;">
+                    <div class="card">
+                        <!-- 加载状态指示器 -->
+                        <div id="pf_loading-indicator" class="pf_loading-indicator" style="display: none; text-align: center; padding: 40px;">
+                            <p>正在加载党员信息...</p>
+                        </div>
+                        
+                        <!-- 表格容器 -->
+                        <div id="pf_members-table-container" class="pf_members-table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>姓名</th>
+                                        <th>性别</th>
+                                        <th>党员类型</th>
+                                        <th>职称</th>
+                                        <th>联系方式</th>
+                                        <th>所属支部</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pf_members_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                </tbody>
+                            </table>
+
+                            <!-- 分页控件 -->
+                            <div class="pf_pagination">
+                                <button id="pf_prev_page" class="pf_pagination-btn" disabled>上一页</button>
+                                <span id="pf_page_info" class="pf_page-info">第 1 页 / 共 1 页</span>
+                                <button id="pf_next_page" class="pf_pagination-btn" disabled>下一页</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -831,10 +902,93 @@
             <!-- 党员发展页面 -->
             <div id="development" class="page-content">
                 <div class="page-header">
-                    <h1 class="page-title">党员发展</h1>
+                   <h1 class="page-title">党员发展</h1>
                     <div class="breadcrumb">首页 / 党员发展</div>
                 </div>
-                <div class="placeholder-content">E</div>
+                <div class="dyfz_development_content">
+                    <!-- 用户查询区域 -->
+                    <div class="dyfz_user_search_area">
+                        <div class="dyfz_search_box">
+                            <div class="dyfz_user_icon"></div>
+                            <input type="text" id="dyfz_search_input" placeholder="请输入学工号或姓名" />
+                            <button id="dyfz_search_button" class="dyfz_search_btn">查询</button>
+                        </div>
+                        <div id="dyfz_search_result" class="dyfz_search_result"></div>
+                    </div>
+
+                    <!-- 流程条区域 -->
+                    <div class="dyfz_progress_bar_area">
+                        <div class="dyfz_progress_bar">
+                            <div class="dyfz_progress_step dyfz_step群众 active">
+                                <div class="dyfz_step_icon"><span>1</span></div>
+                                <div class="dyfz_step_label">群众</div>
+                            </div>
+                            <div class="dyfz_progress_line"></div>
+                            <div class="dyfz_progress_step dyfz_step入党积极分子">
+                                <div class="dyfz_step_icon"><span>2</span></div>
+                                <div class="dyfz_step_label">入党积极分子</div>
+                            </div>
+                            <div class="dyfz_progress_line"></div>
+                            <div class="dyfz_progress_step dyfz_step发展对象">
+                                <div class="dyfz_step_icon"><span>3</span></div>
+                                <div class="dyfz_step_label">发展对象</div>
+                            </div>
+                            <div class="dyfz_progress_line"></div>
+                            <div class="dyfz_progress_step dyfz_step预备党员">
+                                <div class="dyfz_step_icon"><span>4</span></div>
+                                <div class="dyfz_step_label">预备党员</div>
+                            </div>
+                            <div class="dyfz_progress_line"></div>
+                            <div class="dyfz_progress_step dyfz_step普通正式党员">
+                                <div class="dyfz_step_icon"><span>5</span></div>
+                                <div class="dyfz_step_label">普通正式党员</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 筛选和表格区域 -->
+                    <div class="dyfz_table_area">
+                        <div class="dyfz_filter_area">
+                            <label for="dyfz_status_filter">筛选阶段：</label>
+                            <select id="dyfz_status_filter">
+                                <option value="all">全部</option>
+                                <option value="群众">群众</option>
+                                <option value="入党积极分子">入党积极分子</option>
+                                <option value="发展对象">发展对象</option>
+                                <option value="预备党员">预备党员</option>
+                                <option value="普通正式党员">普通正式党员</option>
+                            </select>
+                            <button id="dyfz_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
+                        </div>
+
+                        <div class="dyfz_table_container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>姓名</th>
+                                        <th>学工号</th>
+                                        <th>政治面貌</th>
+                                        <th>培养人</th>
+                                        <th>培养人学号</th>
+                                        <th>材料说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dyfz_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 分页控件 -->
+                        <div class="dyfz_pagination">
+                            <button id="dyfz_prev_page" class="dyfz_page_btn" disabled>上一页</button>
+                            <span id="dyfz_page_info">第 <span id="dyfz_current_page">1</span> 页，共 <span id="dyfz_total_pages">1</span> 页</span>
+                            <button id="dyfz_next_page" class="dyfz_page_btn" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 学习教育页面 -->
@@ -955,9 +1109,9 @@
                     </div>
                 </div>
             </div>
+
         </main>
     </div>
-
 
     <!-- 任务确认表单弹窗 -->
     <div id="activity-modal" class="modal">
@@ -1045,6 +1199,84 @@
         </div>
     </div>
 
+    <!-- 党员详情弹窗 -->
+    <div id="pf_member-detail-modal" class="pf_modal">
+        <div class="pf_modal-content">
+            <div class="pf_modal-header">
+                <h2 id="pf_modal-title">党员详情</h2>
+                <button id="pf_close-modal" class="pf_close-btn">×</button>
+            </div>
+            <div class="pf_modal-body">
+                <div id="pf_loading-state" class="pf_loading">
+                    <div class="pf_loading-spinner"></div>
+                    <p>加载中...</p>
+                </div>
+                <div id="pf_member-details" class="pf_details-container">
+                    <div class="pf_details-grid">
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">姓名</span>
+                            <span id="pf_member-name" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">联系方式</span>
+                            <span id="pf_member-phone" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">籍贯</span>
+                            <span id="pf_member-hometown" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">所在党总支</span>
+                            <span id="pf_member-organization_1" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">所在党支部</span>
+                            <span id="pf_member-organization_2" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">所在党小组</span>
+                            <span id="pf_member-organization_3" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">学历</span>
+                            <span id="pf_member-education" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">职务</span>
+                            <span id="pf_member-position" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">出生日期</span>
+                            <span id="pf_member-birth" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">政治面貌</span>
+                            <span id="pf_member-political" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">入党时间</span>
+                            <span id="pf_member-join-date" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">学号</span>
+                            <span id="pf_member-student-id" class="pf_detail-value"></span>
+                        </div>
+                        <div class="pf_detail-item">
+                            <span class="pf_detail-label">备注</span>
+                            <span id="pf_member-address" class="pf_detail-value"></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="pf_error-state" class="pf_error" style="display: none;">
+                    <p>加载党员信息失败，请稍后重试</p>
+                </div>
+            </div>
+            <div class="pf_modal-footer">
+                <button id="pf_close-btn" class="btn pf_close-button">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../static/sdk/pako.js" defer></script>
     <script src="../static/sdk/jquery.min.js" defer></script>
     <script src="../static/js/home.js" defer></script>
@@ -1062,5 +1294,6 @@
     <script src="../static/js/cloud-form.js" defer></script>
     <script src="../static/js/nav.js" defer></script>
     <script src="../static/js/system_settings.js" defer></script>
+
 </body>
 </html>

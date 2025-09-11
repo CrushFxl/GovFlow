@@ -1,3 +1,4 @@
+from re import sub
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import text
 import json
@@ -68,76 +69,44 @@ def search_user():
         return jsonify({'code': 500, 'msg': f'查询失败: {str(e)}'})
 
 
-@development_bk.route('/get_development_records', methods=['GET'])
+@development_bk.route('/get_development_records', methods=['GET', 'POST'])
 def get_development_records():
     """获取处于不同阶段的党员发展情况记录"""
-    try:
-        # 获取查询参数
-        status_filter = request.args.get('status', 'all')  # 可选：all, 群众, 入党积极分子, 发展对象, 预备党员, 普通正式党员
-        
-        # 查询所有form_id=1且status=1的提交记录
-        query = FormSubmission.query.filter(
-            FormSubmission.form_id == 1,
-            FormSubmission.status == 1
-        )
-        
-        # 按政治面貌过滤
-        if status_filter != 'all':
-            submissions = query.all()
-            filtered_submissions = []
-            for submission in submissions:
-                try:
-                    data = json.loads(submission.data)
-                    if data.get('申请发展的政治面貌') == status_filter:
-                        filtered_submissions.append(submission)
-                except json.JSONDecodeError:
-                    pass
-            submissions = filtered_submissions
-        else:
-            submissions = query.all()
-        
-        # 处理结果
-        results = []
-        user_ids = set([s.user_id for s in submissions])
-        
-        # 批量获取用户信息
-        profiles = Profile.query.filter(Profile.uid.in_(user_ids)).all()
-        profile_dict = {p.uid: p for p in profiles}
-        
-        # 获取每个用户的最新发展记录
-        user_latest_records = {}
+    status_filter = request.args.get('status', 'all')  # 可选：all, 群众, 入党积极分子, 发展对象, 预备党员, 普通正式党员
+    keyword = request.args.get('keyword', None)
+    query = FormSubmission.query.filter_by(form_id=1)
+    # 按政治面貌筛选
+    if status_filter != 'all':
+        submissions = query.all()
+        filtered_submissions = []
         for submission in submissions:
-            if submission.user_id not in user_latest_records or submission.id > user_latest_records[submission.user_id].id:
-                user_latest_records[submission.user_id] = submission
-        
-        # 构建结果
-        for user_id, submission in user_latest_records.items():
-            profile = profile_dict.get(user_id)
-            if not profile:
-                continue
-            
-            try:
-                data = json.loads(submission.data)
-                results.append({
-                    'id': submission.id,
-                    'user_id': user_id,
-                    'real_name': profile.real_name,
-                    'student_id': profile.student_id,
-                    'political_status': data.get('申请发展的政治面貌', '群众'),
-                    'trainer_name': data.get('培养人姓名', ''),
-                    'trainer_student_id': data.get('培养人学号', ''),
-                    'description': data.get('附件或材料说明', '')
-                })
-            except json.JSONDecodeError:
-                continue
-        
-        # 按政治面貌排序
-        status_order = {'群众': 0, '入党积极分子': 1, '发展对象': 2, '预备党员': 3, '普通正式党员': 4}
-        results.sort(key=lambda x: status_order.get(x['political_status'], 999))
-        
-        return jsonify({'code': 200, 'data': results})
-    except Exception as e:
-        return jsonify({'code': 500, 'msg': f'获取记录失败: {str(e)}'})
+            data = json.loads(submission.data)
+            if data.get('申请发展的政治面貌') == status_filter:
+                filtered_submissions.append(submission)
+        submissions = filtered_submissions
+    else:
+        submissions = query.all()
+    # 提取构建结果
+    results = []
+    for submission in submissions:
+        data = json.loads(submission.data)
+        # 按关键词筛选
+        profile = Profile.query.filter_by(real_name=data.get('培养人姓名')).first()
+        if not keyword or profile.real_name == keyword or profile.student_id == keyword:
+            results.append({
+                'id': submission.id,
+                'user_id': profile.uid,
+                'real_name': profile.real_name,
+                'student_id': profile.student_id,
+                'political_status': data.get('申请发展的政治面貌', '群众'),
+                'contact': profile.contact,
+                'trainer_student_id': data.get('培养人学号', ''),
+                'description': data.get('附件或材料说明', '')
+            })
+    # 按政治面貌排序
+    status_order = {'群众': 0, '入党积极分子': 1, '发展对象': 2, '预备党员': 3, '普通正式党员': 4}
+    results.sort(key=lambda x: status_order.get(x['political_status'], 999))
+    return jsonify({'code': 200, 'data': results})
 
 
 @development_bk.route('/get_all_political_statuses', methods=['GET'])

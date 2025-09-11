@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="../static/css/cloud-form.css">
     <link rel="stylesheet" href="../static/css/home.css">
     <link rel="stylesheet" href="../static/css/development.css">
+    <link rel="stylesheet" href="../static/css/fee.css">
+    <link rel="stylesheet" href="../static/css/review.css">
 
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
@@ -135,7 +137,8 @@
         }
 
         .menu-item {
-            padding: 12px 20px;
+            display: flex;
+            padding: 1px 20px;
             border-left: 4px solid transparent;
             cursor: pointer;
             transition: all 0.3s;
@@ -467,44 +470,55 @@
             <div class="menu-title">功能菜单</div>
             <ul class="menu-list">
                 <li class="menu-item active" data-page="dashboard">
-                    <i>★</i>工作台
+                    <img src="../static/img/icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">AI工作台</p>
                 </li>
                 <li class="menu-item" data-page="cloud-form">
-                    <i>★</i>云表单 
+                    <img src="../static/img/icon/zhinengbiaodan.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">智慧表单</p>
                 </li>
                 <li class="menu-item" data-page="profile">
-                    <i>★</i>党员档案 
+                    <img src="../static/img/icon/dangyuanxinxi.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">党员信息</p>
                 </li>
                 <li class="menu-item" data-page="activity">
-                    <i>★</i>任务管理
+                    <img src="../static/img/icon/renwuguanli.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">任务管理</p>
                 </li>
-                <li class="menu-item" data-page="meeting">
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i>></i>三会一课
+                <li class="menu-item" data-page="meeting" style="margin-left: 20px;">
+                    <img src="../static/img/icon/sanhuiyike.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">三会一课</p>
                 </li>
-                <li class="menu-item" data-page="fee">
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i>></i>党费管理
+                <li class="menu-item" data-page="fee" style="margin-left: 20px;">
+                    <img src="../static/img/icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">党费管理</p>
                 </li>
-                <li class="menu-item" data-page="development">
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i>></i>党员发展
+                <li class="menu-item" data-page="development" style="margin-left: 20px;">
+                    <img src="../static/img/icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">党员发展</p>
                 </li>
-                <li class="menu-item" data-page="review">
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i>></i>民主评议
+                <li class="menu-item" data-page="review" style="margin-left: 20px;">
+                    <img src="../static/img/icon/minzhupingyi.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">民主评议</p>
                 </li>
                 <li class="menu-item" data-page="study">
-                    <i>★</i>学习教育
+                    <img src="../static/img/icon/xuexijiaoyu.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">学习教育</p>
                 </li>
                 <li class="menu-item" data-page="statistics">
-                    <i>★</i>统计分析
+                    <img src="../static/img/icon/tongjifenxi.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">统计分析</p>
                 </li>
                 <li class="menu-item" data-page="settings">
-                    <i>★</i>系统设置
+                    <img src="../static/img/icon/xitongshezhi.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">系统设置</p>
                 </li>
             </ul>
         </aside>
 
         <!-- 主内容区 -->
         <main class="content">
-            <!-- 工作台页面 -->
+            <!-- AI工作台页面 -->
             <div id="dashboard" class="page-content active">
                 <iframe
 
@@ -515,7 +529,7 @@
                 </iframe>
             </div>
 
-            <!-- 党员档案页面 -->
+            <!-- 党员信息页面 -->
             <div id="profile" class="page-content profile-page">
                 <style>
                     .page-header {
@@ -550,13 +564,13 @@
                     }
                 </style>
                 <div class="page-header">
-                    <h1 class="page-title">个人党员档案</h1>
+                    <h1 class="page-title">个人党员信息</h1>
                     <!-- 切换按钮 -->
                     <div class="view-toggle">
                         <button id="toggle-profile-btn" class="btn-outline active" style="border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 0;">个人信息</button>
                         <button id="toggle-members-btn" class="btn-outline" style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 0;">党员列表</button>
                     </div>
-                    <div class="breadcrumb">首页 / 党员档案</div>
+                    <div class="breadcrumb">首页 / 党员信息</div>
                 </div>
                 
                 <!-- 个人信息和组织关系区域 -->
@@ -784,7 +798,7 @@
                 </div>
             </div>
 
-            <!-- 云表单页面 -->
+            <!-- 智慧表单页面 -->
             <div id="cloud-form" class="page-content">
                 <div class="page-header">
                     <h1 class="page-title">云表单</h1>
@@ -897,7 +911,74 @@
                     <h1 class="page-title">党费管理</h1>
                     <div class="breadcrumb">首页 / 党费管理</div>
                 </div>
-                <div class="placeholder-content">D</div>
+                
+                <div class="dyfz_development_content">
+                    <!-- 筛选和表格区域 -->
+                    <div class="dyfz_table_area">
+                        <div class="dyfz_filter_area">
+                            <label for="dfy_month_filter">筛选月份：</label>
+                            <select id="dfy_month_filter">
+                                <option value="all">全部</option>
+                                <option value="1">1月</option>
+                                <option value="2">2月</option>
+                                <option value="3">3月</option>
+                                <option value="4">4月</option>
+                                <option value="5">5月</option>
+                                <option value="6">6月</option>
+                                <option value="7">7月</option>
+                                <option value="8">8月</option>
+                                <option value="9">9月</option>
+                                <option value="10">10月</option>
+                                <option value="11">11月</option>
+                                <option value="12">12月</option>
+                            </select>
+                            <button id="dfy_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
+                            
+                            <!-- 统计信息 -->
+                            <div class="dfy_stats" style="margin-left: 30px; display: flex; align-items: center;">
+                                <span id="dfy_total_amount" style="margin-right: 20px; font-size: 14px; font-weight: bold;">总金额: <span style="color: var(--primary-red);">0.00</span> 元</span>
+                                <span id="dfy_total_count" style="font-size: 14px; font-weight: bold;">总笔数: <span style="color: var(--primary-red);">0</span> 笔</span>
+                            </div>
+                            <!-- 用户查询区域 -->
+                            <div class="dyfz_user_search_area" style="margin: 1px 0 0 20px">
+                                <div class="dyfz_search_box">
+                                    <div class="dyfz_user_icon"></div>
+                                    <input type="text" id="dfy_search_input" placeholder="请输入姓名查询" />
+                                    <button id="dfy_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 图表区域 -->
+                        <div class="chart-container">
+                            <canvas id="feeChart"></canvas>
+                        </div>
+                        <div class="dyfz_table_container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>姓名</th>
+                                        <th>缴纳月份</th>
+                                        <th>缴纳金额</th>
+                                        <th>提交时间</th>
+                                        <th>回执材料</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dfy_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                    <tr><td colspan="6" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页控件 -->
+                        <div class="dyfz_pagination">
+                            <button id="dfy_prev_page" class="dyfz_page_btn" disabled>上一页</button>
+                            <span id="dfy_page_info">第 <span id="dfy_current_page">1</span> 页，共 <span id="dfy_total_pages">1</span> 页</span>
+                            <button id="dfy_next_page" class="dyfz_page_btn" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 党员发展页面 -->
@@ -907,22 +988,12 @@
                     <div class="breadcrumb">首页 / 党员发展</div>
                 </div>
                 <div class="dyfz_development_content">
-                    <!-- 用户查询区域 -->
-                    <div class="dyfz_user_search_area">
-                        <div class="dyfz_search_box">
-                            <div class="dyfz_user_icon"></div>
-                            <input type="text" id="dyfz_search_input" placeholder="请输入学工号或姓名" />
-                            <button id="dyfz_search_button" class="dyfz_search_btn">查询</button>
-                        </div>
-                        <div id="dyfz_search_result" class="dyfz_search_result"></div>
-                    </div>
-
                     <!-- 流程条区域 -->
                     <div class="dyfz_progress_bar_area">
                         <div class="dyfz_progress_bar">
                             <div class="dyfz_progress_step dyfz_step群众 active">
                                 <div class="dyfz_step_icon"><span>1</span></div>
-                                <div class="dyfz_step_label">群众</div>
+                                <div class="dyfz_step_label">申请入党</div>
                             </div>
                             <div class="dyfz_progress_line"></div>
                             <div class="dyfz_progress_step dyfz_step入党积极分子">
@@ -960,6 +1031,14 @@
                                 <option value="普通正式党员">普通正式党员</option>
                             </select>
                             <button id="dyfz_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
+                            <!-- 用户查询区域 -->
+                            <div class="dyfz_user_search_area" style="margin: 1px 0 0 20px">
+                                <div class="dyfz_search_box">
+                                    <div class="dyfz_user_icon"></div>
+                                    <input type="text" id="dyfz_search_input" placeholder="请输入学工号或姓名" />
+                                    <button id="dyfz_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="dyfz_table_container">
@@ -968,10 +1047,9 @@
                                     <tr>
                                         <th>序号</th>
                                         <th>姓名</th>
-                                        <th>学工号</th>
                                         <th>政治面貌</th>
-                                        <th>培养人</th>
-                                        <th>培养人学号</th>
+                                        <th>学工号</th>
+                                        <th>联系方式</th>
                                         <th>材料说明</th>
                                     </tr>
                                 </thead>
@@ -1007,7 +1085,58 @@
                     <h1 class="page-title">民主评议</h1>
                     <div class="breadcrumb">首页 / 民主评议</div>
                 </div>
-                <div class="placeholder-content">G</div>
+                
+                <div class="dyfz_development_content">
+                    <!-- 筛选和表格区域 -->
+                    <div class="rw_dyfz_table_area">
+                        <div class="rw_dyfz_filter_area">
+                            <!-- 用户查询区域 -->
+                            <div class="rw_dyfz_user_search_area" style="margin: 1px 0 0 20px">
+                                <div class="rw_dyfz_search_box">
+                                    <div class="rw_dyfz_user_icon"></div>
+                                    <input type="text" id="review_search_input" placeholder="请输入被评议人姓名查询" />
+                                    <button id="review_search_button" class="rw_dyfz_search_btn" style="font-weight: bold;">查询</button>
+                                </div>
+                            </div>
+                            <button id="review_refresh_button" class="btn rw_dyfz_refresh_btn">刷新</button>
+                        </div>
+                        
+                        <!-- 图表区域 -->
+                        <div class="rw_review_charts_container">
+                            <div class="rw_chart-container" style="width: 100%;">
+                                <h3>历年平均评分变化</h3>
+                                <canvas id="lineChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="rw_dyfz_table_container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>被评议人姓名</th>
+                                        <th>评议年份</th>
+                                        <th>政治立场(分)</th>
+                                        <th>工作作风(分)</th>
+                                        <th>道德品行(分)</th>
+                                        <th>其他评价</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="review_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                    <tr><td colspan="7" class="rw_dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页控件 -->
+                        <div class="rw_dyfz_pagination">
+                            <button id="review_prev_page" class="dyfz_page_btn" disabled>上一页</button>
+                            <span id="review_page_info">第 <span id="review_current_page">1</span> 页，共 <span id="review_total_pages">1</span> 页</span>
+                            <button id="review_next_page" class="dyfz_page_btn" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 统计分析页面 -->
@@ -1280,6 +1409,7 @@
 
     <script src="../static/sdk/pako.js" defer></script>
     <script src="../static/sdk/jquery.min.js" defer></script>
+    <script src="../static/sdk/chart.umd.min.js" defer></script>
     <script src="../static/js/home.js" defer></script>
     <script src="../static/js/dashboard.js" defer></script>
     <script src="../static/js/member.js" defer></script>

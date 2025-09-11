@@ -26,7 +26,7 @@ $(document).ready(function() {
     
     // 初始化流程条
     function initProgressBar() {
-        // 默认将群众节点设为激活状态
+        // 默认将申请入党节点设为激活状态
         $('.dyfz_progress_step').removeClass('active highlight');
         $('.dyfz_progress_step:first').addClass('active');
     }
@@ -34,50 +34,26 @@ $(document).ready(function() {
     // 搜索用户
     function searchUser() {
         const keyword = searchInput.val().trim();
-        
         if (!keyword) {
             searchResult.html('<div style="color: #e74c3c;">请输入学工号或姓名</div>');
             return;
         }
-        
-        // 显示加载状态
-        searchResult.html('<div style="color: #3498db;">正在搜索...</div>');
-        
         // 发送请求查询用户
         $.ajax({
             url: URL + '/get_development_records',
             xhrFields: {withCredentials: true},
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ keyword: keyword }),
+            type: 'GET',
+            data: {'status' : 'all', 'keyword': keyword},
             success: function(response) {
                 if (response.code === 200) {
-                    const users = response.data;
-                    
-                    if (users.length === 0) {
-                        searchResult.html('<div style="color: #e74c3c;">未找到匹配的用户</div>');
-                        return;
-                    }
-                    
-                    // 显示查询结果
-                    let resultHtml = '<div style="color: #27ae60;">找到 ' + users.length + ' 个用户：</div><ul>';
-                    users.forEach(function(user) {
-                        resultHtml += `<li style="margin: 5px 0;">${user.real_name}（学工号：${user.student_id}，政治面貌：${user.political_status}）</li>`;
-                    });
-                    resultHtml += '</ul>';
-                    searchResult.html(resultHtml);
-                    
-                    // 高亮显示第一个用户的政治面貌
-                    if (users.length > 0) {
-                        highlightPoliticalStatus(users[0].political_status);
-                    }
-                } else {
-                    searchResult.html('<div style="color: #e74c3c;">' + response.msg + '</div>');
+                    allRecords = response.data;
+                    totalPages = Math.ceil(allRecords.length / pageSize);
+                    currentPage = 1;
+                    renderTable();        // 重新刷新页面
                 }
             },
-            error: function(xhr, status, error) {
-                searchResult.html('<div style="color: #e74c3c;">查询失败，请稍后重试</div>');
-                console.error('搜索用户失败:', error);
+            error: function() {
+                searchResult.html('<div style="color: #e74c3c;">搜索失败，请稍后再试</div>');
             }
         });
     }
@@ -110,14 +86,13 @@ $(document).ready(function() {
     // 加载党员发展记录
     function loadDevelopmentRecords() {
         const status = statusFilter.val();
-        
         // 显示加载状态
         tableBody.html('<tr><td colspan="7" class="dyfz_no_data">正在加载数据...</td></tr>');
-        
         // 发送请求获取记录
         $.ajax({
-            url: URL + `/api/development/get_development_records?status=${status}`,
+            url: URL + `/get_development_records`,
             xhrFields: {withCredentials: true},
+            data: {'status' : status, 'keyword': ''},
             type: 'GET',
             success: function(response) {
                 if (response.code === 200) {
@@ -128,10 +103,6 @@ $(document).ready(function() {
                 } else {
                     tableBody.html('<tr><td colspan="7" class="dyfz_no_data">' + response.msg + '</td></tr>');
                 }
-            },
-            error: function(xhr, status, error) {
-                tableBody.html('<tr><td colspan="7" class="dyfz_no_data">加载数据失败，请稍后重试</td></tr>');
-                console.error('加载党员发展记录失败:', error);
             }
         });
     }
@@ -154,6 +125,8 @@ $(document).ready(function() {
         // 渲染表格内容
         if (currentRecords.length === 0) {
             tableBody.html('<tr><td colspan="7" class="dyfz_no_data">暂无数据</td></tr>');
+            // 无数据时重置流程条
+            initProgressBar();
             return;
         }
         
@@ -163,20 +136,25 @@ $(document).ready(function() {
                 <tr>
                     <td>${startIndex + index + 1}</td>
                     <td>${record.real_name}</td>
-                    <td>${record.student_id}</td>
                     <td>
                         <span class="dyfz_status_${record.political_status.replace(/\s+/g, '_')}">
                             ${record.political_status}
                         </span>
                     </td>
-                    <td>${record.trainer_name}</td>
-                    <td>${record.trainer_student_id}</td>
+                    <td>${record.student_id}</td>
+                    <td>${record.contact}</td>
                     <td>${record.description}</td>
                 </tr>
             `;
         });
         
         tableBody.html(tableHtml);
+        
+        // 以表格的第一个对象的政治面貌为准，渲染流程条
+        const firstRecord = currentRecords[0];
+        if (firstRecord && firstRecord.political_status) {
+            highlightPoliticalStatus(firstRecord.political_status);
+        }
     }
     
     // 为不同政治面貌添加颜色样式
@@ -210,25 +188,21 @@ $(document).ready(function() {
         searchButton.click(function() {
             searchUser();
         });
-        
         // 回车键搜索
         searchInput.keyup(function(event) {
             if (event.keyCode === 13) {
                 searchUser();
             }
         });
-        
         // 刷新按钮点击事件
         refreshButton.click(function() {
             loadDevelopmentRecords();
         });
-        
         // 筛选条件变化事件
         statusFilter.change(function() {
             currentPage = 1;
             loadDevelopmentRecords();
         });
-        
         // 上一页按钮点击事件
         prevPageButton.click(function() {
             if (currentPage > 1) {
@@ -236,7 +210,6 @@ $(document).ready(function() {
                 renderTable();
             }
         });
-        
         // 下一页按钮点击事件
         nextPageButton.click(function() {
             if (currentPage < totalPages) {

@@ -1,0 +1,137 @@
+/* 党费管理页面样式 */
+
+
+/* 图表容器样式 */
+.chart-container {
+    height: 300px;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+/* 统计信息样式 */
+.dfy_stats {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.dfy_stats span {
+    margin-right: 5px;
+}
+
+/* 金额样式 */
+.fee-amount {
+    color: var(--primary-red);
+    font-weight: bold;
+}
+
+/* 月份筛选下拉框样式 */
+#dfy_month_filter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 15px;
+    outline: none;
+    cursor: pointer;
+}
+
+#dfy_month_filter:hover {
+    border-color: var(--primary-red);
+}
+
+/* 查询输入框样式 */
+#dfy_search_input {
+    flex: 1;
+    min-width: 250px;
+    height: 40px;
+    border: none;
+    background-color: transparent;
+    font-size: 14px;
+    outline: none;
+}
+
+/* 按钮样式复用 */
+#dfy_refresh_button {
+    padding: 8px 20px;
+    background-color: var(--primary-red);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#dfy_refresh_button:hover {
+    background-color: var(--dark-red);
+}
+
+/* 分页按钮样式 */
+.dfy_page_btn {
+    padding: 6px 15px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 0 5px;
+}
+
+.dfy_page_btn:hover:not(:disabled) {
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+}
+
+.dfy_page_btn:disabled {
+    background-color: #f5f5f5;
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+/* 回执材料样式 */
+.receipt-material {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    color: #0066cc;
+}
+
+.receipt-material:hover {
+    text-decoration: underline;
+}
+
+/* 无数据提示样式 */
+.dyfz_no_data {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 14px;
+}
+
+/* 表格行悬停效果 */
+.table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .dyfz_filter_area {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .dfy_stats {
+        margin-top: 10px;
+        margin-left: 0 !important;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}

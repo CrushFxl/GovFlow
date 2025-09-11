@@ -478,7 +478,7 @@ def init_profiles():
                     gender='female',
                     birth_date='2004-04-13', native_place='浙江杭州',
                     position='无',
-                    student_id=1, contact='17768493328',
+                    student_id=4003230228, contact='17768493328',
                     address='无',
                     party_committee='committee1',
                     party_subcommittee='subcommittee11',

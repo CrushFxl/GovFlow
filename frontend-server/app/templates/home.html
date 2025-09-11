@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../static/css/cloud-form.css">
     <link rel="stylesheet" href="../static/css/home.css">
     <link rel="stylesheet" href="../static/css/development.css">
+    <link rel="stylesheet" href="../static/css/fee.css">
 
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
@@ -909,7 +910,74 @@
                     <h1 class="page-title">党费管理</h1>
                     <div class="breadcrumb">首页 / 党费管理</div>
                 </div>
-                <div class="placeholder-content">D</div>
+                
+                <div class="dyfz_development_content">
+                    <!-- 筛选和表格区域 -->
+                    <div class="dyfz_table_area">
+                        <div class="dyfz_filter_area">
+                            <label for="dfy_month_filter">筛选月份：</label>
+                            <select id="dfy_month_filter">
+                                <option value="all">全部</option>
+                                <option value="1">1月</option>
+                                <option value="2">2月</option>
+                                <option value="3">3月</option>
+                                <option value="4">4月</option>
+                                <option value="5">5月</option>
+                                <option value="6">6月</option>
+                                <option value="7">7月</option>
+                                <option value="8">8月</option>
+                                <option value="9">9月</option>
+                                <option value="10">10月</option>
+                                <option value="11">11月</option>
+                                <option value="12">12月</option>
+                            </select>
+                            <button id="dfy_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
+                            
+                            <!-- 统计信息 -->
+                            <div class="dfy_stats" style="margin-left: 30px; display: flex; align-items: center;">
+                                <span id="dfy_total_amount" style="margin-right: 20px; font-size: 14px; font-weight: bold;">总金额: <span style="color: var(--primary-red);">0.00</span> 元</span>
+                                <span id="dfy_total_count" style="font-size: 14px; font-weight: bold;">总笔数: <span style="color: var(--primary-red);">0</span> 笔</span>
+                            </div>
+                            <!-- 用户查询区域 -->
+                            <div class="dyfz_user_search_area" style="margin: 1px 0 0 20px">
+                                <div class="dyfz_search_box">
+                                    <div class="dyfz_user_icon"></div>
+                                    <input type="text" id="dfy_search_input" placeholder="请输入姓名查询" />
+                                    <button id="dfy_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 图表区域 -->
+                        <div class="chart-container">
+                            <canvas id="feeChart"></canvas>
+                        </div>
+                        <div class="dyfz_table_container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>姓名</th>
+                                        <th>缴纳月份</th>
+                                        <th>缴纳金额</th>
+                                        <th>提交时间</th>
+                                        <th>回执材料</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dfy_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                    <tr><td colspan="6" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页控件 -->
+                        <div class="dyfz_pagination">
+                            <button id="dfy_prev_page" class="dyfz_page_btn" disabled>上一页</button>
+                            <span id="dfy_page_info">第 <span id="dfy_current_page">1</span> 页，共 <span id="dfy_total_pages">1</span> 页</span>
+                            <button id="dfy_next_page" class="dyfz_page_btn" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 党员发展页面 -->
@@ -1289,6 +1357,7 @@
 
     <script src="../static/sdk/pako.js" defer></script>
     <script src="../static/sdk/jquery.min.js" defer></script>
+    <script src="../static/sdk/chart.umd.min.js" defer></script>
     <script src="../static/js/home.js" defer></script>
     <script src="../static/js/dashboard.js" defer></script>
     <script src="../static/js/member.js" defer></script>

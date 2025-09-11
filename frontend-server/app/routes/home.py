@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, current_app
 
 from .filters import login_required
 from app.config import config
+import os
 
 home_ft = Blueprint('home', __name__)
 
@@ -10,10 +11,10 @@ home_ft = Blueprint('home', __name__)
 @login_required
 def home():
     # 获取当前环境配置
-    env = current_app.config.get('ENV', 'production')
+    env = os.getenv('ENV', 'production')
     current_config = config[env]
     # 传递iframe URL参数给模板
-    if env == 'production':
+    if env == 'development':
         iframe_url = 'http://127.0.0.1/chatbot/' + current_config.IFRAME_URL_PARAM
     else:
         domain = current_config.BACKEND_SERVER_DOMAIN[:-6] + '/chatbot/'

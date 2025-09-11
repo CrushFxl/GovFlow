@@ -133,7 +133,7 @@ $(document).ready(function() {
         switch(pageId) {
             case 'dashboard':
                 if (window.dashboardModule && window.dashboardModule.init) {
-                    $('.page-title').text('工作台');
+                    $('.page-title').text('AI工作台');
                     dashboardModule.init();
                 }
                 break;
@@ -146,7 +146,7 @@ $(document).ready(function() {
             case 'cloud-form':
                 // 云表单页面初始化
                 if (window.cloudFormModule && window.cloudFormModule.init) {
-                    $('.page-title').text('云表单');
+                    $('.page-title').text('智慧表单');
                     cloudFormModule.init();
                 }
                 break;

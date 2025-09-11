@@ -52,6 +52,10 @@ def init_forms():
             Form(name='党员发展申请表', description='用于入党积极分子、发展对象和预备党员的培养。',
                  created_uid=101, created_realname='系统管理员', is_protected=1),
         ]
+        db.session.bulk_save_objects(default_forms)
+        print("初始化表格完成.")
+
+    if not FormControl.query.first():
         default_controls = [
             FormControl(form_id=1, type='text', label='培养人姓名',
                         placeholder='例如：冯洋一', required=1, order=0),
@@ -60,9 +64,23 @@ def init_forms():
             FormControl(form_id=1, type='radio', label='申请发展的政治面貌',
                         required=1, order=2, options='["入党积极分子", "发展对象", "预备党员", "普通正式党员"]'),
             FormControl(form_id=1, type='textarea', label='附件或材料说明',
-                        placeholder='须详细描述培养人的基本情况、动机、组织谈话，以及必要的审批材料附件、审批意见。', required=1, order=3)
+                        placeholder='须详细描述培养人的基本情况、动机、组织谈话，以及必要的审批材料附件、审批意见。',
+                        required=1, order=3)
         ]
-        db.session.bulk_save_objects(default_forms)
         db.session.bulk_save_objects(default_controls)
-        db.session.commit()
-        print("初始化测试表格完成.")
+        print("初始化表格组件完成.")
+
+    if not FormSubmission.query.first():
+        default_submissions = [
+            FormSubmission(form_id=1, user_id=143,
+                           data="{\"培养人姓名\": \"冯洋一\", \"培养人学号\": \"6401230103\", \"申请发展的政治面貌\": \"入党积极分子\", \"附件或材料说明\": \"上级意见：同意\"}"),
+            FormSubmission(form_id=1, user_id=143,
+                           data="{\"培养人姓名\": \"冯洋一\", \"培养人学号\": \"6401230103\", \"申请发展的政治面貌\": \"发展对象\", \"附件或材料说明\": \"上级意见：同意，材料另送\"}"),
+            FormSubmission(form_id=1, user_id=132,
+                           data="{\"培养人姓名\": \"唐佳良\", \"培养人学号\": \"4003230303\", \"申请发展的政治面貌\": \"发展对象\", \"附件或材料说明\": \"上级意见：同意\"}"),
+            FormSubmission(form_id=1, user_id=138,
+                           data="{\"培养人姓名\": \"王语佳\", \"培养人学号\": \"4003230228\", \"申请发展的政治面貌\": \"普通正式党员\", \"附件或材料说明\": \"上级意见：讨论通过\"}")
+        ]
+        db.session.bulk_save_objects(default_submissions)
+        print("初始化表格提交记录完成.")
+    db.session.commit()

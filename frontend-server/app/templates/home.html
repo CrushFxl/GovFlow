@@ -135,7 +135,8 @@
         }
 
         .menu-item {
-            padding: 12px 20px;
+            display: flex;
+            padding: 1px 20px;
             border-left: 4px solid transparent;
             cursor: pointer;
             transition: all 0.3s;
@@ -467,37 +468,48 @@
             <div class="menu-title">功能菜单</div>
             <ul class="menu-list">
                 <li class="menu-item active" data-page="dashboard">
-                    <i>★</i>工作台
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">AI工作台</p>
                 </li>
                 <li class="menu-item" data-page="cloud-form">
-                    <i>★</i>云表单 
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">智慧表单</p>
                 </li>
                 <li class="menu-item" data-page="profile">
-                    <i>★</i>党员档案 
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">党员档案</p>
                 </li>
                 <li class="menu-item" data-page="activity">
-                    <i>★</i>任务管理
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">任务管理</p>
                 </li>
-                <li class="menu-item" data-page="meeting">
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i>></i>三会一课
+                <li class="menu-item" data-page="meeting" style="margin-left: 20px;">
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">三会一课</p>
                 </li>
-                <li class="menu-item" data-page="fee">
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i>></i>党费管理
+                <li class="menu-item" data-page="fee" style="margin-left: 20px;">
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">党费管理</p>
                 </li>
-                <li class="menu-item" data-page="development">
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i>></i>党员发展
+                <li class="menu-item" data-page="development" style="margin-left: 20px;">
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">党员发展</p>
                 </li>
-                <li class="menu-item" data-page="review">
-                    &nbsp;&nbsp;&nbsp;&nbsp;<i>></i>民主评议
+                <li class="menu-item" data-page="review" style="margin-left: 20px;">
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">民主评议</p>
                 </li>
                 <li class="menu-item" data-page="study">
-                    <i>★</i>学习教育
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">学习教育</p>
                 </li>
                 <li class="menu-item" data-page="statistics">
-                    <i>★</i>统计分析
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">统计分析</p>
                 </li>
                 <li class="menu-item" data-page="settings">
-                    <i>★</i>系统设置
+                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">系统设置</p>
                 </li>
             </ul>
         </aside>
@@ -907,22 +919,12 @@
                     <div class="breadcrumb">首页 / 党员发展</div>
                 </div>
                 <div class="dyfz_development_content">
-                    <!-- 用户查询区域 -->
-                    <div class="dyfz_user_search_area">
-                        <div class="dyfz_search_box">
-                            <div class="dyfz_user_icon"></div>
-                            <input type="text" id="dyfz_search_input" placeholder="请输入学工号或姓名" />
-                            <button id="dyfz_search_button" class="dyfz_search_btn">查询</button>
-                        </div>
-                        <div id="dyfz_search_result" class="dyfz_search_result"></div>
-                    </div>
-
                     <!-- 流程条区域 -->
                     <div class="dyfz_progress_bar_area">
                         <div class="dyfz_progress_bar">
                             <div class="dyfz_progress_step dyfz_step群众 active">
                                 <div class="dyfz_step_icon"><span>1</span></div>
-                                <div class="dyfz_step_label">群众</div>
+                                <div class="dyfz_step_label">申请入党</div>
                             </div>
                             <div class="dyfz_progress_line"></div>
                             <div class="dyfz_progress_step dyfz_step入党积极分子">
@@ -960,6 +962,14 @@
                                 <option value="普通正式党员">普通正式党员</option>
                             </select>
                             <button id="dyfz_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
+                            <!-- 用户查询区域 -->
+                            <div class="dyfz_user_search_area" style="margin: 1px 0 0 20px">
+                                <div class="dyfz_search_box">
+                                    <div class="dyfz_user_icon"></div>
+                                    <input type="text" id="dyfz_search_input" placeholder="请输入学工号或姓名" />
+                                    <button id="dyfz_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="dyfz_table_container">
@@ -968,10 +978,9 @@
                                     <tr>
                                         <th>序号</th>
                                         <th>姓名</th>
-                                        <th>学工号</th>
                                         <th>政治面貌</th>
-                                        <th>培养人</th>
-                                        <th>培养人学号</th>
+                                        <th>学工号</th>
+                                        <th>联系方式</th>
                                         <th>材料说明</th>
                                     </tr>
                                 </thead>

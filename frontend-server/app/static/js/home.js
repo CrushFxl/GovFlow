@@ -139,7 +139,7 @@ $(document).ready(function() {
                 break;
             case 'profile':
                 if (window.profileModule && window.profileModule.init) {
-                    $('.page-title').text('党员档案');
+                    $('.page-title').text('党员信息');
                     profileModule.init();
                 }
                 break;

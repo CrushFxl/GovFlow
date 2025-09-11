@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../static/css/home.css">
     <link rel="stylesheet" href="../static/css/development.css">
     <link rel="stylesheet" href="../static/css/fee.css">
+    <link rel="stylesheet" href="../static/css/review.css">
 
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
@@ -469,47 +470,47 @@
             <div class="menu-title">功能菜单</div>
             <ul class="menu-list">
                 <li class="menu-item active" data-page="dashboard">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">AI工作台</p>
                 </li>
                 <li class="menu-item" data-page="cloud-form">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/zhinengbiaodan.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">智慧表单</p>
                 </li>
                 <li class="menu-item" data-page="profile">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">党员档案</p>
+                    <img src="../static/img/icon/dangyuanxinxi.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">党员信息</p>
                 </li>
                 <li class="menu-item" data-page="activity">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/renwuguanli.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">任务管理</p>
                 </li>
                 <li class="menu-item" data-page="meeting" style="margin-left: 20px;">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/sanhuiyike.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">三会一课</p>
                 </li>
                 <li class="menu-item" data-page="fee" style="margin-left: 20px;">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">党费管理</p>
                 </li>
                 <li class="menu-item" data-page="development" style="margin-left: 20px;">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">党员发展</p>
                 </li>
                 <li class="menu-item" data-page="review" style="margin-left: 20px;">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/minzhupingyi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">民主评议</p>
                 </li>
                 <li class="menu-item" data-page="study">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/xuexijiaoyu.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">学习教育</p>
                 </li>
                 <li class="menu-item" data-page="statistics">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/tongjifenxi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">统计分析</p>
                 </li>
                 <li class="menu-item" data-page="settings">
-                    <img src="../static/img/icon/dashboard.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/icon/xitongshezhi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">系统设置</p>
                 </li>
             </ul>
@@ -517,7 +518,7 @@
 
         <!-- 主内容区 -->
         <main class="content">
-            <!-- 工作台页面 -->
+            <!-- AI工作台页面 -->
             <div id="dashboard" class="page-content active">
                 <iframe
 
@@ -528,7 +529,7 @@
                 </iframe>
             </div>
 
-            <!-- 党员档案页面 -->
+            <!-- 党员信息页面 -->
             <div id="profile" class="page-content profile-page">
                 <style>
                     .page-header {
@@ -563,13 +564,13 @@
                     }
                 </style>
                 <div class="page-header">
-                    <h1 class="page-title">个人党员档案</h1>
+                    <h1 class="page-title">个人党员信息</h1>
                     <!-- 切换按钮 -->
                     <div class="view-toggle">
                         <button id="toggle-profile-btn" class="btn-outline active" style="border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: 0;">个人信息</button>
                         <button id="toggle-members-btn" class="btn-outline" style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: 0;">党员列表</button>
                     </div>
-                    <div class="breadcrumb">首页 / 党员档案</div>
+                    <div class="breadcrumb">首页 / 党员信息</div>
                 </div>
                 
                 <!-- 个人信息和组织关系区域 -->
@@ -797,7 +798,7 @@
                 </div>
             </div>
 
-            <!-- 云表单页面 -->
+            <!-- 智慧表单页面 -->
             <div id="cloud-form" class="page-content">
                 <div class="page-header">
                     <h1 class="page-title">云表单</h1>
@@ -1084,7 +1085,58 @@
                     <h1 class="page-title">民主评议</h1>
                     <div class="breadcrumb">首页 / 民主评议</div>
                 </div>
-                <div class="placeholder-content">G</div>
+                
+                <div class="dyfz_development_content">
+                    <!-- 筛选和表格区域 -->
+                    <div class="rw_dyfz_table_area">
+                        <div class="rw_dyfz_filter_area">
+                            <!-- 用户查询区域 -->
+                            <div class="rw_dyfz_user_search_area" style="margin: 1px 0 0 20px">
+                                <div class="rw_dyfz_search_box">
+                                    <div class="rw_dyfz_user_icon"></div>
+                                    <input type="text" id="review_search_input" placeholder="请输入被评议人姓名查询" />
+                                    <button id="review_search_button" class="rw_dyfz_search_btn" style="font-weight: bold;">查询</button>
+                                </div>
+                            </div>
+                            <button id="review_refresh_button" class="btn rw_dyfz_refresh_btn">刷新</button>
+                        </div>
+                        
+                        <!-- 图表区域 -->
+                        <div class="rw_review_charts_container">
+                            <div class="rw_chart-container" style="width: 100%;">
+                                <h3>历年平均评分变化</h3>
+                                <canvas id="lineChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="rw_dyfz_table_container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>被评议人姓名</th>
+                                        <th>评议年份</th>
+                                        <th>政治立场(分)</th>
+                                        <th>工作作风(分)</th>
+                                        <th>道德品行(分)</th>
+                                        <th>其他评价</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="review_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                    <tr><td colspan="7" class="rw_dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页控件 -->
+                        <div class="rw_dyfz_pagination">
+                            <button id="review_prev_page" class="dyfz_page_btn" disabled>上一页</button>
+                            <span id="review_page_info">第 <span id="review_current_page">1</span> 页，共 <span id="review_total_pages">1</span> 页</span>
+                            <button id="review_next_page" class="dyfz_page_btn" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 统计分析页面 -->

@@ -10,6 +10,7 @@ from .create_todos import create_todos_bk
 from .solve_todos import solve_todos_bk
 from .development import development_bk
 from .fee import fee_bk
+from .review import review_bk
 
 routes = [
     auth_bk,
@@ -23,5 +24,6 @@ routes = [
     create_todos_bk,
     solve_todos_bk,
     development_bk,
-    fee_bk
+    fee_bk,
+    review_bk
 ]

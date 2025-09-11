@@ -56,6 +56,8 @@ def init_forms():
                  created_uid=101, created_realname='系统管理员', is_protected=1),
             Form(name='民主评议评价表', description='此表用于收集党内成员评价。',
                  created_uid=101, created_realname='系统管理员', is_protected=1),
+            Form(name='三会一课记录表', description='支部党员大会、支部委员会、党小组会和团课的召开记录。',
+                 created_uid=101, created_realname='系统管理员', is_protected=1),
         ]
         db.session.bulk_save_objects(default_forms)
         print("初始化表格完成.")
@@ -71,10 +73,13 @@ def init_forms():
             FormControl(form_id=2, type='text', label='缴纳月份', required=1, order=2),
             FormControl(form_id=2, type='textarea', label='回执或截图材料', placeholder='材料可直接粘贴到此处', required=1, order=3),
             FormControl(form_id=3, type='text', label='被评议人姓名', placeholder='请输入评议要求中的被评议人姓名', required=1, order=0),
-            FormControl(form_id=3, type='radio', label='（1-5评分）政治立场和理想信念', placeholder='', required=1, order=1),
-            FormControl(form_id=3, type='radio', label='（1-5评分）工作作风和履职尽责', placeholder='', required=1, order=2),
-            FormControl(form_id=3, type='radio', label='（1-5评分）道德品行和生活作风', placeholder='', required=1, order=3),
+            FormControl(form_id=3, type='radio', label='（1-5评分）政治立场和理想信念', options='["1", "2", "3", "4", "5"]', required=1, order=1),
+            FormControl(form_id=3, type='radio', label='（1-5评分）工作作风和履职尽责', options='["1", "2", "3", "4", "5"]', required=1, order=2),
+            FormControl(form_id=3, type='radio', label='（1-5评分）道德品行和生活作风', options='["1", "2", "3", "4", "5"]', required=1, order=3),
             FormControl(form_id=3, type='textarea', label='你对该同志其他评价', placeholder='请输入详细评价内容，可选。', required=1, order=4),
+            FormControl(form_id=4, type='text', label='会议标题', placeholder='请输入会议标题', required=1, order=0),
+            FormControl(form_id=4, type='radio', label='会议类型', options='["支部党员大会", "支部委员会", "党小组会", "团课"]', required=1, order=1),
+            FormControl(form_id=4, type='textarea', label='会议纪要', placeholder='请输入会议纪要', required=1, order=2),
         ]
         db.session.bulk_save_objects(default_controls)
         print("初始化表格组件完成.")
@@ -103,6 +108,26 @@ def init_forms():
                            data="{\"姓名\": \"蒋伟祺\", \"缴纳党费金额\": \"400.00\", \"缴纳月份\": \"4\", \"回执或截图材料\": \"无\"}"),
             FormSubmission(form_id=2, user_id=138,
                            data="{\"姓名\": \"王语佳\", \"缴纳党费金额\": \"178.00\", \"缴纳月份\": \"2\", \"回执或截图材料\": \"无\"}"),
+            FormSubmission(form_id=3, user_id=138,
+                           data="{\"被评议人姓名\": \"王语佳\", \"（1-5评分）政治立场和理想信念\": \"1\", \"（1-5评分）工作作风和履职尽责\": \"4\", \"（1-5评分）道德品行和生活作风\": \"1\", \"你对该同志其他评价\": \"无\"}",
+                           created_at=datetime(2019, 1, 1)),
+            FormSubmission(form_id=3, user_id=138,
+                           data="{\"被评议人姓名\": \"王语佳\", \"（1-5评分）政治立场和理想信念\": \"5\", \"（1-5评分）工作作风和履职尽责\": \"4\", \"（1-5评分）道德品行和生活作风\": \"3\", \"你对该同志其他评价\": \"无\"}",
+                           created_at=datetime(2020, 1, 1)),
+            FormSubmission(form_id=3, user_id=138,
+                           data="{\"被评议人姓名\": \"王语佳\", \"（1-5评分）政治立场和理想信念\": \"4\", \"（1-5评分）工作作风和履职尽责\": \"4\", \"（1-5评分）道德品行和生活作风\": \"3\", \"你对该同志其他评价\": \"无\"}",
+                           created_at=datetime(2021, 1, 1)),
+            FormSubmission(form_id=3, user_id=138,
+                           data="{\"被评议人姓名\": \"王语佳\", \"（1-5评分）政治立场和理想信念\": \"4\", \"（1-5评分）工作作风和履职尽责\": \"3\", \"（1-5评分）道德品行和生活作风\": \"3\", \"你对该同志其他评价\": \"无\"}",
+                           created_at=datetime(2022, 1, 1)),
+            FormSubmission(form_id=3, user_id=138,
+                           data="{\"被评议人姓名\": \"王语佳\", \"（1-5评分）政治立场和理想信念\": \"5\", \"（1-5评分）工作作风和履职尽责\": \"5\", \"（1-5评分）道德品行和生活作风\": \"4\", \"你对该同志其他评价\": \"无\"}",
+                           created_at=datetime(2023, 1, 1)),
+            FormSubmission(form_id=3, user_id=138,
+                           data="{\"被评议人姓名\": \"王语佳\", \"（1-5评分）政治立场和理想信念\": \"5\", \"（1-5评分）工作作风和履职尽责\": \"5\", \"（1-5评分）道德品行和生活作风\": \"5\", \"你对该同志其他评价\": \"无\"}",
+                           created_at=datetime(2024, 1, 1)),
+            FormSubmission(form_id=4, user_id=138,
+                           data="{\"会议标题\": \"讨论社团财务报销拨款事宜\", \"会议类型\": \"党小组会\", \"会议纪要\": \"审议通过关于拨款给医学信息与智能协会的下一年度财务计划。\"}"),
         ]
         db.session.bulk_save_objects(default_submissions)
         print("初始化表格提交记录完成.")

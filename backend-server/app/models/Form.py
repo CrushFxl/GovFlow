@@ -51,6 +51,8 @@ def init_forms():
         default_forms = [
             Form(name='党员发展申请表', description='用于入党积极分子、发展对象和预备党员的培养。',
                  created_uid=101, created_realname='系统管理员', is_protected=1),
+            Form(name='党费缴纳信息表', description='党员缴纳党费后需填写此回执。',
+                 created_uid=101, created_realname='系统管理员', is_protected=1)
         ]
         db.session.bulk_save_objects(default_forms)
         print("初始化表格完成.")
@@ -65,7 +67,21 @@ def init_forms():
                         required=1, order=2, options='["入党积极分子", "发展对象", "预备党员", "普通正式党员"]'),
             FormControl(form_id=1, type='textarea', label='附件或材料说明',
                         placeholder='须详细描述培养人的基本情况、动机、组织谈话，以及必要的审批材料附件、审批意见。',
-                        required=1, order=3)
+                        required=1, order=3),
+            FormControl(form_id=2, type='text', label='姓名',
+                        placeholder='请输入姓名',
+                        required=1, order=0),
+            FormControl(form_id=2, type='text', label='缴纳党费金额',
+                        placeholder='例如：300.00，精确到小数点后两位。',
+                        required=1, order=1),
+            FormControl(form_id=2, type='text', label='缴纳月份',
+                        placeholder='例如：9',
+                        required=1, order=2),
+            FormControl(form_id=2, type='textarea', label='回执或截图材料',
+                        placeholder='材料可直接粘贴到此处',
+                        required=1, order=3),
+
+
         ]
         db.session.bulk_save_objects(default_controls)
         print("初始化表格组件完成.")

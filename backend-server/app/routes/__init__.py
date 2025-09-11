@@ -9,6 +9,7 @@ from .excel import excel_bk
 from .create_todos import create_todos_bk
 from .solve_todos import solve_todos_bk
 from .development import development_bk
+from .fee import fee_bk
 
 routes = [
     auth_bk,
@@ -21,5 +22,6 @@ routes = [
     excel_bk,
     create_todos_bk,
     solve_todos_bk,
-    development_bk
+    development_bk,
+    fee_bk
 ]

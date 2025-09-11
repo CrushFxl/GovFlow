@@ -27,7 +27,7 @@ def init_system_settings():
     if not System.query.first():
         default_settings = [
             System(key='system_password', value='123456', description='系统设置访问密码'),
-            System(key='dingtalk_url', value='http://xxdb.hmc.edu.cn:9088', description='钉钉App URL'),
+            System(key='dingtalk_url', value='http://xxdb.hmc.edu.cn', description='钉钉App URL'),
             System(key='dingtalk_appkey', value='98e55883-323b-42da-86b2-ff96f0024ecd', description='钉钉App Key'),
             System(key='dingtalk_appsecret', value=config[ENV].DINGTALK_APPSECRET, description='钉钉App Secret(敏感)'),
         ]

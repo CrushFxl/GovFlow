@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../static/css/development.css">
     <link rel="stylesheet" href="../static/css/fee.css">
     <link rel="stylesheet" href="../static/css/review.css">
+    <link rel="stylesheet" href="../static/css/meeting.css">
 
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
@@ -902,7 +903,61 @@
                     <h1 class="page-title">三会一课</h1>
                     <div class="breadcrumb">首页 / 三会一课</div>
                 </div>
-                <div class="placeholder-content">C</div>
+                
+                <div class="dyfz_development_content">
+                    <!-- 筛选和表格区域 -->
+                    <div class="dyfz_table_area">
+                        <div class="dyfz_filter_area">
+                            <label for="meeting_type_filter">会议类型：</label>
+                            <select id="meeting_type_filter">
+                                <option value="all">全部</option>
+                                <option value="支部党员大会">支部党员大会</option>
+                                <option value="支部委员会">支部委员会</option>
+                                <option value="党小组会">党小组会</option>
+                                <option value="团课">团课</option>
+                            </select>
+                            <button id="meeting_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
+                            
+                            <!-- 统计信息 -->
+                            <div class="dfy_stats" style="margin-left: 30px; display: flex; align-items: center;">
+                                <span id="meeting_total_count" style="font-size: 14px; font-weight: bold;">总记录数: <span style="color: var(--primary-red);">0</span></span>
+                            </div>
+                            <!-- 用户查询区域 -->
+                            <div class="dyfz_user_search_area" style="margin: 1px 0 0 20px">
+                                <div class="dyfz_search_box">
+                                    <div class="dyfz_user_icon"></div>
+                                    <input type="text" id="meeting_search_input" placeholder="请输入会议名称查询" />
+                                    <button id="meeting_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dyfz_table_container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>会议标题</th>
+                                        <th>会议类型</th>
+                                        <th>会议纪要</th>
+                                        <th>提交时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="meeting_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                    <tr><td colspan="5" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页控件 -->
+                        <div class="dyfz_pagination">
+                            <button id="meeting_prev_page" class="dyfz_page_btn" disabled>上一页</button>
+                            <span id="meeting_page_info">第 <span id="meeting_current_page">1</span> 页，共 <span id="meeting_total_pages">1</span> 页</span>
+                            <button id="meeting_next_page" class="dyfz_page_btn" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 党费管理页面 -->

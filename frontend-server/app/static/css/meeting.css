@@ -1,0 +1,19 @@
+#meeting_type_filter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 15px;
+    outline: none;
+    cursor: pointer;
+}
+
+#meeting_search_input {
+    flex: 1;
+    min-width: 250px;
+    height: 40px;
+    border: none;
+    background-color: transparent;
+    font-size: 14px;
+    outline: none;
+}

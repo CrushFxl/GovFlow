@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../static/css/fee.css">
     <link rel="stylesheet" href="../static/css/review.css">
     <link rel="stylesheet" href="../static/css/meeting.css">
+    <link rel="stylesheet" href="../static/css/study.css">
 
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
@@ -1131,7 +1132,78 @@
                     <h1 class="page-title">学习教育</h1>
                     <div class="breadcrumb">首页 / 学习教育</div>
                 </div>
-                <div class="placeholder-content">F</div>
+                
+                <div class="study-content">
+                    <div style="display: flex; flex-direction: row; justify-content:space-around;">
+                        <!-- 轮播图区域 - 保持在顶部 -->
+                        <div class="carousel-container">
+                            <div class="carousel" id="news-carousel">
+                                <!-- 轮播项将通过JavaScript动态加载 -->
+                                <div class="carousel-item active">
+                                    <img src="../static/img/placeholder-carousel.jpg" alt="轮播图">
+                                    <div class="carousel-caption">
+                                        <h3>新闻标题加载中...</h3>
+                                        <p>新闻描述加载中...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="carousel-controls">
+                                <button class="carousel-prev" id="carousel-prev">&lt;</button>
+                                <button class="carousel-next" id="carousel-next">&gt;</button>
+                            </div>
+                            <div class="carousel-indicators" id="carousel-indicators">
+                                <span class="indicator active"></span>
+                            </div>
+                        </div>
+                        <!-- 筛选区域 - 保持在轮播图下方 -->
+                        <div class="news-filter-area">
+                            <div class="filter-title" style="margin-top: 10px;">按新闻来源筛选</div>
+                            <div class="filter-channel-buttons" style="margin-bottom: 20px;">
+                                <button class="filter-btn active" data-channel="all">全部</button>
+                                <button class="filter-btn" data-channel="xinhua">新华社</button>
+                                <button class="filter-btn" data-channel="xinlang">新浪新闻</button>
+                                <button class="filter-btn" data-channel="cctv">央视新闻</button>
+                                <button class="filter-btn" data-channel="people">人民日报</button>
+                            </div>
+                            <div class="filter-title">按新闻日期筛选</div>
+                            <div class="filter-date-buttons" style="margin-bottom: 20px;">
+                                <button class="filter-btn active">全部</button>
+                                <button class="filter-btn">最新</button>
+                                <button class="filter-btn">近一天</button>
+                                <button class="filter-btn" >近三天</button>
+                                <button class="filter-btn">近七天</button>
+                            </div>
+                            <div class="filter-title">新闻获取选项</div>
+                            <div class="filter-option-buttons" style="margin-bottom: 20px;">
+                                <button id="refresh_news" class="btn" style="margin-right: 10px;">换一换</button>
+                                <button id="get_today_news" class="btn">获取今日新闻</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 动态分栏的新闻卡片容器 -->
+                    <div class="news-cards-container-wrapper">
+                        <!-- 左栏新闻卡片区域 - 将通过JavaScript动态管理列数 -->
+                        <div class="news-cards-container" id="news-cards-container-left">
+                            <!-- 新闻卡片将通过JavaScript动态加载 -->
+                            <div class="news-card skeleton">
+                                <div class="skeleton-tags"></div>
+                                <div class="skeleton-title"></div>
+                                <div class="skeleton-desc"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右栏新闻卡片区域 - 将通过JavaScript动态管理列数 -->
+                        <div class="news-cards-container" id="news-cards-container">
+                            <!-- 新闻卡片将通过JavaScript动态加载 -->
+                            <div class="news-card skeleton">
+                                <div class="skeleton-title"></div>
+                                <div class="skeleton-desc"></div>
+                                <div class="skeleton-tags"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 民主评议页面 -->

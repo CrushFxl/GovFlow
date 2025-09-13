@@ -12,6 +12,7 @@ from .development import development_bk
 from .fee import fee_bk
 from .review import review_bk
 from .meeting import meeting_bk
+from .study import study_bk
 
 routes = [
     auth_bk,
@@ -27,5 +28,6 @@ routes = [
     development_bk,
     fee_bk,
     review_bk,
-    meeting_bk
+    meeting_bk,
+    study_bk
 ]

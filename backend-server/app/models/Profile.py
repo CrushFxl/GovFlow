@@ -3,6 +3,32 @@ from email.policy import default
 from . import db
 
 
+def profile_description():
+    text = """【表格名称】profiles
+    【表格描述】用于存储用户档案信息。
+    【字段描述】
+    - uid, int, 用户UID
+    - real_name, str, 真实姓名
+    - alias, str, 别名
+    - gender, str, 性别， male或female
+    - birth_date, str, 出生日期, 格式YYYY-MM-DD
+    - native_place, str, 籍贯
+    - education, str, 学历的英文，例如'bachelor'、'master'、'doctor'等
+    - student_id, int, 学工号
+    - position, str, 职务，例如讲师、教授等
+    - contact, str, 联系电话
+    - address, str, 备注
+    - party_committee, str, 对应branches表中的value字段, 表示用户所属的党委, 例如'committee1'
+    - party_subcommittee, str, 对应branches表中的value字段, 表示用户所属的党总支, 例如'subcommittee11'
+    - party_branch, str, 对应branches表中的value字段, 表示用户所属的党支部, 例如'branch111'
+    - party_status, str, 党内职务名称, 例如支部委员、支部书记等
+    - join_date, str, 成为党员的日期, 格式YYYY-MM-DD
+    - admin_status, int, 管理员状态, 0: 普通用户, 1: 管理员，只有管理员可以审核用户发起的任务和通知。
+    
+    """
+    return text
+
+
 class Profile(db.Model):
     __tablename__ = 'profiles'
     uid = db.Column('uid', db.Integer, db.ForeignKey('users.uid'), primary_key=True, unique=True, index=True, nullable=False)

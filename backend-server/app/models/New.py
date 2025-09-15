@@ -2,6 +2,25 @@ from . import db
 from datetime import datetime, timedelta
 import re
 
+
+def new_description():
+    text = """【表格名称】news
+    【表格描述】用于存储新闻信息。
+    【字段描述】
+    - title, str, 新闻标题
+    - time, str, 新闻发布时间
+    - src, str, 新闻来源
+    - category, str, 新闻分类
+    - pic, str, 新闻图片
+    - url, str, 新闻URL
+    - weburl, str, 新闻网页URL
+    - raw, str, 新闻原始内容（此字段已弃用）
+    - content, str, 新闻内容
+    
+    """
+    return text
+
+
 class New(db.Model):
     __tablename__ = 'news'
     

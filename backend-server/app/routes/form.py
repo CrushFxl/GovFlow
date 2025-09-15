@@ -1,9 +1,8 @@
 from flask import Blueprint, request, current_app, jsonify
+from flask import Blueprint, request, jsonify
 from ..models.Form import Form, FormControl
 from ..models import db
-from flask_cors import cross_origin
 import json
-from ..config import config
 
 form_bk = Blueprint('form', __name__, url_prefix='/form')
 
@@ -11,32 +10,28 @@ form_bk = Blueprint('form', __name__, url_prefix='/form')
 @form_bk.route('/list', methods=['GET'])
 def get_form_list():
     """获取所有表单列表"""
-    try:
-        created_uid = request.args.get('created_uid', type=int)
-        # 构建查询条件
-        query = Form.query
-        if created_uid:
-            query = query.filter_by(created_uid=created_uid)
-        # 查询所有表单并按创建时间降序排列
-        forms = query.order_by(Form.created_at.desc()).all()
-        # 转换为JSON格式
-        result = []
-        for form in forms:
-            result.append({
-                'id': form.id,
-                'name': form.name,
-                'description': form.description,
-                'created_uid': form.created_uid,
-                'created_realname': form.created_realname,
-                'created_at': form.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'updated_at': form.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'is_active': form.is_active,
-                'is_protected': form.is_protected
-            })
-        return jsonify({'code': 200, 'data': result, 'msg': 'success'})
-    except Exception as e:
-        current_app.logger.error(f'获取表单列表失败: {str(e)}')
-        return jsonify({'code': 500, 'data': None, 'msg': f'获取表单列表失败: {str(e)}'})
+    created_uid = request.args.get('created_uid', type=int)
+    # 构建查询条件
+    query = Form.query
+    if created_uid:
+        query = query.filter_by(created_uid=created_uid)
+    # 查询所有表单并按创建时间降序排列
+    forms = query.order_by(Form.created_at.desc()).all()
+    # 转换为JSON格式
+    result = []
+    for form in forms:
+        result.append({
+            'id': form.id,
+            'name': form.name,
+            'description': form.description,
+            'created_uid': form.created_uid,
+            'created_realname': form.created_realname,
+            'created_at': form.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_at': form.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'is_active': form.is_active,
+            'is_protected': form.is_protected
+        })
+    return jsonify({'code': 200, 'data': result, 'msg': 'success'})
 
 
 @form_bk.route('/detail/<int:form_id>', methods=['GET'])

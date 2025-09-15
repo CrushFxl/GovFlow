@@ -1,6 +1,20 @@
 from . import db
 
 
+def user_description():
+    text = f"""【表格名称】users
+    【表格描述】用于存储用户账户信息。
+    【字段描述】
+    - uid, int, 用户的唯一标识符
+    - nick, str, 用户昵称
+    - status, int, 用户状态(此字段已弃用)
+    - mob, str, 用户手机号
+    - pwd, str, 用户密码
+    
+    """
+    return text
+
+
 class User(db.Model):
     __tablename__ = 'users'
     uid = db.Column('uid', db.Integer, primary_key=True, unique=True, index=True, nullable=False)

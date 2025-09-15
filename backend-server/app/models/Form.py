@@ -2,6 +2,23 @@ from datetime import datetime
 from . import db
 
 
+def form_description():
+    text = """【表格名称】forms
+    【表格描述】用于存储用户自定义的表格。
+    【字段描述】
+    - id, int, 主键, 自增
+    - name, str, 表格名称
+    - description, str, 表格描述
+    - created_uid, int, 创建用户的UID
+    - created_realname, str, 创建用户的真实姓名
+    - created_at, datetime, 创建时间
+    - updated_at, datetime, 更新时间
+    - is_protected, int(0/1), 是否受保护，受保护的表格不可删除
+    
+    """
+    return text
+
+
 class Form(db.Model):
     __tablename__ = 'forms'
 
@@ -19,6 +36,24 @@ class Form(db.Model):
     controls = db.relationship('FormControl', backref='form', lazy=True, cascade='all, delete-orphan')
 
 
+def from_contorl_description():
+    text = """【表格名称】form_contorls
+    【表格描述】用于存储用户自定义的表格中具体的控件。
+    【字段描述】
+    - id, int, 主键, 自增
+    - form_id, int, 该控件所属的表格ID
+    - type, str, 控件类型, 共有5种, 分别为select(多选), radio(单选), text(填空), textarea(文本)
+    - label, str, 控件标题
+    - placeholder, str, 控件提示说明
+    - required, bool, 是否必填
+    - options, str, 控件选项, 当type为select或radio时, 该字段为列表, 例如：['苹果', '香蕉', '菠萝']
+    - order, int, 控件顺序, 用于确定一张表格中控件的排列顺序
+    - default_value, str, 控件的默认值
+    
+    """
+    return text
+
+
 class FormControl(db.Model):
     __tablename__ = 'form_controls'
 
@@ -31,6 +66,21 @@ class FormControl(db.Model):
     options = db.Column('options', db.Text, nullable=True)  # JSON格式存储选项
     order = db.Column('order', db.Integer, nullable=False, default=0)
     default_value = db.Column('default_value', db.Text, nullable=True)
+
+
+def form_submission_description():
+    text = """【表格名称】form_submissions
+    【表格描述】用于存储用户自定义的表格的填写记录。
+    【字段描述】
+    - id, int, 主键, 自增
+    - form_id, int, 该提交记录所属的表格ID
+    - user_id, int, 提交用户的UID
+    - data, str, 提交的数据, 格式为JSON, 例如：{"姓名": "张三", "学号": "6401230103"}, 键为表格控件的label
+    - status, int, 提交状态（此字段已弃用）
+    - created_at, datetime, 提交时间
+    
+    """
+    return text
 
 
 class FormSubmission(db.Model):

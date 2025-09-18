@@ -78,7 +78,7 @@ def get_meeting_types():
     """
     try:
         # 定义会议类型选项
-        meeting_types = ["支部党员大会", "支部委员会", "党小组会", "团课"]
+        meeting_types = ["支部党员大会", "支部委员会", "党小组会", "党课"]
         
         return jsonify({'code': 200, 'msg': 'success', 'data': meeting_types})
     except Exception as e:

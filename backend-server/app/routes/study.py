@@ -20,7 +20,7 @@ def get_news_by_api():
         'key': "6610ea621d28462a1c1f31f070ee6e2f",
         'type': "政治",
         'num': 40,
-        'start': random.randint(0, 350)
+        'start': 0
     }
     response = requests.get(url, params=params)
     data = response.json()['data']['list']

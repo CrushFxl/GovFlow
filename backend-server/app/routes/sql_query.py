@@ -49,6 +49,5 @@ def get_sql_sentence():
 def get_table_description():
     prompt_str = (branch_description() + form_description() + form_submission_description()
                   + from_contorl_description() + new_description() + task_description()
-                  + user_description() + notice_description()
-                  + todo_description() + profile_description())
+                 + notice_description() + todo_description() + profile_description())
     return {'code': 1000, 'msg': 'ok', 'prompt': prompt_str}

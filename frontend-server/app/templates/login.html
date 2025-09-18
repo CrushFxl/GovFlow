@@ -20,6 +20,12 @@
         }
 
         body {
+            /* 设置登录背景 */
+            background-image: url('../static/img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
             font-family: "Microsoft YaHei", sans-serif;
             background-color: #f5f5f5;
             display: flex;
@@ -36,22 +42,24 @@
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            margin-left: 850px;
         }
 
         .login-header {
-            background-color: var(--primary-red);
-            color: white;
-            padding: 20px;
-            text-align: center;
+            background-color: #fff;
+            color: #444;
+            padding: 20px 20px 0 20px;
+            text-align: left;
         }
 
-        .login-header h1 {
-            font-size: 1.8em;
-            margin-bottom: 5px;
+        .login-header p {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-left: 8px;
         }
 
         .login-body {
-            padding: 30px;
+            padding: 20px 30px 30px 30px;
         }
 
         .form-group {
@@ -120,7 +128,7 @@
 
         @media (max-width: 480px) {
             .login-body {
-                padding: 20px;
+                padding: 10px 20px 20px 20px;
             }
 
             .login-header h1 {
@@ -133,8 +141,8 @@
     <p id="URL" style="display: none">{{URL}}</p>
     <div class="login-container">
         <div class="login-header">
-            <h1><span class="party-icon">★</span>智慧党建系统</h1>
-            <p>请登录您的账号</p>
+            <p>智慧党建系统</p>
+            <div class="header-divider" style="height: 2px; width: 40px; background-color: var(--primary-red); margin: 8px 8px 0 10px;"></div>
         </div>
 
         <div class="login-body">
@@ -154,7 +162,7 @@
         </div>
 
         <div class="login-footer">
-            <a href="#">忘记密码?</a> | <a href="/register/">注册新账号</a>
+            <a href="#">忘记密码</a> | <a href="/register/">注册新账号</a>
         </div>
     </div>
     <script src="../static/sdk/jquery.min.js"></script>

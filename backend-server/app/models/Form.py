@@ -106,7 +106,7 @@ def init_forms():
                  created_uid=101, created_realname='系统管理员', is_protected=1),
             Form(name='民主评议评价表', description='此表用于收集党内成员评价。',
                  created_uid=101, created_realname='系统管理员', is_protected=1),
-            Form(name='三会一课记录表', description='支部党员大会、支部委员会、党小组会和团课的召开记录。',
+            Form(name='三会一课记录表', description='支部党员大会、支部委员会、党小组会和党课的召开记录。',
                  created_uid=101, created_realname='系统管理员', is_protected=1),
         ]
         db.session.bulk_save_objects(default_forms)
@@ -128,7 +128,7 @@ def init_forms():
             FormControl(form_id=3, type='radio', label='（1-5评分）道德品行和生活作风', options='["1", "2", "3", "4", "5"]', required=1, order=3),
             FormControl(form_id=3, type='textarea', label='你对该同志其他评价', placeholder='请输入详细评价内容，可选。', required=1, order=4),
             FormControl(form_id=4, type='text', label='会议标题', placeholder='请输入会议标题', required=1, order=0),
-            FormControl(form_id=4, type='radio', label='会议类型', options='["支部党员大会", "支部委员会", "党小组会", "团课"]', required=1, order=1),
+            FormControl(form_id=4, type='radio', label='会议类型', options='["支部党员大会", "支部委员会", "党小组会", "党课"]', required=1, order=1),
             FormControl(form_id=4, type='textarea', label='会议纪要', placeholder='请输入会议纪要', required=1, order=2),
         ]
         db.session.bulk_save_objects(default_controls)

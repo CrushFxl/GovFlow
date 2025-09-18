@@ -16,7 +16,7 @@
 }
 
 .rw_chart-container h3 {
-    color: #c12c1f;
+    color: var(--primary-red);
     margin-bottom: 15px;
     font-size: 16px;
     text-align: center;
@@ -81,7 +81,7 @@
 }
 
 .rw_dyfz_search_btn {
-    background: #c12c1f;
+    background: var(--primary-red);
     color: white;
     border: none;
     padding: 0 15px;

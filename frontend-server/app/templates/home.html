@@ -17,6 +17,9 @@
 
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
+    
+    <!-- 主题切换脚本 -->
+    <script src="../static/js/theme.js"></script>
 
     <style>
         :root {
@@ -63,6 +66,8 @@
 
         .nav-menu {
             display: flex;
+            justify-content: center;
+            align-items: center;
             list-style: none;
         }
 
@@ -384,7 +389,7 @@
     }
 
     .btn-delete {
-        background-color: #dc3545;
+        background-color: var(--primary-red);
         color: white;
     }
 
@@ -446,6 +451,78 @@
     #exit{
         cursor: pointer;
     }
+    
+    /* 菜单标题样式 */
+    .menu-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    
+    /* 菜单切换按钮样式 */
+    .menu-toggle-btn {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    /* 侧边栏折叠样式 */
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+    
+    /* 响应式设计：移动端适配 */
+    @media (max-width: 768px) {
+        /* 保持菜单切换按钮常驻显示 */
+        .menu-toggle-btn {
+            display: flex;
+        }
+        
+        /* 侧边栏默认折叠 */
+        .sidebar {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            height: 100%;
+            z-index: 1000;
+            background-color: #fff;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        /* 侧边栏展开状态 */
+        .sidebar.expanded {
+            left: 0;
+        }
+        
+        /* 侧边栏折叠状态 */
+        .sidebar.collapsed {
+            left: -100%;
+        }
+        
+        /* 主内容区自适应 */
+        .content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* 移动端隐藏未读消息、待办事项、我发布的和党样式头像 */
+        .nav-menu {
+            display: none;
+        }
+        
+        .user-avatar {
+            display: none;
+        }
+    }
     </style>
 </head>
 <body>
@@ -469,7 +546,12 @@
     <div class="main-container">
         <!-- 左侧菜单栏 -->
         <aside class="sidebar">
-            <div class="menu-title">功能菜单</div>
+            <div class="menu-title">
+                <span>功能菜单</span>
+                <button class="menu-toggle-btn" id="menuToggleBtn">
+                    <span class="menu-icon">☰</span>
+                </button>
+            </div>
             <ul class="menu-list">
                 <li class="menu-item active" data-page="dashboard">
                     <img src="../static/img/icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
@@ -557,11 +639,11 @@
                     }
                     
                     .view-toggle .btn-outline:hover {
-                        color: #c12c1f;
+                        color: var(--primary-red);
                     }
                     
                     .view-toggle .btn-outline.active {
-                        background-color: #c12c1f;
+                        background-color: var(--primary-red);
                         color: #fff;
                     }
                 </style>
@@ -780,9 +862,9 @@
                         <thead>
                             <tr>
                                 <th>任务名称</th>
+                                <th>任务描述</th>
                                 <th>时间</th>
-                                <th>地点</th>
-                                <th>参与人员</th>
+                                <th>执行频次</th>
                                 <th>任务状态</th>
                                 <th>操作</th>
                             </tr>
@@ -915,7 +997,7 @@
                                 <option value="支部党员大会">支部党员大会</option>
                                 <option value="支部委员会">支部委员会</option>
                                 <option value="党小组会">党小组会</option>
-                                <option value="团课">团课</option>
+                                <option value="党课">党课</option>
                             </select>
                             <button id="meeting_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
                             
@@ -1272,7 +1354,152 @@
                     <h1 class="page-title">统计分析</h1>
                     <div class="breadcrumb">首页 / 统计分析</div>
                 </div>
-                <div class="placeholder-content">H</div>
+                
+                <!-- 筛选和导出区域 -->
+                <div class="filter-export-section">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label for="time-range">时间范围：</label>
+                            <select id="time-range">
+                                <option value="7">最近7天</option>
+                                <option value="30" selected>最近30天</option>
+                                <option value="90">最近90天</option>
+                                <option value="180">最近半年</option>
+                                <option value="365">最近一年</option>
+                                <option value="custom">自定义</option>
+                            </select>
+                        </div>
+                        <div class="filter-item" id="custom-date-range" style="display: none;">
+                            <input type="date" id="start-date">
+                            <span>至</span>
+                            <input type="date" id="end-date">
+                        </div>
+                        <div class="filter-item">
+                            <label for="branch-filter">党支部：</label>
+                            <select id="branch-filter">
+                                <option value="all">全部党支部</option>
+                                <option value="1">第一党支部</option>
+                                <option value="2">第二党支部</option>
+                                <option value="3">第三党支部</option>
+                                <option value="4">第四党支部</option>
+                                <option value="5">第五党支部</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="export-btn" class="export-btn">
+                        <i class="fa fa-download"></i>
+                        导出数据
+                    </button>
+                </div>
+                
+                <!-- 数据概览卡片 -->
+                <div class="stats-overview">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="total-members">0</div>
+                        <div class="stat-label">党员总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-value" id="pending-tasks">0</div>
+                        <div class="stat-label">待办任务</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="completed-tasks">0</div>
+                        <div class="stat-label">已完成任务</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-value" id="branch-activity">0%</div>
+                        <div class="stat-label">支部活跃度</div>
+                    </div>
+                </div>
+                
+                <!-- 图表区域 -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">活动趋势图</h3>
+                        </div>
+                        <div class="chart-content">
+                            <canvas id="activity-trend-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">党员分布图</h3>
+                        </div>
+                        <div class="chart-content">
+                            <canvas id="party-member-distribution-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">任务完成情况</h3>
+                        </div>
+                        <div class="chart-content">
+                            <canvas id="task-status-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">各支部活跃度</h3>
+                        </div>
+                        <div class="chart-content">
+                            <canvas id="branch-activity-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 加载覆盖层 -->
+                <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center;">
+                    <div style="text-align: center;">
+                        <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="sr-only">加载中...</span>
+                        </div>
+                        <p style="margin-top: 1rem;">数据加载中，请稍候...</p>
+                    </div>
+                </div>
+
+                <!-- 表格区域 -->
+                <div class="recent-activities-section">
+                    <div class="section-header">
+                        <h3 class="section-title">近期活动统计</h3>
+                    </div>
+                    <div class="stats-table-container">
+                        <!-- 表格加载状态 -->
+                        <div id="table-loading" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">加载中...</span>
+                            </div>
+                        </div>
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>活动名称</th>
+                                    <th>类型</th>
+                                    <th>参与人数</th>
+                                    <th>完成率</th>
+                                    <th>所属支部</th>
+                                    <th>创建时间</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activities-table-body">
+                                <!-- 表格内容将通过JavaScript动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination">
+                        <button class="pagination-btn" id="prev-page">上一页</button>
+                        <button class="pagination-btn active" data-page="1">1</button>
+                        <button class="pagination-btn" data-page="2">2</button>
+                        <button class="pagination-btn" data-page="3">3</button>
+                        <span>...</span>
+                        <button class="pagination-btn" data-page="10">10</button>
+                        <button class="pagination-btn" id="next-page">下一页</button>
+                    </div>
+                </div>
             </div>
 
             <!-- 系统设置页面 -->
@@ -1437,6 +1664,16 @@
                             <input type="text" id="form-partners" name="partners">
                         </div>
                         <div class="form-group">
+                            <label for="form-frequency">执行频次</label>
+                            <select id="form-frequency" name="frequency" required>
+                                <option value="0">一次性</option>
+                                <option value="1">每周</option>
+                                <option value="3">每月</option>
+                                <option value="4">每季度</option>
+                                <option value="6">每年</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="activity-form-description">描述</label>
                             <textarea id="activity-form-description" name="description" rows="4"></textarea>
                         </div>
@@ -1534,6 +1771,61 @@
         </div>
     </div>
 
+    <!-- 移动端菜单切换功能 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取菜单切换按钮和侧边栏元素
+            const menuToggleBtn = document.getElementById('menuToggleBtn');
+            const sidebar = document.querySelector('.sidebar');
+            
+            // 侧边栏展开状态标志
+            let isSidebarExpanded = false;
+            
+            // 移动端菜单切换逻辑
+            function toggleSidebar() {
+                isSidebarExpanded = !isSidebarExpanded;
+                
+                if (isSidebarExpanded) {
+                    sidebar.classList.add('expanded');
+                    sidebar.classList.remove('collapsed');
+                } else {
+                    sidebar.classList.remove('expanded');
+                    sidebar.classList.add('collapsed');
+                }
+            }
+            
+            // 添加菜单切换按钮点击事件
+            if (menuToggleBtn && sidebar) {
+                menuToggleBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    toggleSidebar();
+                });
+                
+                // 点击页面其他区域关闭侧边栏
+                document.addEventListener('click', function(e) {
+                    // 检查是否点击了菜单切换按钮或侧边栏内部
+                    if (isSidebarExpanded && 
+                        e.target !== menuToggleBtn && 
+                        !sidebar.contains(e.target) && 
+                        !menuToggleBtn.contains(e.target)) {
+                        toggleSidebar();
+                    }
+                });
+                
+                // 为移动端菜单项添加点击事件，点击后自动关闭侧边栏
+                const menuItems = sidebar.querySelectorAll('.menu-item');
+                menuItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        // 移动设备上自动关闭侧边栏
+                        if (window.innerWidth <= 768) {
+                            toggleSidebar();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    
     <script src="../static/sdk/pako.js" defer></script>
     <script src="../static/sdk/jquery.min.js" defer></script>
     <script src="../static/sdk/chart.umd.min.js" defer></script>

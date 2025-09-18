@@ -22,6 +22,13 @@ def create_task_prompt(uuid):
         prompt += f"- 被通知党员：{p if p else '无'}\n"
     else:
         todo = Task.query.filter_by(uuid=uuid).first()
+        frequency_str = {
+            0: '一次性',
+            1: '每周一次',
+            2: '每月一次',
+            3: '每季度一次',
+            4: '每年一次'
+        }.get(todo.frequency, '未知')
         o = '、'.join(todo.organizations)
         p = '、'.join(todo.partners)
         prompt += f"【日程任务】{todo.title}\n\n"
@@ -29,6 +36,7 @@ def create_task_prompt(uuid):
         prompt += f"- 【开始时间】{todo.start_date}  {todo.start_time}\n"
         prompt += f"- 【结束时间】{todo.end_date}  {todo.end_time}\n"
         prompt += f"- 【日程地点】{todo.location}\n"
+        prompt += f"- 【执行频次】{frequency_str}\n"
         prompt += f"- 【参与党组】{o if o else '无'}\n"
         prompt += f"- 【参与党员】{p if p else '无'}\n"
         prompt += f"- 【附件要求】{'无' if todo.need_attachment == 'false' else '**有**'}\n"

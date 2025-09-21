@@ -1,7 +1,6 @@
 $(document).ready(function() {
     const URL = $('#URL').text();
     window.isForcedProfile = false; // 标记是否强制在档案页面（全局变量）
-
     // 初始化用户信息
     $.ajax({
         url: URL + "/user/get_nick",
@@ -15,7 +14,11 @@ $(document).ready(function() {
                 // 获取解密后的uid
                 const uid = resp.data['uid'];
                 const admin = resp.data['admin'];
+                const coin = resp.data['coin'];
+                localStorage.setItem('coin', coin);
                 localStorage.setItem('uid', uid);
+                // 更新UI上的coin数量显示
+                updateCoinDisplay();
                 if(admin === 1){
                     localStorage.setItem('admin', 1);
                 }
@@ -79,7 +82,6 @@ $(document).ready(function() {
                 // 检查URL是否已经包含参数
                 const separator = originalSrc.includes('?') ? '&' : '?';
                 iframe.src = originalSrc + separator + 'uid=' + encodedUid;
-                console.log('Updated iframe URL with uid parameter');
             }
         } catch (error) {
             console.error('Error updating iframe with uid:', error);
@@ -118,12 +120,11 @@ $(document).ready(function() {
             
             // 控制大模型管理和知识库管理页面的padding
             const contentElement = document.querySelector('.content');
-            if (pageId === 'llm_manage' || pageId === 'knowledge_manage') {
+            if (pageId === 'llm_manage' || pageId === 'knowledge_manage' || pageId === 'statistics') {
                 contentElement.classList.add('no-padding');
             } else {
                 contentElement.classList.remove('no-padding');
             }
-            
             // 调用对应模块的初始化函数
             initModule(pageId);
         });
@@ -342,4 +343,14 @@ function showLoading(text = '加载中') {
 // 隐藏加载中函数
 function hideLoading() {
     $('#loading-mask').remove();
+}
+
+// 更新学点显示
+function updateCoinDisplay() {
+    // 从localStorage中读取coin数据
+    const coin = localStorage.getItem('coin');
+    // 更新UI上的coin数量显示
+    if (coin !== null) {
+        $('#coin-amount').text(coin);
+    }
 }

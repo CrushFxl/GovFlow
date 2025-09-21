@@ -142,7 +142,7 @@
 }
 
 /* 响应式调整 */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     .rw_review_charts_container {
         flex-direction: column;
     }

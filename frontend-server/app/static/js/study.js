@@ -247,6 +247,7 @@ const studyModule = {
         news.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'news-card';
+            card.dataset.newsId = item.url; // 使用URL作为唯一标识符
             // 创建标签（放置在卡片顶部）
             const tag = document.createElement('div');
             tag.className = 'news-card-tag';
@@ -300,6 +301,21 @@ const studyModule = {
             // 组装完整卡片
             card.appendChild(tag);
             card.appendChild(contentContainer);
+            
+            // 添加点击事件监听器，处理加分逻辑
+            card.addEventListener('click', function(e) {
+                // 如果点击的是链接，让链接正常跳转，但也要处理加分逻辑
+                if (e.target.tagName === 'A' || e.target.closest('a')) {
+                    // 延迟执行加分逻辑，确保链接能正常跳转
+                    setTimeout(() => {
+                        studyModule.handleNewsCardClick(item);
+                    }, 100);
+                } else {
+                    // 如果点击的不是链接，只处理加分逻辑
+                    studyModule.handleNewsCardClick(item);
+                }
+            });
+            
             // 根据索引将卡片分配到对应的列容器
             const columnIndex = index % columnCount;
             columnContainers[columnIndex].appendChild(card);
@@ -369,6 +385,93 @@ const studyModule = {
         const rightContainer = document.querySelector('#news-cards-container');
         leftContainer.innerHTML = `<div class="error-message">${message}</div>`;
         rightContainer.innerHTML = `<div class="error-message">${message}</div>`;
+    },
+    
+    // 处理新闻卡片点击事件，实现加分功能和防止刷分机制
+    handleNewsCardClick: function(newsItem) {
+        const newsUrl = newsItem.url;
+        const uid = localStorage.getItem('uid');
+        
+        if (!uid) {
+            console.error('用户未登录，无法加分');
+            return;
+        }
+        
+        // 检查该新闻是否已经被点击过
+        const clickedNews = JSON.parse(localStorage.getItem('clicked_news') || '[]');
+        
+        if (clickedNews.includes(newsUrl)) {
+            // 新闻已经被点击过，不重复加分
+            console.log('该新闻已经获得过学点，不重复加分');
+            return;
+        }
+        
+        // 调用后端API增加学点
+        $.ajax({
+            url: this.URL + '/user/add_coin',
+            xhrFields: {withCredentials: true},
+            type: 'POST',
+            data: {
+                news_url: newsUrl
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.code === 1000) {
+                    // 更新localStorage中的coin数量
+                    const newCoin = response.data.coin;
+                    localStorage.setItem('coin', newCoin);
+                    
+                    // 更新UI上的coin数量显示
+                    window.updateCoinDisplay && window.updateCoinDisplay();
+                    
+                    // 记录已点击的新闻
+                    clickedNews.push(newsUrl);
+                    localStorage.setItem('clicked_news', JSON.stringify(clickedNews));
+                    
+                    // 显示加分成功提示
+                    studyModule.showToast('阅读新闻获得1学点！');
+                } else {
+                    console.error('加分失败:', response.msg);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('加分请求失败:', error);
+            }
+        });
+    },
+    
+    // 显示简短提示消息
+    showToast: function(message) {
+        // 检查是否已存在toast元素
+        let toast = document.querySelector('#study-toast');
+        if (!toast) {
+            // 创建toast元素
+            toast = document.createElement('div');
+            toast.id = 'study-toast';
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 4px;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+        }
+        
+        // 设置消息内容并显示
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        
+        // 2秒后隐藏
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 2000);
     },
     
     // 启动轮播图自动播放

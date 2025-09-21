@@ -120,7 +120,7 @@
 }
 
 /* 响应式调整 */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     .dyfz_filter_area {
         flex-direction: column;
         align-items: flex-start;

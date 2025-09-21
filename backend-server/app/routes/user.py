@@ -1,4 +1,4 @@
-from flask import Blueprint, request, session
+from flask import Blueprint, request, session, jsonify
 
 from app.models.User import User
 from app.models.Profile import Profile
@@ -21,6 +21,21 @@ def get_nick():
     admin = Profile.query.filter_by(uid=uid).first().admin_status
     return {'code': 1000, 'msg': 'ok', 'data':
         {'uid': uid, 'nick': nick, 'admin': admin, 'coin': coin}}
+
+
+@user_bk.route('/add_coin', methods=['POST'])
+def add_coin():
+    """
+    处理用户点击新闻后增加学点的请求
+    """
+    uid = session.get('uid')
+    # 从请求中获取新闻URL（可用于记录或验证）
+    # news_url = request.form.get('news_url')
+    user = User.query.filter_by(uid=uid).first()
+    user.coin += 1
+    from app.models import db
+    db.session.commit()
+    return jsonify({'code': 1000, 'msg': 'success', 'data': {'coin': user.coin}})
 
 
 @user_bk.route('/get_todos', methods=['GET', 'POST'])

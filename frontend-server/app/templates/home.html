@@ -535,7 +535,7 @@
     }
     
     /* 响应式设计：移动端适配 */
-    @media (max-width: 768px) {
+    @media (max-width: 1000px) {
         /* 保持菜单切换按钮常驻显示 */
         .menu-toggle-btn {
             display: flex;
@@ -594,7 +594,11 @@
         <div class="user-info">
             <div class="user-avatar">党</div>
             <span id="username"></span>
-            <span id="exit" style="margin-left: 30px">退出登录</span>
+            <div id="coin-display" class="coin-display" style="margin-left: 20px; margin-right: 20px; display: flex; align-items: center; background-color: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                <span class="coin-icon" style="font-size: 16px; margin:0 5px 2px 0;">⭐</span>
+                <span id="coin-amount" style="font-weight: bold;">0</span>
+            </div>
+            <span id="exit" style="margin-left: 10px">退出登录</span>
         </div>
     </nav>
 
@@ -1446,7 +1450,6 @@
                             </div>
                             <button id="review_refresh_button" class="btn rw_dyfz_refresh_btn">刷新</button>
                         </div>
-                        </div>
                         
                         <div class="rw_dyfz_table_container">
                             <table class="table">
@@ -1480,155 +1483,15 @@
 
             <!-- 统计分析页面 -->
             <div id="statistics" class="page-content">
-                <div class="page-header">
-                    <h1 class="page-title">统计分析</h1>
-                    <div class="breadcrumb">首页 / 统计分析</div>
-                </div>
-                
-                <!-- 筛选和导出区域 -->
-                <div class="filter-export-section">
-                    <div class="filter-group">
-                        <div class="filter-item">
-                            <label for="time-range">时间范围：</label>
-                            <select id="time-range">
-                                <option value="7">最近7天</option>
-                                <option value="30" selected>最近30天</option>
-                                <option value="90">最近90天</option>
-                                <option value="180">最近半年</option>
-                                <option value="365">最近一年</option>
-                                <option value="custom">自定义</option>
-                            </select>
-                        </div>
-                        <div class="filter-item" id="custom-date-range" style="display: none;">
-                            <input type="date" id="start-date">
-                            <span>至</span>
-                            <input type="date" id="end-date">
-                        </div>
-                        <div class="filter-item">
-                            <label for="branch-filter">党支部：</label>
-                            <select id="branch-filter">
-                                <option value="all">全部党支部</option>
-                                <option value="1">第一党支部</option>
-                                <option value="2">第二党支部</option>
-                                <option value="3">第三党支部</option>
-                                <option value="4">第四党支部</option>
-                                <option value="5">第五党支部</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button id="export-btn" class="export-btn">
-                        <i class="fa fa-download"></i>
-                        导出数据
-                    </button>
-                </div>
-                
-                <!-- 数据概览卡片 -->
-                <div class="stats-overview">
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-value" id="total-members">0</div>
-                        <div class="stat-label">党员总数</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📋</div>
-                        <div class="stat-value" id="pending-tasks">0</div>
-                        <div class="stat-label">待办任务</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-value" id="completed-tasks">0</div>
-                        <div class="stat-label">已完成任务</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🔥</div>
-                        <div class="stat-value" id="branch-activity">0%</div>
-                        <div class="stat-label">支部活跃度</div>
-                    </div>
-                </div>
-                
-                <!-- 图表区域 -->
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">活动趋势图</h3>
-                        </div>
-                        <div class="chart-content">
-                            <canvas id="activity-trend-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">党员分布图</h3>
-                        </div>
-                        <div class="chart-content">
-                            <canvas id="party-member-distribution-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">任务完成情况</h3>
-                        </div>
-                        <div class="chart-content">
-                            <canvas id="task-status-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">各支部活跃度</h3>
-                        </div>
-                        <div class="chart-content">
-                            <canvas id="branch-activity-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 加载覆盖层 -->
-                <div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center;">
-                    <div style="text-align: center;">
-                        <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;">
-                            <span class="sr-only">加载中...</span>
-                        </div>
-                        <p style="margin-top: 1rem;">数据加载中，请稍候...</p>
-                    </div>
-                </div>
-
-                <!-- 表格区域 -->
-                <div class="recent-activities-section">
-                    <div class="section-header">
-                        <h3 class="section-title">近期活动统计</h3>
-                    </div>
-                    <div class="stats-table-container">
-                        <!-- 表格加载状态 -->
-                        <div id="table-loading" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                            <div class="spinner-border" role="status">
-                                <span class="sr-only">加载中...</span>
-                            </div>
-                        </div>
-                        <table class="stats-table">
-                            <thead>
-                                <tr>
-                                    <th>活动名称</th>
-                                    <th>类型</th>
-                                    <th>参与人数</th>
-                                    <th>完成率</th>
-                                    <th>所属支部</th>
-                                    <th>创建时间</th>
-                                </tr>
-                            </thead>
-                            <tbody id="activities-table-body">
-                                <!-- 表格内容将通过JavaScript动态填充 -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="pagination">
-                        <button class="pagination-btn" id="prev-page">上一页</button>
-                        <button class="pagination-btn active" data-page="1">1</button>
-                        <button class="pagination-btn" data-page="2">2</button>
-                        <button class="pagination-btn" data-page="3">3</button>
-                        <span>...</span>
-                        <button class="pagination-btn" data-page="10">10</button>
-                        <button class="pagination-btn" id="next-page">下一页</button>
-                    </div>
+                <!-- 可视化大屏 -->
+                <div style="width: 100%; height: 100vh; overflow: hidden; scrollbar-width: none; -ms-overflow-style: none;">
+                    <iframe 
+                        src="/static/sdk/bigscreen/index.html" 
+                        style="width: 100%; height: 100%; border: none; overflow: hidden; -ms-overflow-style: none; scrollbar-width: none;"
+                        frameborder="0"
+                        allowfullscreen
+                        onload="this.style.overflow = 'hidden'; this.contentDocument.documentElement.style.overflow = 'hidden';"
+                    ></iframe>
                 </div>
             </div>
 
@@ -1947,7 +1810,7 @@
                 menuItems.forEach(item => {
                     item.addEventListener('click', function() {
                         // 移动设备上自动关闭侧边栏
-                        if (window.innerWidth <= 768) {
+                        if (window.innerWidth <= 1000) {
                             toggleSidebar();
                         }
                     });
@@ -1970,7 +1833,6 @@
     <script src="../static/js/party_day.js" defer></script>
     <script src="../static/js/study.js" defer></script>
     <script src="../static/js/review.js" defer></script>
-    <script src="../static/js/statistics.js" defer></script>
     <script src="../static/js/settings.js" defer></script>
     <script src="../static/js/cloud-form.js" defer></script>
     <script src="../static/js/nav.js" defer></script>

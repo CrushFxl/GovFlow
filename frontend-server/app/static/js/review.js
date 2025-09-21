@@ -6,7 +6,6 @@ $(document).ready(function() {
     let totalPages = 1;
     let allData = []; // 存储所有数据，用于分页
     let filteredData = []; // 存储筛选后的数据
-    let lineChart = null;
 
     // 获取DOM元素
     const reviewTableBody = $('#review_table_body');
@@ -42,8 +41,6 @@ $(document).ready(function() {
                     renderReviewTable();
                     // 更新分页信息
                     updatePagination();
-                    // 更新图表
-                    updateCharts();
                 } else {
                     reviewTableBody.html('<tr><td colspan="7" class="rw_dyfz_no_data">加载数据失败</td></tr>');
                 }
@@ -88,99 +85,6 @@ $(document).ready(function() {
         
         reviewPrevPage.prop('disabled', currentPage <= 1);
         reviewNextPage.prop('disabled', currentPage >= totalPages);
-    }
-
-    // 更新图表
-    function updateCharts() {
-        // 使用chart.umd.min.js重写图表实现
-        renderLineChart();
-    }
-
-    // 渲染折线图 - 完全使用chart.umd.min.js实现
-    function renderLineChart() {
-        const chartElement = document.getElementById('lineChart');
-        
-        // 如果已经存在图表实例，先销毁
-        if (lineChart) {
-            lineChart.destroy();
-        }
-        
-        // 按年份分组计算平均分数
-        const yearScores = {};
-        
-        filteredData.forEach(item => {
-            const year = item.year;
-            if (!year) return;
-            
-            if (!yearScores[year]) {
-                yearScores[year] = {
-                    politicalSum: 0,
-                    workSum: 0,
-                    moralSum: 0,
-                    count: 0
-                };
-            }
-            
-            const yearData = yearScores[year];
-            if (item.political_score && !isNaN(item.political_score)) {
-                yearData.politicalSum += parseFloat(item.political_score);
-            }
-            if (item.work_score && !isNaN(item.work_score)) {
-                yearData.workSum += parseFloat(item.work_score);
-            }
-            if (item.moral_score && !isNaN(item.moral_score)) {
-                yearData.moralSum += parseFloat(item.moral_score);
-            }
-            yearData.count++;
-        });
-        
-        // 计算各年份的平均总分
-        const years = Object.keys(yearScores).sort();
-        const avgScores = [];
-        
-        years.forEach(year => {
-            const data = yearScores[year];
-            const avgPolitical = data.politicalSum / data.count;
-            const avgWork = data.workSum / data.count;
-            const avgMoral = data.moralSum / data.count;
-            const avgTotal = (avgPolitical + avgWork + avgMoral) / 3;
-            avgScores.push(avgTotal.toFixed(1));
-        });
-        
-        // 使用Chart.js API创建折线图
-        lineChart = new Chart(chartElement, {
-            type: 'line',
-            data: {
-                labels: years,
-                datasets: [{
-                    label: '历年平均总分',
-                    data: avgScores,
-                    backgroundColor: 'rgba(193, 44, 31, 0.2)',
-                    borderColor: 'rgba(193, 44, 31, 0.8)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(193, 44, 31, 1)',
-                    pointRadius: 4,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        suggestedMax: 5,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                }
-            }
-        });
     }
 
     // 绑定事件

@@ -10,7 +10,7 @@ def user_description():
     - status, int, 用户状态(此字段已弃用)
     - mob, str, 用户手机号
     - pwd, str, 用户密码
-    
+    - coin, int, 用户学点数，一种积分，用于衡量用户在本平台上的学习量
     """
     return text
 
@@ -22,12 +22,13 @@ class User(db.Model):
     status = db.Column('status', db.Integer, nullable=False, default=0)
     mob = db.Column('mob', db.Text, unique=True, nullable=False)
     pwd = db.Column('pwd', db.Text, nullable=False)
+    coin = db.Column('coin', db.Integer, nullable=False, default=0)
 
 
 def init_users():
     if not User.query.first():
         default_users = [
-            User(uid=101, nick='杨小二', mob='1', pwd='1'),
+            User(uid=101, nick='杨小二', mob='1', pwd='1', coin=5),
             User(uid=102, nick='朱小二', mob='2', pwd='2'),
             User(uid=103, nick='和小二', mob='3', pwd='3'),
             User(uid=104, nick='邵小二', mob='4', pwd='4'),
@@ -69,7 +70,7 @@ def init_users():
             User(uid=140, nick='王小二', mob='40', pwd='40'),
             User(uid=141, nick='李小二', mob='41', pwd='41'),
             User(uid=142, nick='黄小二', mob='42', pwd='42'),
-            User(uid=143, nick='冯小二', mob='43', pwd='43')
+            User(uid=143, nick='冯小二', mob='43', pwd='43', coin=5)
         ]
         db.session.bulk_save_objects(default_users)
         db.session.commit()

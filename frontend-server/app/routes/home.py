@@ -19,7 +19,11 @@ def home():
     else:
         domain = current_config.BACKEND_SERVER_DOMAIN[:-6] + '/chatbot/'
         iframe_url = domain + current_config.IFRAME_URL_PARAM
-    return render_template("home.html", iframe_url_param=iframe_url)
+    return render_template("home.html",
+    iframe_url_param=iframe_url,
+    iframe_url_llm_manage_param=current_config.IFRAME_URL_LLM_MANAGE_PARAM,
+    iframe_url_knowledge_manage_param=current_config.IFRAME_URL_KNOWLEDGE_MANAGE_PARAM,
+    )
 
 
 @home_ft.get('/login/')

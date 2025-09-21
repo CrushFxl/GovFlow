@@ -166,6 +166,51 @@
             color: var(--gold);
             margin-right: 10px;
         }
+        
+        /* 父菜单项样式 */
+        .parent-menu {
+            position: relative;
+        }
+        
+        /* 菜单折叠/展开图标样式 */
+        .menu-toggle-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--primary-red);
+            font-size: 14px;
+            padding: 8px;
+            transition: transform 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 菜单展开状态下的图标旋转 */
+        .parent-menu.collapsed .menu-toggle-icon {
+            transform: translateY(-50%) rotate(-90deg);
+        }
+        
+        /* 子菜单容器样式 */
+        .sub-menu {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        /* 子菜单折叠状态 */
+        .sub-menu.collapsed {
+            max-height: 0;
+        }
+        
+        /* 子菜单项样式 */
+        .sub-menu .menu-item {
+            padding-left: 20px;
+        }
 
         /* 主内容区 */
         .content {
@@ -324,6 +369,15 @@
 
         .page-content.active {
             display: block;
+        }
+        
+        /* 大模型管理页面特殊样式 - 取消外层padding，使嵌入页面更沉浸 */
+        .content.no-padding {
+            padding: 0 !important;
+        }
+        
+        .content.no-padding #llm_manage {
+            margin: 0 !important;
         }
 
         .placeholder-content {
@@ -567,30 +621,33 @@
                     <img src="../static/img/red-icon/dangyuanxinxi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">党员信息</p>
                 </li>
-                <li class="menu-item" data-page="activity">
+                <li class="menu-item parent-menu" data-page="activity">
                     <img src="../static/img/red-icon/renwuguanli.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">任务管理</p>
+                    <span class="menu-toggle-icon">▼</span>
                 </li>
-                <li class="menu-item" data-page="party-day" style="margin-left: 20px;">
-                    <img src="../static/img/red-icon/sanhuiyike.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">主题党日</p>
-                </li>
-                <li class="menu-item" data-page="meeting" style="margin-left: 20px;">
-                    <img src="../static/img/red-icon/sanhuiyike.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">三会一课</p>
-                </li>
-                <li class="menu-item" data-page="fee" style="margin-left: 20px;">
-                    <img src="../static/img/red-icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">党费管理</p>
-                </li>
-                <li class="menu-item" data-page="development" style="margin-left: 20px;">
-                    <img src="../static/img/red-icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">党员发展</p>
-                </li>
-                <li class="menu-item" data-page="review" style="margin-left: 20px;">
-                    <img src="../static/img/red-icon/minzhupingyi.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">民主评议</p>
-                </li>
+                <div class="sub-menu">
+                    <li class="menu-item" data-page="party-day" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/sanhuiyike.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">主题党日</p>
+                    </li>
+                    <li class="menu-item" data-page="meeting" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/sanhuiyike.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">三会一课</p>
+                    </li>
+                    <li class="menu-item" data-page="fee" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">党费管理</p>
+                    </li>
+                    <li class="menu-item" data-page="development" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">党员发展</p>
+                    </li>
+                    <li class="menu-item" data-page="review" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/minzhupingyi.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">民主评议</p>
+                    </li>
+                </div>
                 <li class="menu-item" data-page="study">
                     <img src="../static/img/red-icon/xuexijiaoyu.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">学习教育</p>
@@ -598,6 +655,14 @@
                 <li class="menu-item" data-page="statistics">
                     <img src="../static/img/red-icon/tongjifenxi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">统计分析</p>
+                </li>
+                <li class="menu-item" data-page="llm_manage">
+                    <img src="../static/img/red-icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">大模型管理</p>
+                </li>
+                <li class="menu-item" data-page="knowledge_manage">
+                    <img src="../static/img/red-icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">知识库管理</p>
                 </li>
                 <li class="menu-item" data-page="settings">
                     <img src="../static/img/red-icon/xitongshezhi.png" style="width: 45px; height: 45px;">
@@ -613,6 +678,26 @@
                 <iframe
 
                     src="{{ iframe_url_param }}"
+                    style="width: 100%; height: 100%; min-height: 700px"
+                    frameborder="0"
+                    allow="microphone">
+                </iframe>
+            </div>
+
+            <!-- 大模型管理页面 -->
+            <div id="llm_manage" class="page-content">
+                <iframe
+                    src="{{ iframe_url_llm_manage_param }}"
+                    style="width: 100%; height: 100%; min-height: 700px"
+                    frameborder="0"
+                    allow="microphone">
+                </iframe>
+            </div>
+
+            <!-- 知识库管理页面 -->
+            <div id="knowledge_manage" class="page-content">
+                <iframe
+                    src="{{ iframe_url_knowledge_manage_param }}"
                     style="width: 100%; height: 100%; min-height: 700px"
                     frameborder="0"
                     allow="microphone">
@@ -1361,13 +1446,6 @@
                             </div>
                             <button id="review_refresh_button" class="btn rw_dyfz_refresh_btn">刷新</button>
                         </div>
-                        
-                        <!-- 图表区域 -->
-                        <div class="rw_review_charts_container">
-                            <div class="rw_chart-container" style="width: 100%;">
-                                <h3>历年平均评分变化</h3>
-                                <canvas id="lineChart"></canvas>
-                            </div>
                         </div>
                         
                         <div class="rw_dyfz_table_container">

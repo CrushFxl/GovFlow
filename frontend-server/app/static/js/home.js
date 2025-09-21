@@ -89,7 +89,13 @@ $(document).ready(function() {
     // 页面切换渲染
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function(e) {
+            // 如果点击的是小三角图标，则阻止页面切换，只处理折叠/展开
+            if (e.target.classList.contains('menu-toggle-icon')) {
+                e.stopPropagation();
+                return;
+            }
+            
             // 获取要显示的页面ID
             const pageId = this.getAttribute('data-page');
             // 如果被强制在档案页面且尝试离开档案页面，则阻止切换
@@ -109,8 +115,37 @@ $(document).ready(function() {
             // 显示当前选中的页面
             const activePage = document.getElementById(pageId);
             activePage.classList.add('active');
+            
+            // 控制大模型管理和知识库管理页面的padding
+            const contentElement = document.querySelector('.content');
+            if (pageId === 'llm_manage' || pageId === 'knowledge_manage') {
+                contentElement.classList.add('no-padding');
+            } else {
+                contentElement.classList.remove('no-padding');
+            }
+            
             // 调用对应模块的初始化函数
             initModule(pageId);
+        });
+    });
+    
+    // 为菜单折叠/展开图标添加点击事件
+    document.querySelectorAll('.menu-toggle-icon').forEach(icon => {
+        icon.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            const parentMenuItem = this.closest('.parent-menu');
+            const subMenu = parentMenuItem.nextElementSibling;
+            
+            // 切换折叠/展开状态
+            parentMenuItem.classList.toggle('collapsed');
+            subMenu.classList.toggle('collapsed');
+        });
+    });
+    
+    // 确保子菜单项点击时不会触发父菜单项的点击事件
+    document.querySelectorAll('.sub-menu .menu-item').forEach(subItem => {
+        subItem.addEventListener('click', function(e) {
+            e.stopPropagation();
         });
     });
 
@@ -203,6 +238,12 @@ $(document).ready(function() {
                     statisticsModule.init();
                 }
                 break;
+            case 'llm_manage':
+                $('.page-title').text('大模型管理');
+                break;
+            case 'knowledge_manage':
+                $('.page-title').text('知识库管理');
+                break;
             case 'settings':
                 if (window.settingsModule && window.settingsModule.init) {
                     $('.page-title').text('系统设置');
@@ -215,6 +256,21 @@ $(document).ready(function() {
     }
     const activeMenuItem = document.querySelector('.menu-item.active');
     initModule(activeMenuItem.getAttribute('data-page'));
+
+    // 根据localStorage中的admin值设置任务管理菜单的展开/折叠状态
+    const adminStatus = localStorage.getItem('admin');
+    const parentMenuItem = document.querySelector('.menu-item.parent-menu');
+    const subMenu = parentMenuItem.nextElementSibling;
+    
+    if (adminStatus === '1') {
+        // 管理员用户，自动折叠任务管理菜单
+        parentMenuItem.classList.add('collapsed');
+        subMenu.classList.add('collapsed');
+    } else {
+        // 非管理员用户，默认展开任务管理菜单
+        parentMenuItem.classList.remove('collapsed');
+        subMenu.classList.remove('collapsed');
+    }
 });
 
 

@@ -15,9 +15,12 @@ user_bk = Blueprint('user', __name__, url_prefix='/user')
 @user_bk.route('/get_nick', methods=['GET', 'POST'])
 def get_nick():
     uid = session.get('uid')
-    nick = User.query.filter_by(uid=uid).first().nick
+    user = User.query.filter_by(uid=uid).first()
+    nick = user.nick
+    coin = user.coin
     admin = Profile.query.filter_by(uid=uid).first().admin_status
-    return {'code': 1000, 'msg': 'ok', 'data': {'uid': uid, 'nick': nick, 'admin': admin}}
+    return {'code': 1000, 'msg': 'ok', 'data':
+        {'uid': uid, 'nick': nick, 'admin': admin, 'coin': coin}}
 
 
 @user_bk.route('/get_todos', methods=['GET', 'POST'])

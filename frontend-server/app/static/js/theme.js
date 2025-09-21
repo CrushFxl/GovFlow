@@ -4,8 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const deepOrange = '#E46034';
     const darkDeepOrange = '(168, 10, 155)';
     const lightDeepOrange = '#fce2d9';
-
-
     // 检查localStorage中的admin状态
     function checkAdminStatus() {
         const isAdmin = localStorage.getItem('admin') === '1';
@@ -61,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
             adminHint = document.createElement('li');
             adminHint.id = 'admin-login-hint';
             adminHint.innerText = '您正在以超级管理员身份登录';
-            
             // 设置高对比度样式
             adminHint.style.cssText = `
                 background-color: #fff;
@@ -74,8 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 border: 2px solid #000;
                 display: inline-block;
             `;
-            
-            // 将提示元素添加为'我发布的'链接的同级标签（放在其后）
             const publishedLink = document.querySelector('.nav-menu li:last-child');
             const navMenu = document.querySelector('.nav-menu');
             if (publishedLink && navMenu) {
@@ -94,21 +89,27 @@ document.addEventListener('DOMContentLoaded', function() {
             adminHint.style.display = 'none';
         }
     }
-    
     // 显示所有菜单项
     function showAllMenuItems() {
         const cloudFormItem = document.querySelector('.menu-item[data-page="cloud-form"]');
         const settingsItem = document.querySelector('.menu-item[data-page="settings"]');
+        const llmManageItem = document.querySelector('.menu-item[data-page="llm_manage"]');
+        const knowledgeManageItem = document.querySelector('.menu-item[data-page="knowledge_manage"]');
         if (cloudFormItem) cloudFormItem.style.display = '';
         if (settingsItem) settingsItem.style.display = '';
+        if (llmManageItem) llmManageItem.style.display = '';
+        if (knowledgeManageItem) knowledgeManageItem.style.display = '';
     }
-    
     // 隐藏受限菜单项
     function hideRestrictedMenuItems() {
         const cloudFormItem = document.querySelector('.menu-item[data-page="cloud-form"]');
         const settingsItem = document.querySelector('.menu-item[data-page="settings"]');
+        const llmManageItem = document.querySelector('.menu-item[data-page="llm_manage"]');
+        const knowledgeManageItem = document.querySelector('.menu-item[data-page="knowledge_manage"]');
         if (cloudFormItem) cloudFormItem.style.display = 'none';
         if (settingsItem) settingsItem.style.display = 'none';
+        if (llmManageItem) llmManageItem.style.display = 'none';
+        if (knowledgeManageItem) knowledgeManageItem.style.display = 'none';
     }
     checkAdminStatus();    
     window.addEventListener('storage', function(e) {

@@ -14,6 +14,7 @@ from .review import review_bk
 from .meeting import meeting_bk
 from .study import study_bk
 from .statistics import statistics_bk
+from .party_day import partyday_bk
 
 routes = [
     auth_bk,
@@ -31,5 +32,6 @@ routes = [
     review_bk,
     meeting_bk,
     study_bk,
-    statistics_bk
+    statistics_bk,
+    partyday_bk
 ]

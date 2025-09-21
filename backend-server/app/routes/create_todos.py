@@ -200,6 +200,7 @@ def modify_task():
     location = request.args.get('location')
     if location:
         task.location = location
+    frequency = request.args.get('frequency')
     if frequency:
         task.frequency = int(request.args.get('frequency'))
     db.session.commit()

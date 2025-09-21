@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../static/css/review.css">
     <link rel="stylesheet" href="../static/css/meeting.css">
     <link rel="stylesheet" href="../static/css/study.css">
+    <link rel="stylesheet" href="../static/css/party_day.css">
 
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
@@ -529,7 +530,8 @@
     <p id="URL" style="display: none">{{URL}}</p>
     <!-- 顶部导航栏 -->
     <nav class="top-nav">
-        <div class="logo">智慧党建系统</div>
+        <a href="#" class="logo-link"><img src="../static/img/logo-lc-white.png" alt="智慧党建AI智能体系统" class="logo-img" style="height: 40px; margin: 5px 5px 0 0;"></a>
+        <div class="logo">党建AI智能体系统</div>
         <ul class="nav-menu">
             <li><a href="#">未读消息</a></li>
             <li><a href="#">待办事项</a></li>
@@ -554,47 +556,51 @@
             </div>
             <ul class="menu-list">
                 <li class="menu-item active" data-page="dashboard">
-                    <img src="../static/img/icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">AI工作台</p>
                 </li>
                 <li class="menu-item" data-page="cloud-form">
-                    <img src="../static/img/icon/zhinengbiaodan.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/zhinengbiaodan.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">智慧表单</p>
                 </li>
                 <li class="menu-item" data-page="profile">
-                    <img src="../static/img/icon/dangyuanxinxi.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/dangyuanxinxi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">党员信息</p>
                 </li>
                 <li class="menu-item" data-page="activity">
-                    <img src="../static/img/icon/renwuguanli.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/renwuguanli.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">任务管理</p>
                 </li>
+                <li class="menu-item" data-page="party-day" style="margin-left: 20px;">
+                    <img src="../static/img/red-icon/sanhuiyike.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">主题党日</p>
+                </li>
                 <li class="menu-item" data-page="meeting" style="margin-left: 20px;">
-                    <img src="../static/img/icon/sanhuiyike.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/sanhuiyike.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">三会一课</p>
                 </li>
                 <li class="menu-item" data-page="fee" style="margin-left: 20px;">
-                    <img src="../static/img/icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">党费管理</p>
                 </li>
                 <li class="menu-item" data-page="development" style="margin-left: 20px;">
-                    <img src="../static/img/icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">党员发展</p>
                 </li>
                 <li class="menu-item" data-page="review" style="margin-left: 20px;">
-                    <img src="../static/img/icon/minzhupingyi.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/minzhupingyi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">民主评议</p>
                 </li>
                 <li class="menu-item" data-page="study">
-                    <img src="../static/img/icon/xuexijiaoyu.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/xuexijiaoyu.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">学习教育</p>
                 </li>
                 <li class="menu-item" data-page="statistics">
-                    <img src="../static/img/icon/tongjifenxi.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/tongjifenxi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">统计分析</p>
                 </li>
                 <li class="menu-item" data-page="settings">
-                    <img src="../static/img/icon/xitongshezhi.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/xitongshezhi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">系统设置</p>
                 </li>
             </ul>
@@ -1043,6 +1049,52 @@
                 </div>
             </div>
 
+            <!-- 主题党日页面 -->
+            <div id="party-day" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">主题党日</h1>
+                    <div class="breadcrumb">首页 / 任务管理 / 主题党日</div>
+                </div>
+                
+                <div class="dyfz_development_content">
+                    <!-- 筛选和表格区域 -->
+                    <div class="dyfz_table_area">
+                        <div class="dyfz_filter_area">
+                            <!-- 用户查询区域 -->
+                            <div class="dyfz_search_box">
+                                <div class="dyfz_user_icon"></div>
+                                <input type="text" id="party_day_search_input" placeholder="请输入活动名称查询" />
+                                <button id="party_day_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
+                            </div>
+                        </div>
+                        <div class="dyfz_table_container">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>活动名称</th>
+                                    <th>姓名</th>
+                                    <th>心得内容</th>
+                                    <th>提交时间</th>
+                                </tr>
+                            </thead>
+                                <tbody id="party_day_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                    <tr><td colspan="5" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页控件 -->
+                        <div class="dyfz_pagination">
+                            <button id="party_day_prev_page" class="dyfz_page_btn" disabled>上一页</button>
+                            <span id="party_day_page_info">第 <span id="party_day_current_page">1</span> 页，共 <span id="party_day_total_pages">1</span> 页</span>
+                            <button id="party_day_next_page" class="dyfz_page_btn" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 党费管理页面 -->
             <div id="fee" class="page-content">
                 <div class="page-header">
@@ -1222,7 +1274,7 @@
                             <div class="carousel" id="news-carousel">
                                 <!-- 轮播项将通过JavaScript动态加载 -->
                                 <div class="carousel-item active">
-                                    <img src="../static/img/placeholder-carousel.jpg" alt="轮播图">
+                                    <img alt="轮播图">
                                     <div class="carousel-caption">
                                         <h3>新闻标题加载中...</h3>
                                         <p>新闻描述加载中...</p>
@@ -1837,6 +1889,7 @@
     <script src="../static/js/meeting.js" defer></script>
     <script src="../static/js/fee.js" defer></script>
     <script src="../static/js/development.js" defer></script>
+    <script src="../static/js/party_day.js" defer></script>
     <script src="../static/js/study.js" defer></script>
     <script src="../static/js/review.js" defer></script>
     <script src="../static/js/statistics.js" defer></script>

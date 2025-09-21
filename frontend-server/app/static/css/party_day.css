@@ -1,0 +1,87 @@
+/* 主题党日页面样式 */
+
+/* 活动内容样式 */
+.party-day-content {
+    cursor: pointer;
+    color: #333;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.party-day-content:hover {
+    color: var(--primary-red);
+    text-decoration: underline;
+}
+
+/* 模态框样式 */
+#content-modal .modal-content {
+    background-color: white;
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    width: 90%;
+}
+
+#content-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+#content-modal .modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+#content-modal .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#content-modal .close-btn:hover {
+    color: #333;
+}
+
+#content-modal .modal-body p {
+    white-space: pre-wrap;
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+}
+
+#partyday_type_filter{
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 15px;
+    outline: none;
+    cursor: pointer;
+}
+
+#party_day_search_input {
+    flex: 1;
+    min-width: 250px;
+    height: 40px;
+    border: none;
+    background-color: transparent;
+    font-size: 14px;
+    outline: none;
+}

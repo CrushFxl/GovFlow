@@ -191,6 +191,12 @@ $(document).ready(function() {
                     reviewModule.init();
                 }
                 break;
+            case 'party-day':
+                if (window.partyDayModule && window.partyDayModule.init) {
+                    $('.page-title').text('主题党日');
+                    partyDayModule.init();
+                }
+                break;
             case 'statistics':
                 if (window.statisticsModule && window.statisticsModule.init) {
                     $('.page-title').text('统计分析');

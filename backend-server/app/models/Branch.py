@@ -51,10 +51,10 @@ class Branch(db.Model):
 def init_branches():
     if Branch.query.count() == 0:
         committees = [
-            Branch(name='杭州医学院党委', parent_id=None, level=1, value='committee1'),
-            Branch(name='信息工程学院、信息与教育技术中心党总支部', parent_id=1, level=2, value='subcommittee11'),
-            Branch(name='信息工程学院、信息与教育技术中心教工党支部', parent_id=2, level=3, value='branch111'),
-            Branch(name='信息工程学院、信息与教育技术中心学生党支部', parent_id=2, level=3, value='branch112')
+            Branch(name='灵创大学党委', parent_id=None, level=1, value='committee1'),
+            Branch(name='灵创信息工程学院党总支部', parent_id=1, level=2, value='subcommittee11'),
+            Branch(name='灵创信息工程学院教工党支部', parent_id=2, level=3, value='branch111'),
+            Branch(name='灵创信息工程学院学生党支部', parent_id=2, level=3, value='branch112')
         ]
         db.session.add_all(committees)
         db.session.commit()

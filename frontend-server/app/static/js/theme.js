@@ -1,13 +1,9 @@
 // 主题切换功能
 document.addEventListener('DOMContentLoaded', function() {
     // 定义深橙色主题色
-    // const deepOrange = '#e65100';
-    // const darkDeepOrange = '#bf360c';
-    // const lightDeepOrange = '#fff3e0';
-    const deepOrange = 'rgb(168, 10, 155)';
+    const deepOrange = '#E46034';
     const darkDeepOrange = '(168, 10, 155)';
-    const lightDeepOrange = 'rgb(252, 231, 252)';
-    
+    const lightDeepOrange = '#fce2d9';
 
 
     // 检查localStorage中的admin状态
@@ -23,6 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showAllMenuItems();
             // 显示管理员登录提示
             showAdminLoginHint();
+            // 切换到橙色图标
+            updateMenuIcons('orange-icon');
         } else {
             // 普通用户 - 恢复默认红色主题
             root.style.setProperty('--primary-red', '#c12c1f');
@@ -32,7 +30,26 @@ document.addEventListener('DOMContentLoaded', function() {
             hideRestrictedMenuItems();
             // 隐藏管理员登录提示
             hideAdminLoginHint();
+            // 切换到红色图标
+            updateMenuIcons('red-icon');
         }
+    }
+    
+    // 根据管理员状态更新菜单图标
+    function updateMenuIcons(iconType) {
+        const menuItemIcons = document.querySelectorAll('.menu-item img');
+        menuItemIcons.forEach(icon => {
+            // 获取当前图标文件名
+            const currentSrc = icon.getAttribute('src');
+            const iconFileName = currentSrc.split('/').pop();
+            
+            // 根据iconType更新图标路径
+            if (iconType === 'orange-icon') {
+                icon.setAttribute('src', `../static/img/orange-icon/${iconFileName}`);
+            } else {
+                icon.setAttribute('src', `../static/img/red-icon/${iconFileName}`);
+            }
+        });
     }
     
     // 显示管理员登录提示

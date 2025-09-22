@@ -29,7 +29,7 @@ $(document).ready(function() {
     function loadFeeData() {
         const month = monthFilter.val();
         // 显示加载状态
-        tableBody.html('<tr><td colspan="6" class="dyfz_no_data">正在加载数据...</td></tr>');
+        tableBody.html('<tr><td colspan="7" class="dyfz_no_data">正在加载数据...</td></tr>');
         // 发送请求获取记录
         $.ajax({
             url: URL + `/get_fee_records`,
@@ -45,11 +45,11 @@ $(document).ready(function() {
                     updateStatistics();
                     renderChart();
                 } else {
-                    tableBody.html('<tr><td colspan="6" class="dyfz_no_data">' + response.msg + '</td></tr>');
+                    tableBody.html('<tr><td colspan="7" class="dyfz_no_data">' + response.msg + '</td></tr>');
                 }
             },
             error: function() {
-                tableBody.html('<tr><td colspan="6" class="dyfz_no_data">加载失败，请稍后再试</td></tr>');
+                tableBody.html('<tr><td colspan="7" class="dyfz_no_data">加载失败，请稍后再试</td></tr>');
             }
         });
     }
@@ -100,7 +100,7 @@ $(document).ready(function() {
         
         // 渲染表格内容
         if (currentRecords.length === 0) {
-            tableBody.html('<tr><td colspan="6" class="dyfz_no_data">暂无数据</td></tr>');
+            tableBody.html('<tr><td colspan="7" class="dyfz_no_data">暂无数据</td></tr>');
             return;
         }
         
@@ -124,6 +124,7 @@ $(document).ready(function() {
                     <td class="fee-amount">${parseFloat(record.amount).toFixed(2)} 元</td>
                     <td>${submitTime}</td>
                     <td><span class="receipt-material" title="${record.receipt}">查看回执材料</span></td>
+                    <td><button class="pf_detail-btn btn btn-action delete-fee" data-id="${record.id}">删除</button></td>
                 </tr>
             `;
         });
@@ -134,6 +135,12 @@ $(document).ready(function() {
         $('.receipt-material').click(function() {
             const receiptContent = $(this).attr('title');
             showReceiptModal(receiptContent);
+        });
+        
+        // 为删除按钮添加点击事件
+        $('.delete-fee').click(function() {
+            const recordId = $(this).data('id');
+            deleteFeeRecord(recordId);
         });
     }
     
@@ -299,6 +306,34 @@ $(document).ready(function() {
         bindEvents();
         // 页面加载时默认加载数据
         loadFeeData();
+    }
+    
+    // 删除党费记录
+    function deleteFeeRecord(recordId) {
+        // 显示确认对话框
+        if (!confirm('确定要删除这条党费记录吗？此操作不可撤销。')) {
+            return;
+        }
+        
+        // 发送删除请求
+        $.ajax({
+            url: URL + '/delete_record',
+            xhrFields: {withCredentials: true},
+            type: 'POST',
+            data: {id: recordId},
+            success: function(response) {
+                if (response.code === 200) {
+                    alert('删除成功');
+                    // 重新加载数据
+                    loadFeeData();
+                } else {
+                    alert('删除失败：' + response.msg);
+                }
+            },
+            error: function() {
+                alert('网络错误，请稍后再试');
+            }
+        });
     }
     
     // 初始化页面

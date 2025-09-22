@@ -25,41 +25,91 @@ var democratic_evaluation_data = {"uploadData":[{"count":46},{"count":43},{"coun
 // 三会一课统计模板
 var Tpl1 = '<li>' +
 			'<p class="data-count">18</p>' +
-			'<span class="data-name">党员支部大会</span>' +
+			'<span class="data-name">已完成</span>' +
 			'</li>' +
 			'<li>' +
 			'<p class="data-count">15</p>' +
-			'<span class="data-name">党员组委会</span>' +
+			'<span class="data-name">待审核</span>' +
 			'</li>' +
 			'<li>' +
 			'<p class="data-count">17</p>' +
-			'<span class="data-name">党小组会</span>' +
+			'<span class="data-name">待完成</span>' +
 			'</li>' ;		
 var Tpl2 = '<li>' +
 			'<p class="data-count">20</p>' +
-			'<span class="data-name">党员支部大会</span>' +
+			'<span class="data-name">已完成</span>' +
 			'</li>' +
 			'<li>' +
 			'<p class="data-count">14</p>' +
-			'<span class="data-name">党员组委会</span>' +
+			'<span class="data-name">待审核</span>' +
 			'</li>' +
 			'<li>' +
 			'<p class="data-count">16</p>' +
-			'<span class="data-name">党小组会</span>' +
+			'<span class="data-name">待完成</span>' +
 			'</li>' ;
 var Tpl3 = '<li>' +
 			'<p class="data-count">19</p>' +
-			'<span class="data-name">党员支部大会</span>' +
+			'<span class="data-name">已完成</span>' +
 			'</li>' +
 			'<li>' +
 			'<p class="data-count">16</p>' +
-			'<span class="data-name">党员组委会</span>' +
+			'<span class="data-name">待审核</span>' +
 			'</li>' +
 			'<li>' +
 			'<p class="data-count">15</p>' +
-			'<span class="data-name">党小组会</span>' +
+			'<span class="data-name">待完成</span>' +
 			'</li>' ;		
-$('.com-screen-content .use-data').html(Tpl1);			
+$('.com-screen-content .use-data').html(Tpl1);		
+
+// 更新会议纪要表格数据
+function updateMeetingMinutesTable() {
+    // 会议类型映射
+    var meetingTypes = {
+        "第一季度支部大会": "支部党员大会",
+        "组织生活会": "组织生活会",
+        "民主评议党员会": "民主评议",
+        "党小组学习会": "党小组会",
+        "第二季度支部大会": "支部党员大会",
+        "党课学习会": "党课",
+        "第三季度支部大会": "支部党员大会",
+        "主题党日活动": "主题党日",
+        "年度总结大会": "总结大会"
+    };
+    // 会议时间映射
+    var meetingDates = {
+        "第一季度支部大会": "2023-03-15 09:00",
+        "组织生活会": "2023-04-20 14:30",
+        "民主评议党员会": "2023-05-10 10:00",
+        "党小组学习会": "2023-05-25 16:00",
+        "第二季度支部大会": "2023-06-20 09:30",
+        "党课学习会": "2023-07-15 14:00",
+        "第三季度支部大会": "2023-09-20 10:30",
+        "主题党日活动": "2023-10-10 08:30",
+        "年度总结大会": "2023-12-25 13:30"
+    };    
+    // 生成HTML
+    var meetingHTML = '';
+    for (var i = 0; i < Object.keys(meetingDates).length; i++) {
+		var meetingNames = Object.keys(meetingDates);
+		var meetingName = meetingNames[i];
+		var meetingType = meetingTypes[meetingName];
+		var meetingTime = meetingDates[meetingName];
+        meetingHTML += '<li>';
+        meetingHTML += '    <div>' + meetingName + '</div>';
+        meetingHTML += '    <div>' + meetingType + '</div>';
+        meetingHTML += '    <div>' + meetingTime + '</div>';
+        meetingHTML += '</li>';
+    }
+    // 确保maquee元素存在后再更新
+    let marqueeElement = $('.topRec_List .maquee ul');
+    if (marqueeElement.length > 0) {
+        marqueeElement.append(meetingHTML);
+    } else {
+        console.log('未找到会议纪要表格元素');
+    }
+}
+updateMeetingMinutesTable();
+
 // 基于准备好的dom，初始化echarts实例
 var myChart1= echarts.init(document.getElementById('main1'));
 var myChart2 = echarts.init(document.getElementById('main2'));
@@ -145,7 +195,7 @@ function init_myChart3(data) {
 			itemGap: 10,
 			top: '16',
 			right: '10',
-			data: ['数据总量','共享次数','更新量'],
+			data: ['已完成','待审核','待完成'],
 			textStyle: {
 				fontSize: 14,
 				color: '#a0a8b9'
@@ -201,7 +251,7 @@ function init_myChart3(data) {
 			}
 		}],
 		series: [{
-			name: '数据总量',
+			name: '已完成',
 			type: 'line',
 			smooth: true,
 			showSymbol: false,
@@ -230,7 +280,7 @@ function init_myChart3(data) {
 			},
 			data: uploadCnt
 		}, {
-			name: '共享次数',
+			name: '待完成',
 			type: 'line',
 			smooth: true,
 			showSymbol: false,
@@ -259,7 +309,7 @@ function init_myChart3(data) {
 			},
 			data: viewCnt
 		},  {
-			name: '更新量',
+			name: '待审核',
 			type: 'line',
 			smooth: true,
 			showSymbol: false,
@@ -351,7 +401,7 @@ function init_myChart2() {
 			itemGap: 10,
 			top: '16',
 			right: '10',
-			data: ['数据总量','共享次数','更新量'],
+			data: ['已完成','待审核','待完成'],
 			textStyle: {
 				fontSize: 14,
 				color: '#a0a8b9'
@@ -407,7 +457,7 @@ function init_myChart2() {
 			}
 		}],
 		series: [{
-			name: '数据总量',
+			name: '已完成',
 			type: 'line',
 			smooth: true,
 			showSymbol: false,
@@ -436,7 +486,7 @@ function init_myChart2() {
 			},
 			data: uploadCnt
 		}, {
-			name: '共享次数',
+			name: '待完成',
 			type: 'line',
 			smooth: true,
 			showSymbol: false,
@@ -465,7 +515,7 @@ function init_myChart2() {
 			},
 			data: viewCnt
 		},  {
-			name: '更新量',
+			name: '待审核',
 			type: 'line',
 			smooth: true,
 			showSymbol: false,
@@ -1045,7 +1095,7 @@ option = {
     ],
     series : [
         {
-            name:'共享次数',
+            name:'待完成',
             type:'bar',
             data:yData,
             itemStyle: {
@@ -1150,6 +1200,7 @@ function urlType() {
 		$('.com-screen-content .use-data').html(Tpl3);
     }
 }
+
 var num =0 ;
 //    资源类型定时器
 function resourceType() {

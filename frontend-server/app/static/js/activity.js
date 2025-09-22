@@ -173,7 +173,6 @@ $(document).ready(function() {
                 const id = this.getAttribute('data-id');
                 const type = this.getAttribute('data-type');
                 if (confirm(`确定要将此任务标记为已完成吗？`)) {
-                    showLoading();
                     $.ajax({
                         url: URL + "/activity/mark_complete",
                         xhrFields: {withCredentials: true},

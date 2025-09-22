@@ -21,12 +21,12 @@ $(document).ready(function() {
     function loadReviewData(keyword = '') {
         // 显示加载状态
         reviewTableBody.html('<tr><td colspan="7" class="rw_dyfz_no_data">加载中...</td></tr>');
-        
         // 发送请求到后端获取数据
         $.ajax({
             url: `${config.backendUrl}/get_review_records`,
             type: 'GET',
             data: {
+                uid: localStorage.getItem('uid'),
                 keyword: keyword,
                 page: currentPage,
                 page_size: pageSize
@@ -36,7 +36,6 @@ $(document).ready(function() {
                     allData = response.data.records || [];
                     filteredData = [...allData];
                     totalPages = response.data.total_pages || 1;
-                    
                     // 更新表格
                     renderReviewTable();
                     // 更新分页信息
@@ -69,11 +68,11 @@ $(document).ready(function() {
             const rowNumber = startIndex + index + 1;
             row.append(`<td>${rowNumber}</td>`);
             row.append(`<td>${item.name || '-'}</td>`);
+            row.append(`<td>${item.branch || ''}</td>`);
             row.append(`<td>${item.year || '-'}</td>`);
-            row.append(`<td>${item.political_score || '-'}</td>`);
-            row.append(`<td>${item.work_score || '-'}</td>`);
-            row.append(`<td>${item.moral_score || '-'}</td>`);
+            row.append(`<td>${item.result || '合格'}</td>`);
             row.append(`<td>${item.other_comments || '-'}</td>`);
+            row.append(`<td><button class="pf_detail-btn btn btn-action delete-review" data-id="${item.id}">删除</button></td>`);
             reviewTableBody.append(row);
         });
     }
@@ -82,7 +81,6 @@ $(document).ready(function() {
     function updatePagination() {
         reviewCurrentPage.text(currentPage);
         reviewTotalPages.text(totalPages);
-        
         reviewPrevPage.prop('disabled', currentPage <= 1);
         reviewNextPage.prop('disabled', currentPage >= totalPages);
     }
@@ -125,31 +123,46 @@ $(document).ready(function() {
                 loadReviewData(reviewSearchInput.val().trim());
             }
         });
-        
-        // 页面切换到民主评议时的事件
-        $(document).on('pageChange', function(e, pageId) {
-            if (pageId === 'review') {
-                // 延迟加载，确保页面已经显示
-                setTimeout(() => {
-                    currentPage = 1;
-                    loadReviewData();
-                }, 10);
-            }
+        // 删除按钮点击事件
+        $(document).on('click', '.delete-review', function() {
+            const recordId = $(this).data('id');
+            deleteReviewRecord(recordId);
         });
     }
 
+    // 删除民主评议记录
+    function deleteReviewRecord(recordId) {
+        if (!confirm('确定要删除这条民主评议记录吗？')) {
+            return;
+        }
+        
+        $.ajax({
+            url: `${config.backendUrl}/delete_review_record`,
+            type: 'POST',
+            data: {id: recordId},
+            success: function(response) {
+                if (response.code === 200) {
+                    alert('删除成功');
+                    // 重新加载数据
+                    loadReviewData(reviewSearchInput.val().trim());
+                } else {
+                    alert('删除失败：' + (response.message || '未知错误'));
+                }
+            },
+            error: function() {
+                alert('网络错误，请稍后重试');
+            }
+        });
+    }
+    
     // 初始化民主评议页面
     function initReview() {
         console.log('民主评议页面初始化');
         bindEvents();
         
-        // 检查当前是否在民主评议页面
-        const currentPageElement = $('#review');
-        if (currentPageElement.is(':visible')) {
-            setTimeout(() => {
-                loadReviewData();
-            }, 100);
-        }
+        // 直接加载数据，不需要额外的检查
+        currentPage = 1;
+        loadReviewData();
     }
 
     // 暴露初始化函数供home.js调用

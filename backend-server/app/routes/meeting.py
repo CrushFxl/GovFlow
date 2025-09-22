@@ -69,6 +69,36 @@ def get_meeting_records():
         return jsonify({'code': 500, 'msg': str(e), 'data': []})
 
 
+@meeting_bk.route('/delete_record', methods=['POST'])
+def delete_meeting_record():
+    """
+    删除三会一课记录
+    参数:
+        id: 记录ID
+    返回:
+        删除结果
+    """
+    try:
+        # 获取记录ID
+        record_id = request.form.get('id')
+        if not record_id:
+            return jsonify({'code': 400, 'msg': '缺少记录ID'})
+        
+        # 在数据库中查找记录
+        record = FormSubmission.query.get(record_id)
+        if not record:
+            return jsonify({'code': 404, 'msg': '记录不存在'})
+        
+        # 删除记录
+        db.session.delete(record)
+        db.session.commit()
+        
+        return jsonify({'code': 200, 'msg': '删除成功'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'code': 500, 'msg': f'删除失败: {str(e)}'})
+
+
 @meeting_bk.route('/get_meeting_types', methods=['GET'])
 def get_meeting_types():
     """

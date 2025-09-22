@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="../static/css/meeting.css">
     <link rel="stylesheet" href="../static/css/study.css">
     <link rel="stylesheet" href="../static/css/party_day.css">
-
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
     
@@ -1108,6 +1107,10 @@
                                     <button id="meeting_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
                                 </div>
                             </div>
+                            <!-- 添加三会一课按钮 -->
+                            <button class="dyfz_search_btn" id="add-meeting-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加三会一课</i>         
+                            </button>
                         </div>
                         
                         <div class="dyfz_table_container">
@@ -1119,11 +1122,12 @@
                                         <th>会议类型</th>
                                         <th>会议纪要</th>
                                         <th>提交时间</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="meeting_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="5" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1142,7 +1146,7 @@
             <div id="party-day" class="page-content">
                 <div class="page-header">
                     <h1 class="page-title">主题党日</h1>
-                    <div class="breadcrumb">首页 / 任务管理 / 主题党日</div>
+                    <div class="breadcrumb">首页 / 主题党日</div>
                 </div>
                 
                 <div class="dyfz_development_content">
@@ -1155,6 +1159,10 @@
                                 <input type="text" id="party_day_search_input" placeholder="请输入活动名称查询" />
                                 <button id="party_day_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
                             </div>
+                            <!-- 添加主题党日按钮 -->
+                            <button class="dyfz_search_btn" id="add-party-day-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加主题党日</i>         
+                            </button>
                         </div>
                         <div class="dyfz_table_container">
                             <table class="table">
@@ -1165,11 +1173,12 @@
                                     <th>姓名</th>
                                     <th>心得内容</th>
                                     <th>提交时间</th>
+                                    <th>操作</th>
                                 </tr>
                             </thead>
                                 <tbody id="party_day_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="5" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1226,6 +1235,10 @@
                                     <button id="dfy_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
                                 </div>
                             </div>
+                            <!-- 添加党费记录按钮 -->
+                            <button class="dyfz_search_btn" id="add-fee-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加缴纳记录</i>         
+                            </button>
                         </div>
                         <!-- 图表区域 -->
                         <div class="chart-container">
@@ -1241,11 +1254,12 @@
                                         <th>缴纳金额</th>
                                         <th>提交时间</th>
                                         <th>回执材料</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dfy_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="6" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1318,6 +1332,10 @@
                                     <button id="dyfz_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
                                 </div>
                             </div>
+                            <!-- 添加发展记录按钮 -->
+                            <button class="dyfz_search_btn" id="add-develop-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加发展记录</i>         
+                            </button>
                         </div>
 
                         <div class="dyfz_table_container">
@@ -1330,6 +1348,7 @@
                                         <th>学工号</th>
                                         <th>联系方式</th>
                                         <th>材料说明</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dyfz_table_body">
@@ -1448,7 +1467,11 @@
                                     <button id="review_search_button" class="rw_dyfz_search_btn" style="font-weight: bold;">查询</button>
                                 </div>
                             </div>
-                            <button id="review_refresh_button" class="btn rw_dyfz_refresh_btn">刷新</button>
+                            <!-- 添加民主评议按钮 -->
+                            <button class="dyfz_search_btn" id="add-review-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加民主评议</i>         
+                            </button>
+                            <!-- <button id="review_refresh_button" class="btn rw_dyfz_refresh_btn">刷新</button> -->
                         </div>
                         
                         <div class="rw_dyfz_table_container">
@@ -1457,11 +1480,11 @@
                                     <tr>
                                         <th>序号</th>
                                         <th>被评议人姓名</th>
+                                        <th>所属支部</th>
                                         <th>评议年份</th>
-                                        <th>政治立场(分)</th>
-                                        <th>工作作风(分)</th>
-                                        <th>道德品行(分)</th>
-                                        <th>其他评价</th>
+                                        <th>评议结果</th>
+                                        <th>评议内容</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="review_table_body">
@@ -1821,6 +1844,9 @@
     
     <script src="../static/sdk/pako.js" defer></script>
     <script src="../static/sdk/jquery.min.js" defer></script>
+    <!-- Bootstrap JS -->
+    <script src="../static/sdk/bootstrap.bundle.min.js" defer></script>
+    <script src="../static/js/add_form_record.js" defer></script>
     <script src="../static/sdk/chart.umd.min.js" defer></script>
     <script src="../static/js/home.js" defer></script>
     <script src="../static/js/dashboard.js" defer></script>

@@ -35,7 +35,7 @@ $(document).ready(function() {
     // 加载主题党日数据
     function loadPartyDayData() {
         // 显示加载状态
-        tableBody.html('<tr><td colspan="5" class="dyfz_no_data">正在加载数据...</td></tr>');
+        tableBody.html('<tr><td colspan="6" class="dyfz_no_data">正在加载数据...</td></tr>');
         // 发送请求获取记录
         $.ajax({
             url: URL + `/party_day/get_records`,
@@ -50,11 +50,11 @@ $(document).ready(function() {
                     renderTable();
                     updateStatistics();
                 } else {
-                    tableBody.html('<tr><td colspan="5" class="dyfz_no_data">' + response.msg + '</td></tr>');
+                    tableBody.html('<tr><td colspan="6" class="dyfz_no_data">' + response.msg + '</td></tr>');
                 }
             },
             error: function() {
-                tableBody.html('<tr><td colspan="5" class="dyfz_no_data">加载失败，请稍后再试</td></tr>');
+                tableBody.html('<tr><td colspan="6" class="dyfz_no_data">加载失败，请稍后再试</td></tr>');
             }
         });
     }
@@ -102,7 +102,7 @@ $(document).ready(function() {
         nextPageButton.prop('disabled', currentPage === totalPages);
         // 渲染表格内容
         if (currentRecords.length === 0) {
-            tableBody.html('<tr><td colspan="5" class="dyfz_no_data">暂无数据</td></tr>');
+            tableBody.html('<tr><td colspan="6" class="dyfz_no_data">暂无数据</td></tr>');
             return;
         }
         let tableHtml = '';
@@ -142,6 +142,7 @@ $(document).ready(function() {
                     <td>${userName}</td>
                     <td><span class="party-day-content" title="${fullContent}">${displayContent}</span></td>
                     <td>${submitTime}</td>
+                    <td><button class="pf_detail-btn btn btn-action delete-party-day" data-id="${record.id}">删除</button></td>
                 </tr>
             `;
         });
@@ -150,6 +151,12 @@ $(document).ready(function() {
         $('.party-day-content').click(function() {
             const fullContent = $(this).attr('title');
             showContentModal(fullContent);
+        });
+        
+        // 为删除按钮添加点击事件
+        $('.delete-party-day').click(function() {
+            const recordId = $(this).data('id');
+            deletePartyDayRecord(recordId);
         });
     }
     
@@ -199,6 +206,32 @@ $(document).ready(function() {
             $('#content-modal').remove();
         });
         
+    }
+    
+    // 删除主题党日记录
+    function deletePartyDayRecord(recordId) {
+        // 显示确认对话框
+        if (confirm('确定要删除这条记录吗？删除后将无法恢复。')) {
+            // 发送删除请求
+            $.ajax({
+                url: URL + '/party_day/delete_record',
+                type: 'POST',
+                data: {id: recordId},
+                xhrFields: {withCredentials: true},
+                success: function(response) {
+                    if (response.code === 200) {
+                        alert('删除成功');
+                        // 重新加载数据
+                        loadPartyDayData();
+                    } else {
+                        alert('删除失败：' + response.msg);
+                    }
+                },
+                error: function() {
+                    alert('网络错误，请稍后再试');
+                }
+            });
+        }
     }
     
     // 暴露初始化函数供home.js调用

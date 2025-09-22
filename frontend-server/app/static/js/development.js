@@ -144,11 +144,18 @@ $(document).ready(function() {
                     <td>${record.student_id}</td>
                     <td>${record.contact}</td>
                     <td>${record.description}</td>
+                    <td><button class="pf_detail-btn btn btn-action delete-development" data-id="${record.id}">删除</button></td>
                 </tr>
             `;
         });
         
         tableBody.html(tableHtml);
+        
+        // 为删除按钮添加点击事件
+        $('.delete-development').click(function() {
+            const recordId = $(this).data('id');
+            deleteDevelopmentRecord(recordId);
+        });
         
         // 以表格的第一个对象的政治面貌为准，渲染流程条
         const firstRecord = currentRecords[0];
@@ -215,6 +222,34 @@ $(document).ready(function() {
             if (currentPage < totalPages) {
                 currentPage++;
                 renderTable();
+            }
+        });
+    }
+    
+    // 删除党员发展记录
+    function deleteDevelopmentRecord(recordId) {
+        // 显示确认对话框
+        if (!confirm('确定要删除这条党员发展记录吗？此操作不可撤销。')) {
+            return;
+        }
+        
+        // 发送删除请求
+        $.ajax({
+            url: URL + '/delete_record',
+            xhrFields: {withCredentials: true},
+            type: 'POST',
+            data: {id: recordId},
+            success: function(response) {
+                if (response.code === 200) {
+                    alert('删除成功');
+                    // 重新加载数据
+                    loadDevelopmentRecords();
+                } else {
+                    alert('删除失败：' + response.msg);
+                }
+            },
+            error: function() {
+                alert('网络错误，请稍后再试');
             }
         });
     }

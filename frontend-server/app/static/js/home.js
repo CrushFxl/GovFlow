@@ -1,6 +1,7 @@
 $(document).ready(function() {
     const URL = $('#URL').text();
     window.isForcedProfile = false; // 标记是否强制在档案页面（全局变量）
+    
     // 初始化用户信息
     $.ajax({
         url: URL + "/user/get_nick",

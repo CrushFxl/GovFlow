@@ -25,3 +25,26 @@ def get_party_day_records():
     # 执行查询并返回结果
     records = records.all()
     return jsonify({'code': 200, 'data': [to_json(record) for record in records]})
+
+
+@partyday_bk.route('/delete_record', methods=['POST'])
+def delete_party_day_record():
+    # 获取记录ID
+    record_id = request.form.get('id')
+    if not record_id:
+        return jsonify({'code': 400, 'msg': '缺少记录ID'})
+    
+    try:
+        # 在数据库中查找记录
+        record = FormSubmission.query.get(record_id)
+        if not record:
+            return jsonify({'code': 404, 'msg': '记录不存在'})
+        
+        # 删除记录
+        db.session.delete(record)
+        db.session.commit()
+        
+        return jsonify({'code': 200, 'msg': '删除成功'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'code': 500, 'msg': f'删除失败: {str(e)}'})

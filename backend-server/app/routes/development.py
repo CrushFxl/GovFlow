@@ -117,3 +117,33 @@ def get_all_political_statuses():
         return jsonify({'code': 200, 'data': statuses})
     except Exception as e:
         return jsonify({'code': 500, 'msg': f'获取政治面貌选项失败: {str(e)}'})
+
+
+@development_bk.route('/delete_record', methods=['POST'])
+def delete_development_record():
+    """
+    删除党员发展记录
+    参数:
+        id: 记录ID
+    返回:
+        删除结果
+    """
+    try:
+        # 获取请求参数
+        record_id = request.form.get('id')
+        if not record_id:
+            return jsonify({'code': 400, 'msg': '缺少记录ID', 'data': {}})
+        
+        # 查找记录
+        record = FormSubmission.query.filter_by(id=record_id, form_id=1).first()
+        if not record:
+            return jsonify({'code': 404, 'msg': '记录不存在', 'data': {}})
+        
+        # 删除记录
+        db.session.delete(record)
+        db.session.commit()
+        
+        return jsonify({'code': 200, 'msg': '删除成功', 'data': {}})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'code': 500, 'msg': str(e), 'data': {}})

@@ -29,7 +29,7 @@
 .dyfz_user_icon {
     width: 32px;
     height: 32px;
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
     border-radius: 50%;
     margin-right: 10px;
     position: relative;
@@ -58,7 +58,7 @@
 .dyfz_search_btn {
     height: 40px;
     padding: 0 20px;
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
     color: white;
     border: none;
     border-radius: 20px;
@@ -122,25 +122,25 @@
 .dyfz_progress_line {
     flex: 1;
     height: 3px;
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
     position: relative;
     z-index: 1;
 }
 
 /* 激活状态样式 */
 .dyfz_progress_step.active .dyfz_step_icon {
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
     color: white;
-    border-color: #c12c1f;
+    border-color: var(--primary-red);
 }
 
 .dyfz_progress_step.active .dyfz_step_label {
-    color: #c12c1f;
+    color: var(--primary-red);
     font-weight: bold;
 }
 
 .dyfz_progress_step.active ~ .dyfz_progress_line {
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
 }
 
 .dyfz_progress_step ~ .dyfz_progress_step .dyfz_step_icon {
@@ -154,9 +154,9 @@
 
 /* 目标用户政治面貌高亮样式 */
 .dyfz_progress_step.highlight .dyfz_step_icon {
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
     color: white;
-    border-color: #c12c1f;
+    border-color: var(--primary-red);
     box-shadow: 0 0 0 4px rgba(193, 44, 31, 0.2);
 }
 
@@ -196,7 +196,7 @@
 
 .dyfz_refresh_btn {
     padding: 8px 20px;
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
     color: white;
     border: none;
     border-radius: 4px;
@@ -206,7 +206,7 @@
 }
 
 .dyfz_refresh_btn:hover {
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
 }
 
 /* 表格样式 */
@@ -259,7 +259,7 @@
 .dyfz_page_btn {
     padding: 8px 16px;
     margin: 0 10px;
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
     color: white;
     border: none;
     border-radius: 4px;
@@ -269,7 +269,7 @@
 }
 
 .dyfz_page_btn:hover:not(:disabled) {
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
 }
 
 .dyfz_page_btn:disabled {
@@ -283,7 +283,7 @@
 }
 
 /* 响应式设计 */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     .dyfz_progress_bar {
         flex-direction: column;
         align-items: flex-start;

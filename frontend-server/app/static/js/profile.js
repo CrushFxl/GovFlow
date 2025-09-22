@@ -446,6 +446,14 @@ $(document).ready(function() {
             // 更新页面标题
             $('.page_title').text('党员列表');
         });
+        
+        // 根据localStorage中的admin值设置默认显示的选项卡
+        const admin = localStorage.getItem('admin');
+        if (admin === '1') {
+            // admin为1时，默认显示党员列表
+            toggleMembersBtn.click();
+        }
+        // 否则保持默认（显示个人信息）
     }
 
     // 初始化党员列表

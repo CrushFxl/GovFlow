@@ -103,7 +103,7 @@ $(document).ready(function() {
                 <td>${item.title || '-'}</td>
                 <td>${item.description || '-'}</td>
                 <td>${item.created_time || '-'}</td>
-                <td>${item.partners || '-'}</td>
+                <td>${item.frequency || '-'}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 <td>
                     ${actionButtons}
@@ -123,7 +123,25 @@ $(document).ready(function() {
 
     // 添加任务按钮点击事件
     document.getElementById('add-activity').addEventListener('click', function() {
-        showActivityForm({}, false); // 添加模式，显示确认按钮
+        // 获取用户profile信息，检查admin_status权限
+        $.ajax({
+            url: URL + '/profile/get',
+            xhrFields: {withCredentials: true},
+            type: 'GET',
+            dataType: 'json',
+            success: function(resp) {
+                if (resp.code === 1000 && resp.data && resp.data.admin_status === 0) {
+                    // 普通用户（admin_status=0），提示拒绝创建任务
+                    alert('抱歉，您没有创建任务的权限。请联系管理员获取权限。');
+                } else {
+                    // 管理员用户或未登录用户，显示创建任务表单
+                    showActivityForm({}, false); // 添加模式，显示确认按钮
+                }
+            },
+            error: function() {
+                alert('获取用户信息失败，请稍后再试。');
+            }
+        });
     });
 
     // 绑定表格按钮事件
@@ -155,7 +173,6 @@ $(document).ready(function() {
                 const id = this.getAttribute('data-id');
                 const type = this.getAttribute('data-type');
                 if (confirm(`确定要将此任务标记为已完成吗？`)) {
-                    showLoading();
                     $.ajax({
                         url: URL + "/activity/mark_complete",
                         xhrFields: {withCredentials: true},
@@ -253,6 +270,7 @@ $(document).ready(function() {
     function confirmHandler() {        
         // 从表单中获取用户修改后的数据
         const formData = {
+            uid: localStorage.getItem('uid'),
             title: document.getElementById('form-title').value,
             description: document.getElementById('activity-form-description').value,
             organizations: document.getElementById('form-organizations').value.split(',').map(item => item.trim()).filter(item => item),
@@ -263,7 +281,8 @@ $(document).ready(function() {
             start_time: document.getElementById('form-start-time').value,
             end_date: document.getElementById('form-date').value,
             end_time: document.getElementById('form-end-time').value,
-            location: document.getElementById('form-location').value
+            location: document.getElementById('form-location').value,
+            frequency: parseInt(document.getElementById('form-frequency').value)
         };
         
         // 保留原始数据中的id和type（如果存在）
@@ -285,9 +304,6 @@ $(document).ready(function() {
                     fetchScheduleData();
                     closeModal();
                 }
-            },
-            error: function () {
-                alert("连接失败：无法连接至服务器，请联系站长或稍后再试。");
             }
         });
     }
@@ -309,6 +325,8 @@ $(document).ready(function() {
             (Array.isArray(activityData.organizations) ? activityData.organizations.join(', ') : activityData.organizations) : '';
         document.getElementById('form-partners').value = activityData.partners ? 
             (Array.isArray(activityData.partners) ? activityData.partners.join(', ') : activityData.partners) : '';
+        // 设置执行频次
+        document.getElementById('form-frequency').value = activityData.frequency !== undefined ? activityData.frequency : '0';
         // 设置发起人
         const currentUserNick = document.getElementById('username') ? document.getElementById('username').textContent : '当前用户';
         document.getElementById('form-initiator').value = activityData.creator || currentUserNick;

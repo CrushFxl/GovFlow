@@ -1,32 +1,4 @@
 /* 民主评议页面样式 */
-.rw_review_charts_container {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-    flex-wrap: wrap;
-}
-
-.rw_chart-container {
-    width: 48%;
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-}
-
-.rw_chart-container h3 {
-    color: #c12c1f;
-    margin-bottom: 15px;
-    font-size: 16px;
-    text-align: center;
-}
-
-#radarChart,
-#lineChart {
-    width: 100% !important;
-    height: 300px !important;
-}
 
 /* 表格样式 */
 .rw_dyfz_table_area {
@@ -81,7 +53,7 @@
 }
 
 .rw_dyfz_search_btn {
-    background: #c12c1f;
+    background: var(--primary-red);
     color: white;
     border: none;
     padding: 0 15px;
@@ -170,7 +142,7 @@
 }
 
 /* 响应式调整 */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     .rw_review_charts_container {
         flex-direction: column;
     }

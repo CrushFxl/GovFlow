@@ -1,7 +1,7 @@
 $(document).ready(function() {
     const URL = $('#URL').text();
     window.isForcedProfile = false; // 标记是否强制在档案页面（全局变量）
-
+    
     // 初始化用户信息
     $.ajax({
         url: URL + "/user/get_nick",
@@ -14,7 +14,15 @@ $(document).ready(function() {
                 $('#username').text(name);
                 // 获取解密后的uid
                 const uid = resp.data['uid'];
+                const admin = resp.data['admin'];
+                const coin = resp.data['coin'];
+                localStorage.setItem('coin', coin);
                 localStorage.setItem('uid', uid);
+                // 更新UI上的coin数量显示
+                updateCoinDisplay();
+                if(admin === 1){
+                    localStorage.setItem('admin', 1);
+                }
                 if (uid) {
                     // 更新iframe URL，添加编码后的uid参数
                     updateIframeWithUid(uid);
@@ -75,7 +83,6 @@ $(document).ready(function() {
                 // 检查URL是否已经包含参数
                 const separator = originalSrc.includes('?') ? '&' : '?';
                 iframe.src = originalSrc + separator + 'uid=' + encodedUid;
-                console.log('Updated iframe URL with uid parameter');
             }
         } catch (error) {
             console.error('Error updating iframe with uid:', error);
@@ -85,7 +92,13 @@ $(document).ready(function() {
     // 页面切换渲染
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function(e) {
+            // 如果点击的是小三角图标，则阻止页面切换，只处理折叠/展开
+            if (e.target.classList.contains('menu-toggle-icon')) {
+                e.stopPropagation();
+                return;
+            }
+            
             // 获取要显示的页面ID
             const pageId = this.getAttribute('data-page');
             // 如果被强制在档案页面且尝试离开档案页面，则阻止切换
@@ -105,8 +118,36 @@ $(document).ready(function() {
             // 显示当前选中的页面
             const activePage = document.getElementById(pageId);
             activePage.classList.add('active');
+            
+            // 控制大模型管理和知识库管理页面的padding
+            const contentElement = document.querySelector('.content');
+            if (pageId === 'llm_manage' || pageId === 'knowledge_manage' || pageId === 'statistics') {
+                contentElement.classList.add('no-padding');
+            } else {
+                contentElement.classList.remove('no-padding');
+            }
             // 调用对应模块的初始化函数
             initModule(pageId);
+        });
+    });
+    
+    // 为菜单折叠/展开图标添加点击事件
+    document.querySelectorAll('.menu-toggle-icon').forEach(icon => {
+        icon.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            const parentMenuItem = this.closest('.parent-menu');
+            const subMenu = parentMenuItem.nextElementSibling;
+            
+            // 切换折叠/展开状态
+            parentMenuItem.classList.toggle('collapsed');
+            subMenu.classList.toggle('collapsed');
+        });
+    });
+    
+    // 确保子菜单项点击时不会触发父菜单项的点击事件
+    document.querySelectorAll('.sub-menu .menu-item').forEach(subItem => {
+        subItem.addEventListener('click', function(e) {
+            e.stopPropagation();
         });
     });
 
@@ -121,6 +162,7 @@ $(document).ready(function() {
             success: function (resp) {
                 window.location.replace('/login');
                 localStorage.removeItem('uid');
+                localStorage.removeItem('admin');
             },
             error: function () {
                 alert("退出登陆失败：无法连接至服务器。");
@@ -186,11 +228,23 @@ $(document).ready(function() {
                     reviewModule.init();
                 }
                 break;
+            case 'party-day':
+                if (window.partyDayModule && window.partyDayModule.init) {
+                    $('.page-title').text('主题党日');
+                    partyDayModule.init();
+                }
+                break;
             case 'statistics':
                 if (window.statisticsModule && window.statisticsModule.init) {
                     $('.page-title').text('统计分析');
                     statisticsModule.init();
                 }
+                break;
+            case 'llm_manage':
+                $('.page-title').text('大模型管理');
+                break;
+            case 'knowledge_manage':
+                $('.page-title').text('知识库管理');
                 break;
             case 'settings':
                 if (window.settingsModule && window.settingsModule.init) {
@@ -204,6 +258,21 @@ $(document).ready(function() {
     }
     const activeMenuItem = document.querySelector('.menu-item.active');
     initModule(activeMenuItem.getAttribute('data-page'));
+
+    // 根据localStorage中的admin值设置任务管理菜单的展开/折叠状态
+    const adminStatus = localStorage.getItem('admin');
+    const parentMenuItem = document.querySelector('.menu-item.parent-menu');
+    const subMenu = parentMenuItem.nextElementSibling;
+    
+    if (adminStatus === '1') {
+        // 管理员用户，自动折叠任务管理菜单
+        parentMenuItem.classList.add('collapsed');
+        subMenu.classList.add('collapsed');
+    } else {
+        // 非管理员用户，默认展开任务管理菜单
+        parentMenuItem.classList.remove('collapsed');
+        subMenu.classList.remove('collapsed');
+    }
 });
 
 
@@ -275,4 +344,14 @@ function showLoading(text = '加载中') {
 // 隐藏加载中函数
 function hideLoading() {
     $('#loading-mask').remove();
+}
+
+// 更新学点显示
+function updateCoinDisplay() {
+    // 从localStorage中读取coin数据
+    const coin = localStorage.getItem('coin');
+    // 更新UI上的coin数量显示
+    if (coin !== null) {
+        $('#coin-amount').text(coin);
+    }
 }

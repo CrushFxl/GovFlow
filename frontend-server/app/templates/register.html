@@ -20,8 +20,13 @@
         }
 
         body {
+            /* 设置登录背景 */
+            background-image: url('../static/img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
             font-family: "Microsoft YaHei", sans-serif;
-            background-color: #f5f5f5;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -35,19 +40,22 @@
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-left: 860px;
             overflow: hidden;
         }
 
         .register-header {
-            background-color: var(--primary-red);
-            color: white;
-            padding: 20px;
-            text-align: center;
+            background-color: #fff;
+            color: #444;
+            padding: 20px 20px 0 20px;
+            text-align: left;
         }
 
-        .register-header h1 {
-            font-size: 1.8em;
+        .register-header p {
+            font-size: 1.3em;
             margin-bottom: 5px;
+            margin-left: 8px;
+            font-weight: bold;
         }
 
         .register-header a{
@@ -60,7 +68,7 @@
         }
 
         .register-body {
-            padding: 30px;
+            padding: 20px 30px 30px 30px;
         }
 
         .form-group {
@@ -173,8 +181,8 @@
     <p id="URL" style="display: none">{{URL}}</p>
     <div class="register-container">
         <div class="register-header">
-            <h1><span class="party-icon">★</span>智慧党建系统</h1>
-            <p>请注册您的账号</p>
+            <p>智慧党建系统</p>
+            <div class="header-divider" style="height: 2px; width: 40px; background-color: var(--primary-red); margin: 8px 8px 0 10px;"></div>
         </div>
 
         <div class="register-body">

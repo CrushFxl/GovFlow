@@ -2,13 +2,16 @@ from flask import Blueprint, request, jsonify
 import json
 from datetime import datetime
 from app.models import db
+from app.models.Profile import Profile
 from app.models.Form import FormSubmission
+from app.models.Branch import Branch
 
 review_bk = Blueprint('review', __name__)
 
 @review_bk.route('/get_review_records', methods=['GET'])
 def get_review_records():
     # 获取请求参数
+    uid = request.args.get('uid', '')
     keyword = request.args.get('keyword', '').strip()
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', 10, type=int)
@@ -39,13 +42,14 @@ def get_review_records():
         if submission.created_at:
             year = submission.created_at.strftime('%Y')
         # 构建记录对象
+        profile = Profile.query.filter_by(uid=uid).first()
+        party_branch_name = Branch.query.filter_by(value=profile.party_branch).first().name
         record = {
             'id': submission.id,
             'name': data.get('被评议人姓名', ''),
-            'political_score': data.get('（1-5评分）政治立场和理想信念', ''),
-            'work_score': data.get('（1-5评分）工作作风和履职尽责', ''),
-            'moral_score': data.get('（1-5评分）道德品行和生活作风', ''),
-            'other_comments': data.get('你对该同志其他评价', ''),
+            'branch': party_branch_name,
+            'other_comments': data.get('该同志的评价', ''),
+            'result': data.get('评议结果', '合格'),
             'year': year,
             'created_at': submission.created_at.strftime('%Y-%m-%d %H:%M:%S') if submission.created_at else ''
         }
@@ -70,3 +74,41 @@ def get_review_records():
             'page_size': page_size
         }
     })
+
+@review_bk.route('/delete_review_record', methods=['POST'])
+def delete_review_record():
+    try:
+        # 获取记录ID
+        record_id = request.form.get('id')
+        
+        # 验证参数
+        if not record_id:
+            return jsonify({
+                'code': 400,
+                'message': '缺少记录ID'
+            })
+        
+        # 查找记录
+        record = FormSubmission.query.filter_by(id=record_id, form_id=3).first()
+        
+        if not record:
+            return jsonify({
+                'code': 404,
+                'message': '记录不存在'
+            })
+        
+        # 删除记录
+        db.session.delete(record)
+        db.session.commit()
+        
+        return jsonify({
+            'code': 200,
+            'message': '删除成功'
+        })
+    except Exception as e:
+        # 发生错误时回滚事务
+        db.session.rollback()
+        return jsonify({
+            'code': 500,
+            'message': '删除失败：' + str(e)
+        })

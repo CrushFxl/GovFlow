@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from app.models import db
 from app.models.Branch import Branch
 from app.models.Profile import Profile
-from app.models.Form import Form, FormControl
+from app.models.Form import Form, FormControl, FormSubmission
 from flask import Blueprint, jsonify, request
 
 import json
@@ -47,7 +47,7 @@ def get_form_list():
 @query_bk.route('/form_preview/<int:form_id>', methods=['GET'])
 def form_preview(form_id):
     """
-    获取表单预览数据
+    获取表单基础预览数据
     参数：
     - form_id: 表单ID
     """
@@ -98,6 +98,77 @@ def form_preview(form_id):
     except Exception as e:
         return jsonify({'code': -1, 'message': f'查询失败: {str(e)}', 'data': None})
 
+
+@query_bk.route('/form_get', methods=['GET'])
+def form_get():
+    """
+    获取指定表单ID的表格结构，用于前端渲染
+    参数：
+    - form_id: 表单ID
+    """
+    # 获取请求参数
+    form_id = int(request.args.get('form_id'))    
+    form = Form.query.filter_by(id=form_id).first()
+    # 查询表单控件
+    controls = FormControl.query.filter_by(form_id=form_id).order_by(FormControl.order).all()
+    # 组装返回数据
+    data = {}
+    for c in controls:
+        record = {}
+        record['type'] = c.type
+        record['label'] = c.label
+        record['placeholder'] = c.placeholder
+        record['required'] = c.required
+        record['default_value'] = c.default_value
+        # 如果是单选题，增加options列表
+        if c.type == 'select' or c.type == 'radio' or c.type == 'checkbox':
+            record['options'] = json.loads(c.options) if c.options else []
+        data[c.id] = record
+    return jsonify({'code': 0, 'message': 'success', 'data': data})
+
+@query_bk.route('/submit_form_data', methods=['POST'])
+def submit_form_data():
+    """
+    提交表单数据到FormSubmission表
+    参数：
+    - form_id: 表单ID
+    - form_data: 表单数据（JSON格式字符串）
+    - uid: 用户ID
+    """
+    # 获取请求参数
+    form_id = int(request.form.get('form_id'))
+    form_data_str = request.form.get('form_data')
+    user_id = int(request.form.get('uid'))
+    # 验证参数
+    if not form_id or not form_data_str or not user_id:
+        return jsonify({'code': 400, 'message': '参数不完整', 'data': None})
+    # 检查表单是否存在
+    form = Form.query.filter_by(id=form_id).first()
+    if not form:
+        return jsonify({'code': 404, 'message': '表单不存在', 'data': None})
+    # 解析表单数据
+    try:
+        form_data = json.loads(form_data_str)
+    except json.JSONDecodeError:
+        return jsonify({'code': 400, 'message': '表单数据格式错误', 'data': None})
+    
+    # # 验证必填字段
+    # controls = FormControl.query.filter_by(form_id=form_id, required=True).all()
+    # missing_fields = []
+    # for control in controls:
+    #     if control.label not in form_data or not form_data[control.label]:
+    #         missing_fields.append(control.label)
+    # if missing_fields:
+    #     return jsonify({'code': 400, 'message': f'缺少必填字段：{', '.join(missing_fields)}', 'data': None})
+    
+    submission = FormSubmission(
+        form_id=form_id,
+        user_id=user_id,
+        data=json.dumps(form_data)
+    )
+    db.session.add(submission)
+    db.session.commit()
+    return jsonify({'code': 200, 'message': '提交成功', 'data': {'id': submission.id}})
 
 @query_bk.route('/get_all_party_members', methods=['GET'])
 def get_all_party_members():

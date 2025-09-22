@@ -1,10 +1,14 @@
 import json
 import os
+import datetime
 from datetime import datetime
 from app.models import db
 from app.models.Task import Task
 from app.models.Notice import Notice
 from app.models.User import User
+from app.models.Branch import Branch
+from app.models.Profile import Profile
+import uuid as Uuid
 from flask import Blueprint, request, session, jsonify
 
 
@@ -18,6 +22,17 @@ def truncate_text(text, max_length=15):
     if isinstance(text, str) and len(text) > max_length:
         return text[:max_length] + '...'
     return text
+
+# 任务频率映射函数
+def get_frequency_text(frequency):
+    frequency_map = {
+        0: '一次性',
+        1: '每周一次',
+        2: '每月一次',
+        3: '每季度一次',
+        4: '每年一次'
+    }
+    return frequency_map.get(frequency, '未知')
 
 
 # 任务下发页面表格拉取接口
@@ -47,7 +62,8 @@ def query_tasks():
                 'start_time': task.start_time,
                 'end_date': task.end_date,
                 'end_time': task.end_time,
-                'location': task.location
+                'location': task.location,
+                'frequency': get_frequency_text(task.frequency)
             })
         
         # 处理Notice数据
@@ -149,6 +165,53 @@ def delete_item():
         })
 
 
+@activity_bk.route('/save', methods=['POST'])
+def save_task():
+    data = request.json.get('data', {})
+    # 获取表单数据
+    uid = int(data.get('uid'))
+    item_id = data.get('id')
+    title = data.get('title')
+    description = data.get('description')
+    organizations = data.get('organizations', [])
+    partners = data.get('partners', [])
+    initiator = data.get('initiator')
+    start_date = data.get('start_date')
+    start_time = data.get('start_time')
+    end_date = data.get('end_date')
+    end_time = data.get('end_time')
+    location = data.get('location')
+    frequency = data.get('frequency', 0)  # 默认频率为一次性
+
+    # 检查必要参数
+    if not title or not initiator:
+        return jsonify({'code': 1001, 'message': '标题和发起人参数不能为空'})
+
+    # 确定下一步审核人
+    my_profile = Profile.query.filter_by(uid=uid).first()
+    my_branch = my_profile.party_branch
+    admin = Profile.query.filter_by(admin_status=1, party_branch=my_branch).first()
+
+    new_task = Task(
+        uuid=str(Uuid.uuid4()),
+        title=title,
+        description=description,
+        organizations=organizations,
+        partners=partners,
+        created_uid=initiator,
+        start_date=start_date,
+        start_time=start_time,
+        end_date=end_date,
+        end_time=end_time,
+        location=location,
+        frequency=frequency,
+        status=1,
+        created_time=datetime.now().strftime('%Y-%m-%d %H:%M'),
+        next_uid=uid if my_profile.admin_status else admin.uid
+    )
+    db.session.add(new_task)
+    db.session.commit()
+    return jsonify({'code': 1000, 'message': '保存成功'})
 
 
 

@@ -13,9 +13,13 @@
     <link rel="stylesheet" href="../static/css/fee.css">
     <link rel="stylesheet" href="../static/css/review.css">
     <link rel="stylesheet" href="../static/css/meeting.css">
-
+    <link rel="stylesheet" href="../static/css/study.css">
+    <link rel="stylesheet" href="../static/css/party_day.css">
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
+    
+    <!-- 主题切换脚本 -->
+    <script src="../static/js/theme.js"></script>
 
     <style>
         :root {
@@ -62,6 +66,8 @@
 
         .nav-menu {
             display: flex;
+            justify-content: center;
+            align-items: center;
             list-style: none;
         }
 
@@ -158,6 +164,51 @@
         .menu-item i {
             color: var(--gold);
             margin-right: 10px;
+        }
+        
+        /* 父菜单项样式 */
+        .parent-menu {
+            position: relative;
+        }
+        
+        /* 菜单折叠/展开图标样式 */
+        .menu-toggle-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--primary-red);
+            font-size: 14px;
+            padding: 8px;
+            transition: transform 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 菜单展开状态下的图标旋转 */
+        .parent-menu.collapsed .menu-toggle-icon {
+            transform: translateY(-50%) rotate(-90deg);
+        }
+        
+        /* 子菜单容器样式 */
+        .sub-menu {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        /* 子菜单折叠状态 */
+        .sub-menu.collapsed {
+            max-height: 0;
+        }
+        
+        /* 子菜单项样式 */
+        .sub-menu .menu-item {
+            padding-left: 20px;
         }
 
         /* 主内容区 */
@@ -318,6 +369,15 @@
         .page-content.active {
             display: block;
         }
+        
+        /* 大模型管理页面特殊样式 - 取消外层padding，使嵌入页面更沉浸 */
+        .content.no-padding {
+            padding: 0 !important;
+        }
+        
+        .content.no-padding #llm_manage {
+            margin: 0 !important;
+        }
 
         .placeholder-content {
             display: flex;
@@ -383,7 +443,7 @@
     }
 
     .btn-delete {
-        background-color: #dc3545;
+        background-color: var(--primary-red);
         color: white;
     }
 
@@ -445,13 +505,86 @@
     #exit{
         cursor: pointer;
     }
+    
+    /* 菜单标题样式 */
+    .menu-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    
+    /* 菜单切换按钮样式 */
+    .menu-toggle-btn {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    /* 侧边栏折叠样式 */
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+    
+    /* 响应式设计：移动端适配 */
+    @media (max-width: 1000px) {
+        /* 保持菜单切换按钮常驻显示 */
+        .menu-toggle-btn {
+            display: flex;
+        }
+        
+        /* 侧边栏默认折叠 */
+        .sidebar {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            height: 100%;
+            z-index: 1000;
+            background-color: #fff;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        /* 侧边栏展开状态 */
+        .sidebar.expanded {
+            left: 0;
+        }
+        
+        /* 侧边栏折叠状态 */
+        .sidebar.collapsed {
+            left: -100%;
+        }
+        
+        /* 主内容区自适应 */
+        .content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* 移动端隐藏未读消息、待办事项、我发布的和党样式头像 */
+        .nav-menu {
+            display: none;
+        }
+        
+        .user-avatar {
+            display: none;
+        }
+    }
     </style>
 </head>
 <body>
     <p id="URL" style="display: none">{{URL}}</p>
     <!-- 顶部导航栏 -->
     <nav class="top-nav">
-        <div class="logo">智慧党建系统</div>
+        <a href="#" class="logo-link"><img src="../static/img/logo-lc-white.png" alt="智慧党建AI智能体系统" class="logo-img" style="height: 40px; margin: 5px 5px 0 0;"></a>
+        <div class="logo">党建AI智能体系统</div>
         <ul class="nav-menu">
             <li><a href="#">未读消息</a></li>
             <li><a href="#">待办事项</a></li>
@@ -460,7 +593,11 @@
         <div class="user-info">
             <div class="user-avatar">党</div>
             <span id="username"></span>
-            <span id="exit" style="margin-left: 30px">退出登录</span>
+            <div id="coin-display" class="coin-display" style="margin-left: 20px; margin-right: 20px; display: flex; align-items: center; background-color: rgba(255, 255, 255, 0.15); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                <span class="coin-icon" style="font-size: 16px; margin:0 5px 2px 0;">⭐</span>
+                <span id="coin-amount" style="font-weight: bold;">0</span>
+            </div>
+            <span id="exit" style="margin-left: 10px">退出登录</span>
         </div>
     </nav>
 
@@ -468,50 +605,70 @@
     <div class="main-container">
         <!-- 左侧菜单栏 -->
         <aside class="sidebar">
-            <div class="menu-title">功能菜单</div>
+            <div class="menu-title">
+                <span>功能菜单</span>
+                <button class="menu-toggle-btn" id="menuToggleBtn">
+                    <span class="menu-icon">☰</span>
+                </button>
+            </div>
             <ul class="menu-list">
                 <li class="menu-item active" data-page="dashboard">
-                    <img src="../static/img/icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">AI工作台</p>
                 </li>
                 <li class="menu-item" data-page="cloud-form">
-                    <img src="../static/img/icon/zhinengbiaodan.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/zhinengbiaodan.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">智慧表单</p>
                 </li>
                 <li class="menu-item" data-page="profile">
-                    <img src="../static/img/icon/dangyuanxinxi.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/dangyuanxinxi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">党员信息</p>
                 </li>
-                <li class="menu-item" data-page="activity">
-                    <img src="../static/img/icon/renwuguanli.png" style="width: 45px; height: 45px;">
+                <li class="menu-item parent-menu" data-page="activity">
+                    <img src="../static/img/red-icon/renwuguanli.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">任务管理</p>
+                    <span class="menu-toggle-icon">▼</span>
                 </li>
-                <li class="menu-item" data-page="meeting" style="margin-left: 20px;">
-                    <img src="../static/img/icon/sanhuiyike.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">三会一课</p>
-                </li>
-                <li class="menu-item" data-page="fee" style="margin-left: 20px;">
-                    <img src="../static/img/icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">党费管理</p>
-                </li>
-                <li class="menu-item" data-page="development" style="margin-left: 20px;">
-                    <img src="../static/img/icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">党员发展</p>
-                </li>
-                <li class="menu-item" data-page="review" style="margin-left: 20px;">
-                    <img src="../static/img/icon/minzhupingyi.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">民主评议</p>
-                </li>
+                <div class="sub-menu">
+                    <li class="menu-item" data-page="party-day" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/sanhuiyike.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">主题党日</p>
+                    </li>
+                    <li class="menu-item" data-page="meeting" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/sanhuiyike.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">三会一课</p>
+                    </li>
+                    <li class="menu-item" data-page="fee" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">党费管理</p>
+                    </li>
+                    <li class="menu-item" data-page="development" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">党员发展</p>
+                    </li>
+                    <li class="menu-item" data-page="review" style="margin-left: 20px;">
+                        <img src="../static/img/red-icon/minzhupingyi.png" style="width: 45px; height: 45px;">
+                        <p style="margin-top: 12px;">民主评议</p>
+                    </li>
+                </div>
                 <li class="menu-item" data-page="study">
-                    <img src="../static/img/icon/xuexijiaoyu.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/xuexijiaoyu.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">学习教育</p>
                 </li>
                 <li class="menu-item" data-page="statistics">
-                    <img src="../static/img/icon/tongjifenxi.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/tongjifenxi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">统计分析</p>
                 </li>
+                <li class="menu-item" data-page="llm_manage">
+                    <img src="../static/img/red-icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">大模型管理</p>
+                </li>
+                <li class="menu-item" data-page="knowledge_manage">
+                    <img src="../static/img/red-icon/AIgongzuotai.png" style="width: 45px; height: 45px;">
+                    <p style="margin-top: 12px;">知识库管理</p>
+                </li>
                 <li class="menu-item" data-page="settings">
-                    <img src="../static/img/icon/xitongshezhi.png" style="width: 45px; height: 45px;">
+                    <img src="../static/img/red-icon/xitongshezhi.png" style="width: 45px; height: 45px;">
                     <p style="margin-top: 12px;">系统设置</p>
                 </li>
             </ul>
@@ -524,6 +681,26 @@
                 <iframe
 
                     src="{{ iframe_url_param }}"
+                    style="width: 100%; height: 100%; min-height: 700px"
+                    frameborder="0"
+                    allow="microphone">
+                </iframe>
+            </div>
+
+            <!-- 大模型管理页面 -->
+            <div id="llm_manage" class="page-content">
+                <iframe
+                    src="{{ iframe_url_llm_manage_param }}"
+                    style="width: 100%; height: 100%; min-height: 700px"
+                    frameborder="0"
+                    allow="microphone">
+                </iframe>
+            </div>
+
+            <!-- 知识库管理页面 -->
+            <div id="knowledge_manage" class="page-content">
+                <iframe
+                    src="{{ iframe_url_knowledge_manage_param }}"
                     style="width: 100%; height: 100%; min-height: 700px"
                     frameborder="0"
                     allow="microphone">
@@ -556,11 +733,11 @@
                     }
                     
                     .view-toggle .btn-outline:hover {
-                        color: #c12c1f;
+                        color: var(--primary-red);
                     }
                     
                     .view-toggle .btn-outline.active {
-                        background-color: #c12c1f;
+                        background-color: var(--primary-red);
                         color: #fff;
                     }
                 </style>
@@ -779,9 +956,9 @@
                         <thead>
                             <tr>
                                 <th>任务名称</th>
+                                <th>任务描述</th>
                                 <th>时间</th>
-                                <th>地点</th>
-                                <th>参与人员</th>
+                                <th>执行频次</th>
                                 <th>任务状态</th>
                                 <th>操作</th>
                             </tr>
@@ -914,7 +1091,7 @@
                                 <option value="支部党员大会">支部党员大会</option>
                                 <option value="支部委员会">支部委员会</option>
                                 <option value="党小组会">党小组会</option>
-                                <option value="团课">团课</option>
+                                <option value="党课">党课</option>
                             </select>
                             <button id="meeting_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
                             
@@ -930,6 +1107,10 @@
                                     <button id="meeting_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
                                 </div>
                             </div>
+                            <!-- 添加三会一课按钮 -->
+                            <button class="dyfz_search_btn" id="add-meeting-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加三会一课</i>         
+                            </button>
                         </div>
                         
                         <div class="dyfz_table_container">
@@ -941,11 +1122,12 @@
                                         <th>会议类型</th>
                                         <th>会议纪要</th>
                                         <th>提交时间</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="meeting_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="5" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -955,6 +1137,57 @@
                             <button id="meeting_prev_page" class="dyfz_page_btn" disabled>上一页</button>
                             <span id="meeting_page_info">第 <span id="meeting_current_page">1</span> 页，共 <span id="meeting_total_pages">1</span> 页</span>
                             <button id="meeting_next_page" class="dyfz_page_btn" disabled>下一页</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主题党日页面 -->
+            <div id="party-day" class="page-content">
+                <div class="page-header">
+                    <h1 class="page-title">主题党日</h1>
+                    <div class="breadcrumb">首页 / 主题党日</div>
+                </div>
+                
+                <div class="dyfz_development_content">
+                    <!-- 筛选和表格区域 -->
+                    <div class="dyfz_table_area">
+                        <div class="dyfz_filter_area">
+                            <!-- 用户查询区域 -->
+                            <div class="dyfz_search_box">
+                                <div class="dyfz_user_icon"></div>
+                                <input type="text" id="party_day_search_input" placeholder="请输入活动名称查询" />
+                                <button id="party_day_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
+                            </div>
+                            <!-- 添加主题党日按钮 -->
+                            <button class="dyfz_search_btn" id="add-party-day-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加主题党日</i>         
+                            </button>
+                        </div>
+                        <div class="dyfz_table_container">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>活动名称</th>
+                                    <th>姓名</th>
+                                    <th>心得内容</th>
+                                    <th>提交时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                                <tbody id="party_day_table_body">
+                                    <!-- 表格内容将通过JavaScript动态加载 -->
+                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页控件 -->
+                        <div class="dyfz_pagination">
+                            <button id="party_day_prev_page" class="dyfz_page_btn" disabled>上一页</button>
+                            <span id="party_day_page_info">第 <span id="party_day_current_page">1</span> 页，共 <span id="party_day_total_pages">1</span> 页</span>
+                            <button id="party_day_next_page" class="dyfz_page_btn" disabled>下一页</button>
                         </div>
                     </div>
                 </div>
@@ -1002,6 +1235,10 @@
                                     <button id="dfy_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
                                 </div>
                             </div>
+                            <!-- 添加党费记录按钮 -->
+                            <button class="dyfz_search_btn" id="add-fee-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加缴纳记录</i>         
+                            </button>
                         </div>
                         <!-- 图表区域 -->
                         <div class="chart-container">
@@ -1017,11 +1254,12 @@
                                         <th>缴纳金额</th>
                                         <th>提交时间</th>
                                         <th>回执材料</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dfy_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="6" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1094,6 +1332,10 @@
                                     <button id="dyfz_search_button" class="dyfz_search_btn" style="font-weight: bold;">查询</button>
                                 </div>
                             </div>
+                            <!-- 添加发展记录按钮 -->
+                            <button class="dyfz_search_btn" id="add-develop-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加发展记录</i>         
+                            </button>
                         </div>
 
                         <div class="dyfz_table_container">
@@ -1106,6 +1348,7 @@
                                         <th>学工号</th>
                                         <th>联系方式</th>
                                         <th>材料说明</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dyfz_table_body">
@@ -1131,7 +1374,78 @@
                     <h1 class="page-title">学习教育</h1>
                     <div class="breadcrumb">首页 / 学习教育</div>
                 </div>
-                <div class="placeholder-content">F</div>
+                
+                <div class="study-content">
+                    <div style="display: flex; flex-direction: row; justify-content:space-around;">
+                        <!-- 轮播图区域 - 保持在顶部 -->
+                        <div class="carousel-container">
+                            <div class="carousel" id="news-carousel">
+                                <!-- 轮播项将通过JavaScript动态加载 -->
+                                <div class="carousel-item active">
+                                    <img alt="轮播图">
+                                    <div class="carousel-caption">
+                                        <h3>新闻标题加载中...</h3>
+                                        <p>新闻描述加载中...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="carousel-controls">
+                                <button class="carousel-prev" id="carousel-prev">&lt;</button>
+                                <button class="carousel-next" id="carousel-next">&gt;</button>
+                            </div>
+                            <div class="carousel-indicators" id="carousel-indicators">
+                                <span class="indicator active"></span>
+                            </div>
+                        </div>
+                        <!-- 筛选区域 - 保持在轮播图下方 -->
+                        <div class="news-filter-area">
+                            <div class="filter-title" style="margin-top: 10px;">按新闻来源筛选</div>
+                            <div class="filter-channel-buttons" style="margin-bottom: 20px;">
+                                <button class="filter-btn active" data-channel="all">全部</button>
+                                <button class="filter-btn" data-channel="xinhua">新华社</button>
+                                <button class="filter-btn" data-channel="xinlang">新浪新闻</button>
+                                <button class="filter-btn" data-channel="cctv">央视新闻</button>
+                                <button class="filter-btn" data-channel="people">人民日报</button>
+                            </div>
+                            <div class="filter-title">按新闻日期筛选</div>
+                            <div class="filter-date-buttons" style="margin-bottom: 20px;">
+                                <button class="filter-btn active">全部</button>
+                                <button class="filter-btn">最新</button>
+                                <button class="filter-btn">近一天</button>
+                                <button class="filter-btn" >近三天</button>
+                                <button class="filter-btn">近七天</button>
+                            </div>
+                            <div class="filter-title">新闻获取选项</div>
+                            <div class="filter-option-buttons" style="margin-bottom: 20px;">
+                                <button id="refresh_news" class="btn" style="margin-right: 10px;">换一换</button>
+                                <button id="get_today_news" class="btn">获取今日新闻</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 动态分栏的新闻卡片容器 -->
+                    <div class="news-cards-container-wrapper">
+                        <!-- 左栏新闻卡片区域 - 将通过JavaScript动态管理列数 -->
+                        <div class="news-cards-container" id="news-cards-container-left">
+                            <!-- 新闻卡片将通过JavaScript动态加载 -->
+                            <div class="news-card skeleton">
+                                <div class="skeleton-tags"></div>
+                                <div class="skeleton-title"></div>
+                                <div class="skeleton-desc"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右栏新闻卡片区域 - 将通过JavaScript动态管理列数 -->
+                        <div class="news-cards-container" id="news-cards-container">
+                            <!-- 新闻卡片将通过JavaScript动态加载 -->
+                            <div class="news-card skeleton">
+                                <div class="skeleton-title"></div>
+                                <div class="skeleton-desc"></div>
+                                <div class="skeleton-tags"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 民主评议页面 -->
@@ -1153,15 +1467,11 @@
                                     <button id="review_search_button" class="rw_dyfz_search_btn" style="font-weight: bold;">查询</button>
                                 </div>
                             </div>
-                            <button id="review_refresh_button" class="btn rw_dyfz_refresh_btn">刷新</button>
-                        </div>
-                        
-                        <!-- 图表区域 -->
-                        <div class="rw_review_charts_container">
-                            <div class="rw_chart-container" style="width: 100%;">
-                                <h3>历年平均评分变化</h3>
-                                <canvas id="lineChart"></canvas>
-                            </div>
+                            <!-- 添加民主评议按钮 -->
+                            <button class="dyfz_search_btn" id="add-review-btn" style="margin-left: 20px;">
+                            <i style="font-weight: bold; font-style: normal;">+ 添加民主评议</i>         
+                            </button>
+                            <!-- <button id="review_refresh_button" class="btn rw_dyfz_refresh_btn">刷新</button> -->
                         </div>
                         
                         <div class="rw_dyfz_table_container">
@@ -1170,11 +1480,11 @@
                                     <tr>
                                         <th>序号</th>
                                         <th>被评议人姓名</th>
+                                        <th>所属支部</th>
                                         <th>评议年份</th>
-                                        <th>政治立场(分)</th>
-                                        <th>工作作风(分)</th>
-                                        <th>道德品行(分)</th>
-                                        <th>其他评价</th>
+                                        <th>评议结果</th>
+                                        <th>评议内容</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="review_table_body">
@@ -1196,11 +1506,16 @@
 
             <!-- 统计分析页面 -->
             <div id="statistics" class="page-content">
-                <div class="page-header">
-                    <h1 class="page-title">统计分析</h1>
-                    <div class="breadcrumb">首页 / 统计分析</div>
+                <!-- 可视化大屏 -->
+                <div style="width: 100%; height: 100vh; overflow: hidden; scrollbar-width: none; -ms-overflow-style: none;">
+                    <iframe 
+                        src="/static/sdk/bigscreen/index.html" 
+                        style="width: 100%; height: 100%; border: none; overflow: hidden; -ms-overflow-style: none; scrollbar-width: none;"
+                        frameborder="0"
+                        allowfullscreen
+                        onload="this.style.overflow = 'hidden'; this.contentDocument.documentElement.style.overflow = 'hidden';"
+                    ></iframe>
                 </div>
-                <div class="placeholder-content">H</div>
             </div>
 
             <!-- 系统设置页面 -->
@@ -1365,6 +1680,16 @@
                             <input type="text" id="form-partners" name="partners">
                         </div>
                         <div class="form-group">
+                            <label for="form-frequency">执行频次</label>
+                            <select id="form-frequency" name="frequency" required>
+                                <option value="0">一次性</option>
+                                <option value="1">每周</option>
+                                <option value="3">每月</option>
+                                <option value="4">每季度</option>
+                                <option value="6">每年</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="activity-form-description">描述</label>
                             <textarea id="activity-form-description" name="description" rows="4"></textarea>
                         </div>
@@ -1462,8 +1787,66 @@
         </div>
     </div>
 
+    <!-- 移动端菜单切换功能 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取菜单切换按钮和侧边栏元素
+            const menuToggleBtn = document.getElementById('menuToggleBtn');
+            const sidebar = document.querySelector('.sidebar');
+            
+            // 侧边栏展开状态标志
+            let isSidebarExpanded = false;
+            
+            // 移动端菜单切换逻辑
+            function toggleSidebar() {
+                isSidebarExpanded = !isSidebarExpanded;
+                
+                if (isSidebarExpanded) {
+                    sidebar.classList.add('expanded');
+                    sidebar.classList.remove('collapsed');
+                } else {
+                    sidebar.classList.remove('expanded');
+                    sidebar.classList.add('collapsed');
+                }
+            }
+            
+            // 添加菜单切换按钮点击事件
+            if (menuToggleBtn && sidebar) {
+                menuToggleBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    toggleSidebar();
+                });
+                
+                // 点击页面其他区域关闭侧边栏
+                document.addEventListener('click', function(e) {
+                    // 检查是否点击了菜单切换按钮或侧边栏内部
+                    if (isSidebarExpanded && 
+                        e.target !== menuToggleBtn && 
+                        !sidebar.contains(e.target) && 
+                        !menuToggleBtn.contains(e.target)) {
+                        toggleSidebar();
+                    }
+                });
+                
+                // 为移动端菜单项添加点击事件，点击后自动关闭侧边栏
+                const menuItems = sidebar.querySelectorAll('.menu-item');
+                menuItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        // 移动设备上自动关闭侧边栏
+                        if (window.innerWidth <= 1000) {
+                            toggleSidebar();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    
     <script src="../static/sdk/pako.js" defer></script>
     <script src="../static/sdk/jquery.min.js" defer></script>
+    <!-- Bootstrap JS -->
+    <script src="../static/sdk/bootstrap.bundle.min.js" defer></script>
+    <script src="../static/js/add_form_record.js" defer></script>
     <script src="../static/sdk/chart.umd.min.js" defer></script>
     <script src="../static/js/home.js" defer></script>
     <script src="../static/js/dashboard.js" defer></script>
@@ -1473,9 +1856,9 @@
     <script src="../static/js/meeting.js" defer></script>
     <script src="../static/js/fee.js" defer></script>
     <script src="../static/js/development.js" defer></script>
+    <script src="../static/js/party_day.js" defer></script>
     <script src="../static/js/study.js" defer></script>
     <script src="../static/js/review.js" defer></script>
-    <script src="../static/js/statistics.js" defer></script>
     <script src="../static/js/settings.js" defer></script>
     <script src="../static/js/cloud-form.js" defer></script>
     <script src="../static/js/nav.js" defer></script>

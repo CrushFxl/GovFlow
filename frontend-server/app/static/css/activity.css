@@ -30,7 +30,7 @@
 }
 .modal-header {
     padding: 10px 16px;
-    background-color: #c12c1f;
+    background-color: var(--primary-red);
     color: white;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
@@ -108,5 +108,7 @@ textarea {
     color: white;
 }
 .modal.show {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

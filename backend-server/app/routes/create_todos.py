@@ -109,6 +109,7 @@ def commit_todo():
 def get_notice():
     uuid = request.args.get('uuid')
     notice = Notice.query.filter_by(uuid=uuid).first()
+    
     return {
         'code': 1000,
         'data': {
@@ -160,7 +161,8 @@ def get_task():
             'end_time': task.end_time,
             'location': task.location,
             'organizations': task.organizations,
-            'partners': task.partners
+            'partners': task.partners,
+            'frequency': task.frequency
         }
     }
 
@@ -198,6 +200,9 @@ def modify_task():
     location = request.args.get('location')
     if location:
         task.location = location
+    frequency = request.args.get('frequency')
+    if frequency:
+        task.frequency = int(request.args.get('frequency'))
     db.session.commit()
     # 组装提示词
     prompt = create_task_prompt(uuid)

@@ -1,6 +1,5 @@
 import cherrypy
 import os
-import app
 
 from app import create_app
 

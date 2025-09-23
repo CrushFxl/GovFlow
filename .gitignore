@@ -1,4 +1,5 @@
 /gov.db
 .idea
 __pycache__
-/backend-server/instance/gov.db
+backend-server/instance/gov.db
+backend-server/instance/uploads/

@@ -15,6 +15,7 @@ from .meeting import meeting_bk
 from .study import study_bk
 from .statistics import statistics_bk
 from .party_day import partyday_bk
+from .ragflow import ragflow_bk
 
 routes = [
     auth_bk,
@@ -33,5 +34,6 @@ routes = [
     meeting_bk,
     study_bk,
     statistics_bk,
-    partyday_bk
+    partyday_bk,
+    ragflow_bk
 ]

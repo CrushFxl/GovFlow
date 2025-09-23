@@ -12,6 +12,7 @@ from app.models import db
 from app.models.User import User
 from app.models.Code import Code
 from app.models.System import System
+from app.models.Profile import Profile
 
 VALID_CHAR = ("0123456789ABCEDFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
               "!@#$%^&*()_+.-/<>,';:=`~|\\")
@@ -35,9 +36,10 @@ def login():
     password = req['password']
     user = User.query.filter_by(mob=username, pwd=password).first()
     if user:
+        admin_code = Profile.query.filter_by(uid=user.uid).first().admin_status
         session['uid'] = user.uid
         session.permanent = True
-        return {"code": 1000, "msg": "ok"}
+        return {"code": 1000, "msg": "ok", "admin": admin_code}
     return {"code": 1001, "msg": "用户名或密码错误"}
 
 

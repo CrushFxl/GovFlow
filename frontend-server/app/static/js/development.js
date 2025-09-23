@@ -141,9 +141,9 @@ $(document).ready(function() {
                             ${record.political_status}
                         </span>
                     </td>
-                    <td>${record.student_id}</td>
                     <td>${record.contact}</td>
                     <td>${record.description}</td>
+                    <td>${record.created_at}</td>
                     <td><button class="pf_detail-btn btn btn-action delete-development" data-id="${record.id}">删除</button></td>
                 </tr>
             `;

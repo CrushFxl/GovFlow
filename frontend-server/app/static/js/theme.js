@@ -15,8 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
             root.style.setProperty('--light-red', lightDeepOrange);
             // 显示所有菜单项
             showAllMenuItems();
-            // 显示管理员登录提示
-            showAdminLoginHint();
             // 切换到橙色图标
             updateMenuIcons('orange-icon');
         } else {
@@ -26,8 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
             root.style.setProperty('--light-red', '#f8e6e5');
             // 隐藏智慧表单和系统设计菜单项
             hideRestrictedMenuItems();
-            // 隐藏管理员登录提示
-            hideAdminLoginHint();
             // 切换到红色图标
             updateMenuIcons('red-icon');
         }
@@ -50,45 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // 显示管理员登录提示
-    function showAdminLoginHint() {
-        // 检查提示元素是否已存在
-        let adminHint = document.getElementById('admin-login-hint');
-        if (!adminHint) {
-            // 创建li元素作为同级标签
-            adminHint = document.createElement('li');
-            adminHint.id = 'admin-login-hint';
-            adminHint.innerText = '您正在以超级管理员身份登录';
-            // 设置高对比度样式
-            adminHint.style.cssText = `
-                background-color: #fff;
-                color: #000;
-                font-weight: bold;
-                padding: 5px 10px;
-                border-radius: 5px;
-                margin: 5x 0 0 0;
-                font-size: 0.9em;
-                border: 2px solid #000;
-                display: inline-block;
-            `;
-            const publishedLink = document.querySelector('.nav-menu li:last-child');
-            const navMenu = document.querySelector('.nav-menu');
-            if (publishedLink && navMenu) {
-                navMenu.insertBefore(adminHint, publishedLink.nextSibling);
-            }
-        } else {
-            // 如果元素已存在，确保它是可见的
-            adminHint.style.display = 'inline-block';
-        }
-    }
-    
-    // 隐藏管理员登录提示
-    function hideAdminLoginHint() {
-        const adminHint = document.getElementById('admin-login-hint');
-        if (adminHint) {
-            adminHint.style.display = 'none';
-        }
-    }
+
     // 显示所有菜单项
     function showAllMenuItems() {
         const cloudFormItem = document.querySelector('.menu-item[data-page="cloud-form"]');

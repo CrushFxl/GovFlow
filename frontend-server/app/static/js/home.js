@@ -16,6 +16,7 @@ $(document).ready(function() {
                 const uid = resp.data['uid'];
                 const admin = resp.data['admin'];
                 const coin = resp.data['coin'];
+                const user_type = resp.data['user_type'];
                 localStorage.setItem('coin', coin);
                 localStorage.setItem('uid', uid);
                 // 更新UI上的coin数量显示
@@ -23,11 +24,10 @@ $(document).ready(function() {
                 if(admin === 1){
                     localStorage.setItem('admin', 1);
                 }
-                if (uid) {
-                    // 更新iframe URL，添加编码后的uid参数
-                    updateIframeWithUid(uid);
-                }
-                
+                // 添加用户身份标签
+                addPartyStatusLabel(user_type);
+                // 更新iframe URL，添加编码后的uid参数
+                updateIframeWithUid(uid);
                 // 检查用户档案是否完整
                 checkUserProfileComplete();
             }
@@ -36,6 +36,34 @@ $(document).ready(function() {
             alert("同步状态失败：无法连接至服务器，请联系网站管理员或稍后再试。");
         }
     });
+    
+    // 添加用户身份标签函数
+    function addPartyStatusLabel(partyStatus) {
+        // 首先移除可能存在的旧标签
+        const oldLabel = document.getElementById('party-status-label');
+        if (oldLabel) {
+            oldLabel.remove();
+        }
+        // 根据partyStatus创建相应的标签
+        const usernameElement = document.getElementById('username');
+        if (usernameElement) {
+            const statusLabel = document.createElement('span');
+            statusLabel.id = 'party-status-label';
+            statusLabel.innerText = partyStatus;
+            statusLabel.style.cssText = `
+                margin-left: 8px;
+                padding: 2px 8px;
+                border-radius: 12px;
+                background-color: rgba(255, 255, 255, 0.2);
+                font-size: 0.8em;
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                font-weight: normal;
+            `;
+            // 插入到用户名后面
+            usernameElement.parentNode.insertBefore(statusLabel, usernameElement.nextSibling);
+        }
+    };
 
     // 检查用户档案是否完整
     function checkUserProfileComplete() {

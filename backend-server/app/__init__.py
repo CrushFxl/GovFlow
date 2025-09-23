@@ -7,6 +7,7 @@ from .models.Branch import init_branches
 from .models.System import init_system_settings
 from .models.Form import init_forms
 from .models.New import init_news
+from .models.Task import init_tasks
 
 from flask import Flask
 from flask_cors import CORS
@@ -29,6 +30,7 @@ def create_app(config_name):
         init_system_settings()
         init_forms()
         init_news()
+        init_tasks()
 
     for route in routes:
         app.register_blueprint(route)

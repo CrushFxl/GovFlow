@@ -100,8 +100,9 @@ def get_development_records():
                 'student_id': profile.student_id,
                 'political_status': data.get('申请发展的政治面貌', '群众'),
                 'contact': profile.contact,
-                'trainer_student_id': data.get('培养人学号', ''),
-                'description': data.get('附件或材料说明', '')
+                'description': data.get('附件或材料说明', ''),
+                'created_at': submission.created_at.strftime('%Y-%m-%d %H:%M:%S') if submission.created_at else '',
+                'trainer_student_id': data.get('培养人学号', '')
             })
     # 按政治面貌排序
     status_order = {'群众': 0, '入党积极分子': 1, '发展对象': 2, '预备党员': 3, '普通正式党员': 4}

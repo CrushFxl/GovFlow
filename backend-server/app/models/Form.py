@@ -59,6 +59,7 @@ class FormControl(db.Model):
 
     id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
     form_id = db.Column('form_id', db.Integer, db.ForeignKey('forms.id'), nullable=False)
+    related_uuid = db.Column('related_uuid', db.Text, nullable=True)
     type = db.Column('type', db.String(50), nullable=False)  # select, radio, text, etc.
     label = db.Column('label', db.String(100), nullable=False)
     placeholder = db.Column('placeholder', db.String(200), nullable=True)
@@ -74,11 +75,11 @@ def form_submission_description():
     【字段描述】
     - id, int, 主键, 自增
     - form_id, int, 该提交记录所属的表格ID
+    - related_uuid, str, 该表格填写记录关联的Task UUID
     - user_id, int, 提交用户的UID
     - data, str, 提交的数据, 格式为JSON, 例如：{"姓名": "张三", "学号": "6401230103"}, 键为表格控件的label
     - status, int, 提交状态（此字段已弃用）
     - created_at, datetime, 提交时间
-    
     """
     return text
 

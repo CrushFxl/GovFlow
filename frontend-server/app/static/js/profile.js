@@ -432,7 +432,7 @@ $(document).ready(function() {
             toggleProfileBtn.addClass('active');
             toggleMembersBtn.removeClass('active');
             // 更新页面标题
-            $('.page_title').text('党员信息');
+            $('.page-title').text('党员信息');
         });
         
         // 党员列表按钮点击事件
@@ -444,7 +444,7 @@ $(document).ready(function() {
             toggleMembersBtn.addClass('active');
             toggleProfileBtn.removeClass('active');
             // 更新页面标题
-            $('.page_title').text('党员列表');
+            $('.page-title').text('党员列表');
         });
         
         // 根据localStorage中的admin值设置默认显示的选项卡

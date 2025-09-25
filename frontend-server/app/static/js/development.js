@@ -1,22 +1,33 @@
 // 党员发展模块逻辑
-// 党员发展页面交互逻辑
 
 // 页面加载完成后执行
 $(document).ready(function() {
-    // 从home.html获取后端base_url
     const URL = $('#URL').text();
     
     // 页面元素
     const searchInput = $('#dyfz_search_input');
     const searchButton = $('#dyfz_search_button');
     const searchResult = $('#dyfz_search_result');
-    const statusFilter = $('#dyfz_status_filter');
     const refreshButton = $('#dyfz_refresh_button');
     const tableBody = $('#dyfz_table_body');
     const prevPageButton = $('#dyfz_prev_page');
     const nextPageButton = $('#dyfz_next_page');
     const currentPageElement = $('#dyfz_current_page');
     const totalPagesElement = $('#dyfz_total_pages');
+
+    const statusMap = {
+        1: 'status-pending',
+        2: 'status-processing',
+        3: 'status-completed',
+        4: 'status-canceled'
+    };
+
+    const statusTextMap = {
+        1: '待审核',
+        2: '待处理',
+        3: '已完成',
+        4: '已取消'
+    };
     
     // 分页参数
     let currentPage = 1;
@@ -24,86 +35,67 @@ $(document).ready(function() {
     let totalPages = 1;
     let allRecords = [];
     
-    // 初始化流程条
-    function initProgressBar() {
-        // 默认将申请入党节点设为激活状态
-        $('.dyfz_progress_step').removeClass('active highlight');
-        $('.dyfz_progress_step:first').addClass('active');
-    }
+
     
-    // 搜索用户
+    // 搜索功能（根据新接口调整）
     function searchUser() {
         const keyword = searchInput.val().trim();
         if (!keyword) {
-            searchResult.html('<div style="color: #e74c3c;">请输入学工号或姓名</div>');
+            searchResult.html('<div style="color: #e74c3c;">请输入关键词查询</div>');
             return;
         }
-        // 发送请求查询用户
-        $.ajax({
-            url: URL + '/get_development_records',
-            xhrFields: {withCredentials: true},
-            type: 'GET',
-            data: {'status' : 'all', 'keyword': keyword},
-            success: function(response) {
-                if (response.code === 200) {
-                    allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
+        
+        // 根据新接口，先获取所有数据然后在前端筛选
+        loadDevelopmentRecords().then(function() {
+            if (allRecords.length > 0) {
+                // 在前端进行关键词筛选
+                const filteredRecords = allRecords.filter(function(record) {
+                    return (
+                        record.title && record.title.includes(keyword) ||
+                        record.description && record.description.includes(keyword)
+                    );
+                });
+                
+                if (filteredRecords.length > 0) {
+                    currentRecords = filteredRecords;
+                    totalPages = Math.ceil(filteredRecords.length / pageSize);
                     currentPage = 1;
-                    renderTable();        // 重新刷新页面
+                    renderTable();
+                    searchResult.html('');
+                } else {
+                    tableBody.html('<tr><td colspan="5" class="dyfz_no_data">未找到相关数据</td></tr>');
+                    searchResult.html('<div style="color: #e74c3c;">未找到相关数据</div>');
                 }
-            },
-            error: function() {
-                searchResult.html('<div style="color: #e74c3c;">搜索失败，请稍后再试</div>');
             }
         });
     }
     
-    // 高亮显示政治面貌
-    function highlightPoliticalStatus(status) {
-        // 重置所有节点样式
-        $('.dyfz_progress_step').removeClass('active highlight');
-        
-        // 高亮显示目标状态节点
-        const statusStep = $('.dyfz_progress_step.dyfz_step' + status);
-        
-        if (statusStep.length > 0) {
-            // 高亮目标节点
-            statusStep.addClass('highlight');
-            
-            // 激活所有前面的节点
-            const allSteps = $('.dyfz_progress_step');
-            const targetIndex = allSteps.index(statusStep);
-            
-            for (let i = 0; i <= targetIndex; i++) {
-                allSteps.eq(i).addClass('active');
-            }
-        } else {
-            // 如果没找到对应状态，默认激活第一个节点
-            $('.dyfz_progress_step:first').addClass('active');
-        }
-    }
-    
     // 加载党员发展记录
     function loadDevelopmentRecords() {
-        const status = statusFilter.val();
         // 显示加载状态
-        tableBody.html('<tr><td colspan="7" class="dyfz_no_data">正在加载数据...</td></tr>');
-        // 发送请求获取记录
-        $.ajax({
-            url: URL + `/get_development_records`,
-            xhrFields: {withCredentials: true},
-            data: {'status' : status, 'keyword': ''},
-            type: 'GET',
-            success: function(response) {
-                if (response.code === 200) {
-                    allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
-                    currentPage = 1; // 重置为第一页
-                    renderTable();
-                } else {
-                    tableBody.html('<tr><td colspan="7" class="dyfz_no_data">' + response.msg + '</td></tr>');
+        tableBody.html('<tr><td colspan="5" class="dyfz_no_data">正在加载数据...</td></tr>');
+        
+        // 返回Promise以便searchUser函数可以等待数据加载完成
+        return new Promise(function(resolve, reject) {
+            // 发送请求获取记录
+            $.ajax({
+                url: URL + '/get_development_records',
+                xhrFields: {withCredentials: true},
+                type: 'POST',
+                data: {uid: localStorage.getItem('uid')},
+                success: function(response) {
+                    if (response.code === 1000) {
+                        allRecords = response.data;
+                        totalPages = Math.ceil(allRecords.length / pageSize);
+                        currentPage = 1; // 重置为第一页
+                        renderTable();
+                        resolve();
+                    } else {
+                        tableBody.html('<tr><td colspan="5" class="dyfz_no_data">' + (response.msg || '加载失败') + '</td></tr>');
+                        reject(response);
+                    }
                 }
-            }
+            });
         });
     }
     
@@ -124,70 +116,31 @@ $(document).ready(function() {
         
         // 渲染表格内容
         if (currentRecords.length === 0) {
-            tableBody.html('<tr><td colspan="7" class="dyfz_no_data">暂无数据</td></tr>');
-            // 无数据时重置流程条
-            initProgressBar();
+            tableBody.html('<tr><td colspan="5" class="dyfz_no_data">暂无数据</td></tr>');
             return;
         }
         
         let tableHtml = '';
         currentRecords.forEach(function(record, index) {
+            // 格式化日期
+            const formattedDate = record.start_date ? new Date(record.start_date).toLocaleDateString() : '';
+            
+            // 根据状态设置状态徽标样式
+            const statusClass = getStatusClass(record.status);
+            
             tableHtml += `
                 <tr>
                     <td>${startIndex + index + 1}</td>
-                    <td>${record.real_name}</td>
-                    <td>
-                        <span class="dyfz_status_${record.political_status.replace(/\s+/g, '_')}">
-                            ${record.political_status}
-                        </span>
-                    </td>
-                    <td>${record.contact}</td>
-                    <td>${record.description}</td>
-                    <td>${record.created_at}</td>
-                    <td><button class="pf_detail-btn btn btn-action delete-development" data-id="${record.id}">删除</button></td>
+                    <td>${record.title || ''}</td>
+                    <td>${record.description || ''}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="status-badge ${statusMap[record.status]}">${statusTextMap[record.status]}</span></td>
                 </tr>
             `;
         });
         
         tableBody.html(tableHtml);
-        
-        // 为删除按钮添加点击事件
-        $('.delete-development').click(function() {
-            const recordId = $(this).data('id');
-            deleteDevelopmentRecord(recordId);
-        });
-        
-        // 以表格的第一个对象的政治面貌为准，渲染流程条
-        const firstRecord = currentRecords[0];
-        if (firstRecord && firstRecord.political_status) {
-            highlightPoliticalStatus(firstRecord.political_status);
-        }
     }
-    
-    // 为不同政治面貌添加颜色样式
-    function addStatusColorStyles() {
-        const styleElement = $('<style></style>');
-        const statusColors = {
-            '群众': '#95a5a6',
-            '入党积极分子': '#3498db',
-            '发展对象': '#f39c12',
-            '预备党员': '#e67e22',
-            '普通正式党员': '#27ae60'
-        };
-        
-        let cssRules = '';
-        Object.entries(statusColors).forEach(([status, color]) => {
-            const className = `.dyfz_status_${status.replace(/\s+/g, '_')}`;
-            cssRules += `${className} { color: ${color}; font-weight: bold; }
-`;
-        });
-        
-        styleElement.text(cssRules);
-        $('head').append(styleElement);
-    }
-    
-    // 添加状态颜色样式
-    addStatusColorStyles();
     
     // 绑定事件处理程序
     function bindEvents() {
@@ -203,11 +156,6 @@ $(document).ready(function() {
         });
         // 刷新按钮点击事件
         refreshButton.click(function() {
-            loadDevelopmentRecords();
-        });
-        // 筛选条件变化事件
-        statusFilter.change(function() {
-            currentPage = 1;
             loadDevelopmentRecords();
         });
         // 上一页按钮点击事件
@@ -226,42 +174,12 @@ $(document).ready(function() {
         });
     }
     
-    // 删除党员发展记录
-    function deleteDevelopmentRecord(recordId) {
-        // 显示确认对话框
-        if (!confirm('确定要删除这条党员发展记录吗？此操作不可撤销。')) {
-            return;
-        }
-        
-        // 发送删除请求
-        $.ajax({
-            url: URL + '/delete_record',
-            xhrFields: {withCredentials: true},
-            type: 'POST',
-            data: {id: recordId},
-            success: function(response) {
-                if (response.code === 200) {
-                    alert('删除成功');
-                    // 重新加载数据
-                    loadDevelopmentRecords();
-                } else {
-                    alert('删除失败：' + response.msg);
-                }
-            },
-            error: function() {
-                alert('网络错误，请稍后再试');
-            }
-        });
-    }
-    
     // 暴露初始化函数供home.js调用
     window.developmentModule = {
         init: function() {
             console.log('党员发展页面初始化');
             // 绑定事件处理程序
             bindEvents();
-            // 初始化流程条
-            initProgressBar();
             // 加载数据
             loadDevelopmentRecords();
         }

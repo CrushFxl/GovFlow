@@ -10,98 +10,22 @@ from app.models.Branch import Branch
 from app.models.Profile import Profile
 import uuid as Uuid
 from flask import Blueprint, request, session, jsonify
+from ..utils import filter_related_task_by_user
 
 
 activity_bk = Blueprint('activity', __name__, url_prefix='/activity')
 
 
-# 限制文本长度函数
-def truncate_text(text, max_length=15):
-    if not text:
-        return '-'
-    if isinstance(text, str) and len(text) > max_length:
-        return text[:max_length] + '...'
-    return text
-
-# 任务频率映射函数
-def get_frequency_text(frequency):
-    frequency_map = {
-        0: '一次性',
-        1: '每周一次',
-        2: '每月一次',
-        3: '每季度一次',
-        4: '每年一次'
-    }
-    return frequency_map.get(frequency, '未知')
-
-
 # 任务下发页面表格拉取接口
 @activity_bk.route('/query', methods=['POST'])
 def query_tasks():
-    try:
-        # 从Task表和Notice表中获取数据，排除status=0的记录
-        tasks = Task.query.filter(Task.status != 0).all()
-        notices = Notice.query.filter(Notice.status != 0).all()
-        # 合并数据并转换为统一格式
-        all_data = []
-        # 处理Task数据
-        for task in tasks:
-            # 获取创建者信息
-            creator = User.query.filter_by(uid=task.created_uid).first()
-            creator_name = creator.nick if creator else '未知'
-            all_data.append({
-                'id': task.uuid,
-                'type': 'task',  # 标记为任务类型
-                'title': task.title,
-                'description': truncate_text(task.description),
-                'created_time': task.created_time,
-                'partners': truncate_text("; ".join(task.partners)),
-                'status': task.status,
-                'creator': creator_name,
-                'start_date': task.start_date,
-                'start_time': task.start_time,
-                'end_date': task.end_date,
-                'end_time': task.end_time,
-                'location': task.location,
-                'frequency': get_frequency_text(task.frequency)
-            })
-        
-        # 处理Notice数据
-        for notice in notices:
-            # 获取创建者信息
-            creator = User.query.filter_by(uid=notice.created_uid).first()
-            creator_name = creator.nick if creator else '未知'
-            
-            all_data.append({
-                'id': notice.uuid,
-                'type': 'notice',  # 标记为通知类型
-                'title': notice.title,
-                'description': truncate_text(notice.description),
-                'created_time': notice.created_time,
-                'partners': truncate_text("; ".join(notice.partners)),
-                'status': notice.status,
-                'creator': creator_name,
-                'start_date': '',  # Notice表可能没有这些字段
-                'start_time': '',
-                'end_date': '',
-                'end_time': '',
-                'location': ''
-            })
-        
-        # 按创建时间倒序排序
-        all_data.sort(key=lambda x: x['created_time'], reverse=True)
-        
-        return jsonify({
-            'code': 1000,
-            'data': all_data,
-            'message': '查询成功'
-        })
-    except Exception as e:
-        return jsonify({
-            'code': 1001,
-            'data': [],
-            'message': f'查询失败：{str(e)}'
-        })
+    uid = request.form.get('uid')
+    all_records = filter_related_task_by_user('all', uid)
+    return jsonify({
+        'code': 1000,
+        'data': all_records,
+        'message': '查询成功'
+    })
 
 
 # 标记任务完成接口

@@ -15,6 +15,10 @@
     <link rel="stylesheet" href="../static/css/meeting.css">
     <link rel="stylesheet" href="../static/css/study.css">
     <link rel="stylesheet" href="../static/css/party_day.css">
+    <!-- 引入VUE框架 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <script src="https://unpkg.com/element-plus"></script>
     <!-- 后端服务器地址配置 -->
     <script>const config = {backendUrl: '{{ URL }}'};</script>
     
@@ -626,7 +630,7 @@
                 </li>
                 <li class="menu-item parent-menu" data-page="activity">
                     <img src="../static/img/red-icon/renwuguanli.png" style="width: 45px; height: 45px;">
-                    <p style="margin-top: 12px;">任务管理</p>
+                    <p style="margin-top: 12px;">我的任务</p>
                     <span class="menu-toggle-icon">▼</span>
                 </li>
                 <div class="sub-menu">
@@ -640,7 +644,7 @@
                     </li>
                     <li class="menu-item" data-page="fee" style="margin-left: 20px;">
                         <img src="../static/img/red-icon/dangfeiguanli.png" style="width: 45px; height: 45px;">
-                        <p style="margin-top: 12px;">党费管理</p>
+                        <p style="margin-top: 12px;">党费缴纳</p>
                     </li>
                     <li class="menu-item" data-page="development" style="margin-left: 20px;">
                         <img src="../static/img/red-icon/dangyuanfazhan.png" style="width: 45px; height: 45px;">
@@ -928,25 +932,24 @@
                 </div>
             </div>
 
-            <!-- 任务管理页面 -->
+            <!-- 我的任务页面 -->
             <div id="activity" class="page-content">
                 <div class="page-header">
-                    <h1 class="page-title">任务管理</h1>
-                    <div class="breadcrumb">首页 / 任务管理</div>
+                    <h1 class="page-title">我的任务</h1>
+                    <div class="breadcrumb">首页 / 我的任务</div>
                 </div>
-                <!-- 操作按钮区域 -->
-                <div class="action-bar">
-                    <input id="daily-input" type="text" placeholder="在此描述任务信息，一键下发任务，例如：通知信工党支部今天下午两点来学院105开会，主题是党建教育" class="search-input">
-                    <button class="btn" id="add-activity" style="min-width: 110px">
-                        <i class="icon">+</i> 添加任务
-                    </button>
-                </div>
+
 
                 <!-- 任务表格 -->
                 <div class="card">
                     <div class="card-header">
                         <h2 class="card-title">任务列表</h2>
                         <div class="search-box">
+                            <label for="task_type_filter">任务类型：</label>
+                            <select id="task_type_filter">
+                                <option value="all">全部</option>
+                                <!-- 任务类型将通过JavaScript动态加载 -->
+                            </select>
                             <input type="text" placeholder="搜索任务..." class="search-input">
                             <button class="btn-outline">搜索</button>
                         </div>
@@ -956,8 +959,8 @@
                         <thead>
                             <tr>
                                 <th>任务名称</th>
-                                <th>任务描述</th>
-                                <th>时间</th>
+                                <th>任务类型</th>
+                                <th>发起时间</th>
                                 <th>执行频次</th>
                                 <th>任务状态</th>
                                 <th>操作</th>
@@ -979,8 +982,8 @@
             <!-- 智慧表单页面 -->
             <div id="cloud-form" class="page-content">
                 <div class="page-header">
-                    <h1 class="page-title">云表单</h1>
-                    <div class="breadcrumb">首页 / 云表单</div>
+                    <h1 class="page-title">智慧表单</h1>
+                    <div class="breadcrumb">首页 / 智慧表单</div>
                 </div>
                 
                 <div class="card">
@@ -1122,6 +1125,7 @@
                                         <th>会议类型</th>
                                         <th>会议纪要</th>
                                         <th>提交时间</th>
+                                        <th>活动状态</th>
                                         <th>操作</th>
                                     </tr>
                                 </thead>
@@ -1170,9 +1174,9 @@
                                 <tr>
                                     <th>序号</th>
                                     <th>活动名称</th>
-                                    <th>姓名</th>
-                                    <th>心得内容</th>
-                                    <th>提交时间</th>
+                                    <th>发起时间</th>
+                                    <th>截止时间</th>
+                                    <th>活动状态</th>
                                     <th>操作</th>
                                 </tr>
                             </thead>
@@ -1193,11 +1197,11 @@
                 </div>
             </div>
 
-            <!-- 党费管理页面 -->
+            <!-- 党费缴纳页面 -->
             <div id="fee" class="page-content">
                 <div class="page-header">
-                    <h1 class="page-title">党费管理</h1>
-                    <div class="breadcrumb">首页 / 党费管理</div>
+                    <h1 class="page-title">党费缴纳</h1>
+                    <div class="breadcrumb">首页 / 党费缴纳</div>
                 </div>
                 
                 <div class="dyfz_development_content">
@@ -1240,26 +1244,21 @@
                             <i style="font-weight: bold; font-style: normal;">+ 添加缴纳记录</i>         
                             </button>
                         </div>
-                        <!-- 图表区域 -->
-                        <div class="chart-container">
-                            <canvas id="feeChart"></canvas>
-                        </div>
                         <div class="dyfz_table_container">
                             <table class="table">
                                 <thead>
                                     <tr>
                                         <th>序号</th>
-                                        <th>姓名</th>
-                                        <th>缴纳月份</th>
-                                        <th>缴纳金额</th>
+                                        <th>缴费事项</th>
+                                        <th>说明内容</th>
                                         <th>提交时间</th>
-                                        <th>回执材料</th>
-                                        <th>操作</th>
+                                        <th>截止时间</th>
+                                        <th>缴纳状态</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dfy_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="6" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1281,36 +1280,6 @@
                     <div class="breadcrumb">首页 / 党员发展</div>
                 </div>
                 <div class="dyfz_development_content">
-                    <!-- 流程条区域 -->
-                    <div class="dyfz_progress_bar_area">
-                        <div class="dyfz_progress_bar">
-                            <div class="dyfz_progress_step dyfz_step群众 active">
-                                <div class="dyfz_step_icon"><span>1</span></div>
-                                <div class="dyfz_step_label">申请入党</div>
-                            </div>
-                            <div class="dyfz_progress_line"></div>
-                            <div class="dyfz_progress_step dyfz_step入党积极分子">
-                                <div class="dyfz_step_icon"><span>2</span></div>
-                                <div class="dyfz_step_label">入党积极分子</div>
-                            </div>
-                            <div class="dyfz_progress_line"></div>
-                            <div class="dyfz_progress_step dyfz_step发展对象">
-                                <div class="dyfz_step_icon"><span>3</span></div>
-                                <div class="dyfz_step_label">发展对象</div>
-                            </div>
-                            <div class="dyfz_progress_line"></div>
-                            <div class="dyfz_progress_step dyfz_step预备党员">
-                                <div class="dyfz_step_icon"><span>4</span></div>
-                                <div class="dyfz_step_label">预备党员</div>
-                            </div>
-                            <div class="dyfz_progress_line"></div>
-                            <div class="dyfz_progress_step dyfz_step普通正式党员">
-                                <div class="dyfz_step_icon"><span>5</span></div>
-                                <div class="dyfz_step_label">普通正式党员</div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- 筛选和表格区域 -->
                     <div class="dyfz_table_area">
                         <div class="dyfz_filter_area">
@@ -1343,17 +1312,15 @@
                                 <thead>
                                     <tr>
                                         <th>序号</th>
-                                        <th>姓名</th>
-                                        <th>政治面貌</th>
-                                        <th>联系方式</th>
-                                        <th>材料说明</th>
-                                        <th>提交日期</th>
-                                        <th>操作</th>
+                                        <th>发展事项</th>
+                                        <th>说明内容</th>
+                                        <th>发展时间</th>
+                                        <th>发展状态</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dyfz_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="5" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1479,17 +1446,15 @@
                                 <thead>
                                     <tr>
                                         <th>序号</th>
-                                        <th>被评议人姓名</th>
-                                        <th>所属支部</th>
-                                        <th>评议年份</th>
-                                        <th>评议结果</th>
-                                        <th>评议内容</th>
-                                        <th>操作</th>
+                                        <th>评议通知</th>
+                                        <th>评议说明</th>
+                                        <th>截止时间</th>
+                                        <th>评议状态</th>
                                     </tr>
                                 </thead>
                                 <tbody id="review_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="7" class="rw_dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="5" class="rw_dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>

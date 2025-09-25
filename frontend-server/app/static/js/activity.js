@@ -5,17 +5,63 @@ $(document).ready(function() {
     const itemsPerPage = 6;
     let currentPage = 1;
     let totalPages = 0;
-    let scheduleData = [];
+    let scheduleData = []; // 原始数据
+    let filteredData = []; // 筛选后的数据
     
     // 定位DOM元素
     const tableBody = document.querySelector('#activity .table tbody');
     const prevBtn = document.querySelector('#activity .pagination .btn-outline:first-child');
     const nextBtn = document.querySelector('#activity .pagination .btn-outline:last-child');
     const pageInfo = document.querySelector('#activity .pagination .page-info');
+    const taskTypeFilter = document.getElementById('task_type_filter');
 
     // 初始化日程模块
     function initActivity() {        
         fetchScheduleData();
+        // 绑定类型筛选事件
+        taskTypeFilter.addEventListener('change', applyFilters);
+    }
+    
+    // 获取任务类型列表
+    function fetchTaskTypes() {
+        // 从现有数据中提取任务类型
+        if (scheduleData.length > 0) {
+            const types = new Set();
+            scheduleData.forEach(item => {
+                if (item.type === 'task' && item.task_type) {
+                    types.add(item.task_type);
+                }
+            });
+            
+            // 清空并重新填充下拉菜单（保留"全部"选项）
+            while (taskTypeFilter.options.length > 1) {
+                taskTypeFilter.remove(1);
+            }
+            
+            // 添加任务类型选项
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                taskTypeFilter.appendChild(option);
+            });
+        }
+    }
+    
+    // 应用筛选条件
+    function applyFilters() {
+        const selectedType = taskTypeFilter.value;
+        
+        if (selectedType === 'all') {
+            filteredData = [...scheduleData];
+        } else {
+            filteredData = scheduleData.filter(item => 
+                item.type === 'task' && item.task_type === selectedType
+            );
+        }
+        
+        currentPage = 1; // 重置为第一页
+        renderTableData();
     }
 
     // 获取并渲染日程
@@ -25,11 +71,17 @@ $(document).ready(function() {
             xhrFields: {withCredentials: true},
             type: "POST",
             dataType: "json",
+            data: {
+                'uid': localStorage.getItem('uid'),
+            },
             success: function (resp) {
                 if (resp.code === 1000) {
                     scheduleData = resp.data;
-                    // 存储数据到sessionStorage，方便详情查看
                     sessionStorage.setItem('activityData', JSON.stringify(scheduleData));
+                    // 初始化筛选数据
+                    filteredData = [...scheduleData];
+                    // 获取并填充任务类型
+                    fetchTaskTypes();
                     renderTableData();
                 }
             },
@@ -42,7 +94,7 @@ $(document).ready(function() {
     // 渲染表格数据
     function renderTableData() {
         tableBody.innerHTML = '';
-        if (scheduleData.length === 0) {
+        if (filteredData.length === 0) {
             // 显示空状态
             tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">暂无任务数据</td></tr>`;
             pageInfo.textContent = `第 1 页 / 共 1 页`;
@@ -52,15 +104,15 @@ $(document).ready(function() {
         }
 
         // 重新计算总页数
-        totalPages = Math.ceil(scheduleData.length / itemsPerPage);
+        totalPages = Math.ceil(filteredData.length / itemsPerPage);
         // 确保当前页不超过总页数
         if (currentPage > totalPages && totalPages > 0) {
             currentPage = totalPages;
         }
         // 计算当前页的数据范围
         const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = Math.min(startIndex + itemsPerPage, scheduleData.length);
-        const currentData = scheduleData.slice(startIndex, endIndex);
+        const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+        const currentData = filteredData.slice(startIndex, endIndex);
         
         currentData.forEach(item => {
             // 获取状态文本和CSS类
@@ -73,7 +125,7 @@ $(document).ready(function() {
                     statusClass = 'status-pending';
                     break;
                 case 2:
-                    statusText = '待完成';
+                    statusText = '进行中';
                     statusClass = 'status-processing';
                     break;
                 case 3:
@@ -101,7 +153,7 @@ $(document).ready(function() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${item.title || '-'}</td>
-                <td>${item.description || '-'}</td>
+                <td>${item.task_type || '-'}</td>
                 <td>${item.created_time || '-'}</td>
                 <td>${item.frequency || '-'}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -121,29 +173,6 @@ $(document).ready(function() {
         bindTableButtons();
     }
 
-    // 添加任务按钮点击事件
-    document.getElementById('add-activity').addEventListener('click', function() {
-        // 获取用户profile信息，检查admin_status权限
-        $.ajax({
-            url: URL + '/profile/get',
-            xhrFields: {withCredentials: true},
-            type: 'GET',
-            dataType: 'json',
-            success: function(resp) {
-                if (resp.code === 1000 && resp.data && resp.data.admin_status === 0) {
-                    // 普通用户（admin_status=0），提示拒绝创建任务
-                    alert('抱歉，您没有创建任务的权限。请联系管理员获取权限。');
-                } else {
-                    // 管理员用户或未登录用户，显示创建任务表单
-                    showActivityForm({}, false); // 添加模式，显示确认按钮
-                }
-            },
-            error: function() {
-                alert('获取用户信息失败，请稍后再试。');
-            }
-        });
-    });
-
     // 绑定表格按钮事件
     function bindTableButtons() {
         // 先移除所有已存在的监听器
@@ -162,7 +191,8 @@ $(document).ready(function() {
                 const item = allData.find(item => item.id === id && item.type === type);
                 
                 if (item) {
-                    showActivityForm(item, true); // 查看详情模式，隐藏确认按钮
+                    // 查看详情逻辑已简化，仅做提示
+                    alert(`任务详情：\n${item.title}\n${item.task_type || '无类型'}\n${item.created_time || '无时间'}\n${item.frequency || '一次性'}`);
                 }
             });
         });
@@ -247,118 +277,6 @@ $(document).ready(function() {
         }
     });
 
-    // 关闭弹窗按钮点击事件
-    document.getElementById('cancel-task-btn').addEventListener('click', function() {
-        closeModal();
-    });
-
-    // 提交按钮点击事件
-    document.getElementById('confirm-btn').addEventListener('click', function() {
-        confirmHandler();
-    });
-
-    // 关闭弹窗函数
-    function closeModal() {
-        const modal = document.getElementById('activity-modal');
-        modal.classList.remove('show');
-    }
-    
-    // 存储当前活动数据
-    let currentActivityData = null;
-    
-    // 日程表单确认提交处理函数
-    function confirmHandler() {        
-        // 从表单中获取用户修改后的数据
-        const formData = {
-            uid: localStorage.getItem('uid'),
-            title: document.getElementById('form-title').value,
-            description: document.getElementById('activity-form-description').value,
-            organizations: document.getElementById('form-organizations').value.split(',').map(item => item.trim()).filter(item => item),
-            partners: document.getElementById('form-partners').value.split(',').map(item => item.trim()).filter(item => item),
-            initiator: document.getElementById('form-initiator').value,
-            type: document.getElementById('form-type').value,
-            start_date: document.getElementById('form-date').value,
-            start_time: document.getElementById('form-start-time').value,
-            end_date: document.getElementById('form-date').value,
-            end_time: document.getElementById('form-end-time').value,
-            location: document.getElementById('form-location').value,
-            frequency: parseInt(document.getElementById('form-frequency').value)
-        };
-        
-        // 保留原始数据中的id和type（如果存在）
-        if (currentActivityData && currentActivityData.id) {
-            formData.id = currentActivityData.id;
-            formData.type = currentActivityData.type;
-        }
-        
-        $.ajax({
-            url: URL + "/activity/save",
-            xhrFields: {withCredentials: true},
-            type: "POST",
-            data: JSON.stringify({ data: formData }),
-            contentType: "application/json",
-            dataType: "json",
-            success: function (resp) {
-                if (resp.code === 1000) {
-                    alert('提交成功');
-                    fetchScheduleData();
-                    closeModal();
-                }
-            }
-        });
-    }
-    
-    // 显示活动表单弹窗
-    function showActivityForm(activityData, isDetailMode = false) {
-        // 存储当前活动数据
-        currentActivityData = activityData;
-        const modal = document.getElementById('activity-modal');
-        const confirmBtn = document.getElementById('confirm-btn');
-        // 填充表单数据
-        document.getElementById('form-title').value = activityData.title || '';
-        document.getElementById('activity-form-description').value = activityData.description || '';
-        document.getElementById('form-date').value = activityData.start_date || '';
-        document.getElementById('form-start-time').value = activityData.start_time || '';
-        document.getElementById('form-end-time').value = activityData.end_time || '';
-        document.getElementById('form-location').value = activityData.location || '';
-        document.getElementById('form-organizations').value = activityData.organizations ? 
-            (Array.isArray(activityData.organizations) ? activityData.organizations.join(', ') : activityData.organizations) : '';
-        document.getElementById('form-partners').value = activityData.partners ? 
-            (Array.isArray(activityData.partners) ? activityData.partners.join(', ') : activityData.partners) : '';
-        // 设置执行频次
-        document.getElementById('form-frequency').value = activityData.frequency !== undefined ? activityData.frequency : '0';
-        // 设置发起人
-        const currentUserNick = document.getElementById('username') ? document.getElementById('username').textContent : '当前用户';
-        document.getElementById('form-initiator').value = activityData.creator || currentUserNick;
-        // 设置任务类型
-        document.getElementById('form-type').value = activityData.type || '';
-        // 显示弹窗
-        modal.classList.add('show');        
-        // 根据模式决定是否显示确认按钮和添加事件监听器
-        if (isDetailMode) {
-            // 查看详情模式：隐藏确认按钮，使表单变为只读
-            confirmBtn.style.display = 'none';            
-            const formElements = document.querySelectorAll('#activity-modal input, #activity-modal textarea, #activity-modal select');
-            formElements.forEach(element => {
-                if (element.tagName === 'SELECT') {
-                    element.disabled = true;
-                    element.style.backgroundColor = '#f5f5f5';
-                } else {
-                    element.readOnly = true;
-                    element.style.backgroundColor = '#f5f5f5';
-                }
-            });
-        } else {
-            // 添加/编辑模式：显示确认按钮
-            confirmBtn.style.display = 'inline-block';
-            const formElements = document.querySelectorAll('#activity-modal input, #activity-modal textarea');
-            formElements.forEach(element => {
-                element.readOnly = false;
-                element.style.backgroundColor = '';
-            });
-        }
-    }
-    
     // 显示加载状态
     function showLoading(message = '处理中...') {
         // 简单的加载提示

@@ -82,12 +82,24 @@ label {
     flex: 1;
     margin-bottom: 0;
 }
-input, textarea {
+input, textarea, select {
     width: 100%;
+    max-width: 140px;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
+}
+
+#task_type_filter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 15px;
+    outline: none;
+    cursor: pointer;
+    width: auto;
 }
 textarea {
     resize: vertical;

@@ -5,6 +5,7 @@ from app.models.User import User
 from app.models.Branch import Branch
 from app.models import to_json
 from app.models.Form import Form, FormControl, FormSubmission
+from ..utils import filter_related_task_by_user
 
 
 
@@ -13,18 +14,9 @@ partyday_bk = Blueprint('partyday', __name__, url_prefix='/party_day')
 
 @partyday_bk.route('/get_records', methods=['GET', 'POST', 'PUT'])
 def get_party_day_records():
-    # 获取查询参数
-    activity_type = request.args.get('type', 'all')
-    keyword = request.args.get('keyword', '')
-    # 筛选form_submmisions 表格中form_id为5的所有记录
-    records = FormSubmission.query.filter_by(form_id=5)
-    # 根据关键词筛选
-    if keyword:
-        records = records.filter(FormSubmission.data.like(f'%{keyword}%'))
-    
-    # 执行查询并返回结果
-    records = records.all()
-    return jsonify({'code': 200, 'data': [to_json(record) for record in records]})
+    uid = int(request.form.get('uid'))
+    all_records = filter_related_task_by_user('主题党日', uid)
+    return jsonify({'code': 1000, 'data': all_records})
 
 
 @partyday_bk.route('/delete_record', methods=['POST'])

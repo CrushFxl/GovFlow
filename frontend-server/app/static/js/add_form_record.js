@@ -53,6 +53,47 @@ function openAddRecordModal(formId, formName) {
                 min-height: calc(100vh - 1rem);
                 justify-content: center;
             }
+            .task-detail-container {
+                width: 96%;
+                margin-left: 10px;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+                padding: 15px 0;
+                background-color: #f9f9f9;
+            }
+            .task-detail-header {
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+            .task-detail-header::before {
+                content: '▼';
+                margin-right: 5px;
+                font-size: 12px;
+                transition: transform 0.3s;
+            }
+            .task-detail-header.collapsed::before {
+                transform: rotate(-90deg);
+            }
+            .task-detail-content {
+                display: none;
+                padding-left: 15px;
+            }
+            .task-detail-row {
+                margin-bottom: 8px;
+                display: flex;
+            }
+            .task-detail-label {
+                font-weight: bold;
+                width: 100px;
+            }
+            .task-detail-value {
+                flex: 1;
+            }
         </style>
         <div id="add-record-modal" class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-lg" role="document">
@@ -71,6 +112,47 @@ function openAddRecordModal(formId, formName) {
                             <p class="mt-2">正在加载表单...</p>
                         </div>
                         <form id="record-form" style="display: none;">
+                            <!-- 任务关联部分 -->
+                            <div class="form-group">
+                                <label>关联任务 <span class="text-danger">*</span></label>
+                                <select id="task-select" name="task_uuid" class="form-control" required>
+                                    <option value="">请选择关联任务</option>
+                                </select>
+                            </div>
+                            
+                            <!-- 任务详情部分 -->
+                            <div id="task-detail-container" class="task-detail-container" style="display: none;">
+                                <div id="task-detail-header" class="task-detail-header collapsed">
+                                    任务详情
+                                </div>
+                                <div id="task-detail-content" class="task-detail-content">
+                                    <div class="task-detail-row">
+                                        <div class="task-detail-label">任务标题：</div>
+                                        <div id="task-title" class="task-detail-value"></div>
+                                    </div>
+                                    <div class="task-detail-row">
+                                        <div class="task-detail-label">任务描述：</div>
+                                        <div id="task-description" class="task-detail-value"></div>
+                                    </div>
+                                    <div class="task-detail-row">
+                                        <div class="task-detail-label">时间：</div>
+                                        <div id="task-time" class="task-detail-value"></div>
+                                    </div>
+                                    <div class="task-detail-row">
+                                        <div class="task-detail-label">地点：</div>
+                                        <div id="task-location" class="task-detail-value"></div>
+                                    </div>
+                                    <div class="task-detail-row">
+                                        <div class="task-detail-label">参与党员：</div>
+                                        <div id="task-partners" class="task-detail-value"></div>
+                                    </div>
+                                    <div class="task-detail-row">
+                                        <div class="task-detail-label">参与党组织：</div>
+                                        <div id="task-organizations" class="task-detail-value"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <!-- 表单内容将通过JavaScript动态加载 -->
                         </form>
                     </div>
@@ -85,6 +167,26 @@ function openAddRecordModal(formId, formName) {
     $('body').append(modalHtml);
     const $modal = $('#add-record-modal');
     $modal.modal('show');
+    
+    // 加载任务列表
+    loadTaskList();
+    
+    // 绑定任务选择变化事件
+    $('#task-select').change(function() {
+        const taskUuid = $(this).val();
+        if (taskUuid) {
+            loadTaskDetail(taskUuid);
+        } else {
+            $('#task-detail-container').hide();
+        }
+    });
+    
+    // 绑定任务详情折叠/展开事件
+    $('#task-detail-header').click(function() {
+        $(this).toggleClass('collapsed');
+        $('#task-detail-content').toggle();
+    });
+    
     // 请求表单结构
     $.ajax({
         url: `${URL}/form_get`,
@@ -117,6 +219,58 @@ function openAddRecordModal(formId, formName) {
     // 当模态弹窗关闭时清理资源
     $modal.on('hidden.bs.modal', function() {
         $(this).remove();
+    });
+}
+
+// 加载任务列表
+function loadTaskList() {
+    $.ajax({
+        url: `${URL}/get_task_list`,
+        type: 'GET',
+        success: function(response) {
+            if (response.code === 0 && response.data && response.data.length > 0) {
+                const $taskSelect = $('#task-select');
+                $taskSelect.empty().append('<option value="">请选择关联任务</option>');
+                response.data.forEach(task => {
+                    $taskSelect.append(`<option value="${task.uuid}">${task.title}</option>`);
+                });
+            }
+        },
+        error: function() {
+            console.error('加载任务列表失败');
+        }
+    });
+}
+
+// 加载任务详情
+function loadTaskDetail(taskUuid) {
+    showLoading('加载任务详情...');
+    $.ajax({
+        url: `${URL}/get_task_detail/${taskUuid}`,
+        type: 'GET',
+        success: function(response) {
+            hideLoading();
+            if (response.code === 0 && response.data) {
+                const taskData = response.data;
+                // 填充任务详情
+                $('#task-title').text(taskData.title);
+                $('#task-description').text(taskData.description);
+                $('#task-time').text(`${taskData.start_date} ${taskData.start_time} - ${taskData.end_date} ${taskData.end_time}`);
+                $('#task-location').text(taskData.location);
+                $('#task-partners').text(Array.isArray(taskData.partners) ? taskData.partners.join('、') : taskData.partners);
+                $('#task-organizations').text(Array.isArray(taskData.organizations) ? taskData.organizations.join('、') : taskData.organizations);
+                
+                // 显示任务详情容器
+                $('#task-detail-container').show();
+                // 默认展开详情
+                $('#task-detail-header').removeClass('collapsed');
+                $('#task-detail-content').show();
+            }
+        },
+        error: function() {
+            hideLoading();
+            console.error('加载任务详情失败');
+        }
     });
 }
 
@@ -227,6 +381,9 @@ function submitRecordForm(formId, formName) {
     Object.assign(formData, checkboxGroups);
     // 显示加载状态
     showLoading('提交中...');
+    // 获取选中的任务UUID
+    const taskUuid = $('#task-select').val();
+    
     // 发送请求到后端
     $.ajax({
         url: `${URL}/submit_form_data`,
@@ -234,7 +391,8 @@ function submitRecordForm(formId, formName) {
         data: {
             form_id: formId,
             form_data: JSON.stringify(formData),
-            uid: localStorage.getItem('uid')
+            uid: localStorage.getItem('uid'),
+            task_uuid: taskUuid  // 新增：提交关联任务UUID
         },
         success: function(response) {
             hideLoading();

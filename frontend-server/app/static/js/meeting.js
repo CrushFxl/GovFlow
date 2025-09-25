@@ -17,6 +17,21 @@ $(document).ready(function() {
     const totalPagesElement = $('#meeting_total_pages');
     const totalCountElement = $('#meeting_total_count');
     
+    // 状态映射
+    const statusMap = {
+        1: 'status-pending',
+        2: 'status-processing',
+        3: 'status-completed',
+        4: 'status-canceled'
+    };
+
+    const statusTextMap = {
+        1: '待审核',
+        2: '待处理',
+        3: '已完成',
+        4: '已取消'
+    };
+
     // 分页参数
     let currentPage = 1;
     const pageSize = 5;
@@ -44,22 +59,22 @@ $(document).ready(function() {
     function loadMeetingData() {
         const meetingType = typeFilter.val();
         // 显示加载状态
-        tableBody.html('<tr><td colspan="6" class="dyfz_no_data">正在加载数据...</td></tr>');
+        tableBody.html('<tr><td colspan="7" class="dyfz_no_data">正在加载数据...</td></tr>');
         // 发送请求获取记录
         $.ajax({
             url: URL + `/get_meeting_records`,
             xhrFields: {withCredentials: true},
-            data: {'type' : meetingType, 'keyword': ''},
-            type: 'GET',
+            type: 'POST',
+            data: {'type' : meetingType, 'keyword': '', 'uid': localStorage.getItem('uid')},
             success: function(response) {
-                if (response.code === 200) {
+                if (response.code === 1000) {
                     allRecords = response.data;
                     totalPages = Math.ceil(allRecords.length / pageSize);
                     currentPage = 1; // 重置为第一页
                     renderTable();
                     updateStatistics();
                 } else {
-                    tableBody.html('<tr><td colspan="6" class="dyfz_no_data">' + response.msg + '</td></tr>');
+                    tableBody.html('<tr><td colspan="6" class="dyfz_no_data">' + (response.msg || '加载失败') + '</td></tr>');
                 }
             },
             error: function() {
@@ -84,16 +99,14 @@ $(document).ready(function() {
         $.ajax({
             url: URL + '/get_meeting_records',
             xhrFields: {withCredentials: true},
-            type: 'GET',
-            data: {'type' : typeFilter.val(), 'keyword': keyword},
+            type: 'POST',
+            data: {'type' : typeFilter.val(), 'keyword': keyword, 'uid': localStorage.getItem('uid')},
             success: function(response) {
-                if (response.code === 200) {
-                    allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
-                    currentPage = 1;
-                    renderTable();
-                    updateStatistics();
-                }
+                allRecords = response.data;
+                totalPages = Math.ceil(allRecords.length / pageSize);
+                currentPage = 1;
+                renderTable();
+                updateStatistics();
             },
             error: function() {
                 alert('搜索失败，请稍后再试');
@@ -118,14 +131,14 @@ $(document).ready(function() {
         
         // 渲染表格内容
         if (currentRecords.length === 0) {
-            tableBody.html('<tr><td colspan="6" class="dyfz_no_data">暂无数据</td></tr>');
+            tableBody.html('<tr><td colspan="7" class="dyfz_no_data">暂无数据</td></tr>');
             return;
         }
         
         let tableHtml = '';
         currentRecords.forEach(function(record, index) {
-            // 格式化日期
-            const submitTime = new Date(record.created_at).toLocaleString('zh-CN', {
+            // 格式化日期 - 使用created_time代替created_at
+            const submitTime = new Date(record.created_time).toLocaleString('zh-CN', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -134,22 +147,31 @@ $(document).ready(function() {
                 second: '2-digit'
             });
             
-            // 处理会议纪要过长的情况，超出部分用省略号显示
-            let summary = record.summary || '';
+            // 处理会议纪要过长的情况，超出部分用省略号显示 - 使用description代替summary
+            let summary = record.description || '';
             const maxSummaryLength = 100;
             const fullSummary = summary;
             if (summary.length > maxSummaryLength) {
                 summary = summary.substring(0, maxSummaryLength) + '...';
             }
             
+            // 获取会议类型 - 使用task_type代替type
+            const meetingType = record.task_type;
+            
+            // 获取状态信息
+            const status = record.status;
+            const statusText = statusTextMap[status];
+            const statusClass = statusMap[status];
+            
             tableHtml += `
                 <tr>
                     <td>${startIndex + index + 1}</td>
                     <td>${record.title}</td>
-                    <td>${record.type}</td>
+                    <td>${meetingType}</td>
                     <td><span class="meeting-summary" title="${fullSummary}">${summary}</span></td>
                     <td>${submitTime}</td>
-                    <td><button class="pf_detail-btn btn btn-action delete-meeting" data-id="${record.id}">删除</button></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td></td>
                 </tr>
             `;
         });
@@ -162,11 +184,7 @@ $(document).ready(function() {
             showSummaryModal(fullSummary);
         });
         
-        // 为删除按钮添加点击事件
-        $('.delete-meeting').click(function() {
-            const recordId = $(this).data('id');
-            deleteMeetingRecord(recordId);
-        });
+
     }
     
     // 更新统计信息
@@ -217,27 +235,7 @@ $(document).ready(function() {
         
     }
     
-    // 删除三会一课记录
-    function deleteMeetingRecord(recordId) {
-        // 显示确认对话框
-        if (confirm('确定要删除这条记录吗？删除后将无法恢复。')) {
-            // 发送删除请求
-            $.ajax({
-                url: URL + '/delete_record',
-                type: 'POST',
-                data: {id: recordId},
-                xhrFields: {withCredentials: true},
-                success: function(response) {
-                    if (response.code === 200) {
-                        alert('删除成功');
-                        loadMeetingData();
-                    } else {
-                        alert('删除失败：' + response.msg);
-                    }
-                }
-            });
-        }
-    }
+
     
     // 暴露初始化函数供home.js调用
     window.meetingModule = {

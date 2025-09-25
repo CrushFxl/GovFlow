@@ -9,6 +9,7 @@ def task_description():
     - uuid, str, 任务的唯一标识符
     - title, str, 任务标题
     - description, str, 任务描述
+    - type, str, 任务类型，枚举：通知/../..
     - start_date, str, 任务开始日期, 格式为YYYY-MM-DD
     - start_time, str, 任务开始时间, 格式为HH:MM
     - end_date, str, 任务结束日期, 格式为YYYY-MM-DD
@@ -33,6 +34,7 @@ class Task(db.Model):
     uuid = db.Column('uuid', db.Text, primary_key=True, unique=True, index=True, nullable=False)
     title = db.Column('title', db.Text, nullable=False)
     description = db.Column('description', db.Text, nullable=False)
+    type = db.Column('type', db.Text, nullable=True, default='通知')
     start_date = db.Column('start_date', db.Text, nullable=False)
     start_time = db.Column('start_time', db.Text, nullable=False, default='00:00')
     end_date = db.Column('end_date', db.Text, nullable=False)
@@ -53,8 +55,9 @@ class Task(db.Model):
 def init_tasks():
     if not Task.query.first():
         default_task = [
-            Task(uuid="TEST-UUID-1", title='召开主题廉政教育大会',
+            Task(uuid="TEST-UUID-1", title='召开主题党日活动',
                  description='明天下午三点在活动中心125召开主题廉政教育大会，受邀各级党组织和党员需要按时参加，会议期间手机保持静音，从侧门入，不要迟到。',
+                 type='主题党日',
                  location='活动中心125',
                  start_date=datetime.now().strftime('%Y-%m-%d'),
                  end_date=datetime.now().strftime('%Y-%m-%d'),
@@ -65,9 +68,10 @@ def init_tasks():
                  partners=['冯小二', '杨小二'],
                  organizations=['灵创大学党委'],
                  status=2),
-            Task(uuid="TEST-UUID-2", title='关于九月份党费收缴的通知',
-                 description='请各党组织和党员及时完成九月份党费收缴工作，务必于本月底前将党费足额上缴至党费专用账户。上缴时请备注好党组织名称或党员姓名，如有疑问请联系冯小二。',
-                 location='线上',
+            Task(uuid="TEST-UUID-2", title='召开主题廉政教育大会',
+                 description='明天下午三点在活动中心125召开主题廉政教育大会，受邀各级党组织和党员需要按时参加，会议期间手机保持静音，从侧门入，不要迟到。',
+                 type='支部党员大会',
+                 location='活动中心125',
                  start_date=datetime.now().strftime('%Y-%m-%d'),
                  end_date=datetime.now().strftime('%Y-%m-%d'),
                  end_time='15:00',
@@ -77,9 +81,23 @@ def init_tasks():
                  partners=['冯小二', '杨小二'],
                  organizations=['灵创大学党委'],
                  status=2),
-            Task(uuid="TEST-UUID-3", title='关于确定冯小二同志为预备党员的决定',
+            Task(uuid="TEST-UUID-3", title='关于九月份党费收缴的通知',
+                 description='请各党组织和党员及时完成九月份党费收缴工作，务必于本月底前将党费足额上缴至党费专用账户。上缴时请备注好党组织名称或党员姓名，如有疑问请联系冯小二。',
+                 location='线上',
+                 type='党费缴纳',
+                 start_date=datetime.now().strftime('%Y-%m-%d'),
+                 end_date=datetime.now().strftime('%Y-%m-%d'),
+                 end_time='15:00',
+                 created_uid=1,
+                 created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                 next_uid=1,
+                 partners=['冯小二', '杨小二'],
+                 organizations=['灵创大学党委'],
+                 status=2),
+            Task(uuid="TEST-UUID-4", title='关于确定冯小二同志为预备党员的决定',
                  description='请孔小二做好冯小二同志确定为预备党员的发展记录。',
                  location='行政楼302会议室',
+                 type='党员发展',
                  start_date=datetime.now().strftime('%Y-%m-%d'),
                  end_date=datetime.now().strftime('%Y-%m-%d'),
                  end_time='16:00',
@@ -89,9 +107,10 @@ def init_tasks():
                  partners=['孔小二'],
                  organizations=['灵创大学各二级学院党委'],
                  status=2),
-            Task(uuid="TEST-UUID-4", title='关于开展冯小二同志年度民主评议的通知',
+            Task(uuid="TEST-UUID-5", title='关于开展冯小二同志年度民主评议的通知',
                  description='请各党员针对冯小二同志进行民主评议，从政治素质、工作能力、作风表现等方面给出客观评价。评议结果需在规定时间内提交。',
                  location='线上',
+                 type='民主评议',
                  start_date=datetime.now().strftime('%Y-%m-%d'),
                  end_date=datetime.now().strftime('%Y-%m-%d'),
                  end_time='23:59',

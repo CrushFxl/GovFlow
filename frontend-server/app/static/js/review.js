@@ -102,7 +102,7 @@ $(document).ready(function() {
             
             // 处理评议说明过长的情况，超出部分用省略号显示
             let description = record.description || '';
-            const maxDescriptionLength = 20;
+            const maxDescriptionLength = 18;
             const fullDescription = description;
             if (description.length > maxDescriptionLength) {
                 description = description.substring(0, maxDescriptionLength) + '...';
@@ -112,6 +112,13 @@ $(document).ready(function() {
             const statusClass = statusMap[record.status] || '';
             const statusText = statusTextMap[record.status] || '-';
             
+            // 根据attachment_name是否为空决定是否添加'去完成'按钮
+            let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'review'}">详情</button>`;
+            
+            // 如果attachment_name不为空，添加'去完成'按钮
+            if (record.attachment_name  && record.status === 2) {
+                actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}" data-task-id="${record.id}">去完成</button>`;
+            }
             
             tableHtml += `
                 <tr>
@@ -120,7 +127,7 @@ $(document).ready(function() {
                     <td><span title="${fullDescription}">${description}</span></td>
                     <td>${deadline}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td><button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'review'}">详情</button></td>
+                    <td>${actionButtons}</td>
                 </tr>
             `;
         });
@@ -232,6 +239,58 @@ $(document).ready(function() {
                     // 调用统一的详情显示函数
                     showTaskDetail(item);
                 }
+            });
+        });
+
+        // 绑定'去完成'按钮事件
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function() {
+                const taskId = this.getAttribute('data-task-id');
+                const attachmentName = this.getAttribute('data-attachment');
+                
+                // 打开添加民主评议模态框
+                openAddRecordModal(3, '民主评议');
+                
+                // 延迟执行，确保模态框已经渲染完成
+                setTimeout(function() {
+                    // 查找并设置关联表单
+                    const taskSelect = document.getElementById('task-select');
+                    if (taskSelect) {
+                        // 遍历所有选项，找到匹配的附件名称
+                        let found = false;
+                        for (let i = 0; i < taskSelect.options.length; i++) {
+                            const option = taskSelect.options[i];
+                            // 使用includes条件，增加匹配的灵活性
+                            if (option.text.includes(attachmentName) || option.value.includes(attachmentName)) {
+                                taskSelect.value = option.value;
+                                // 触发change事件，确保加载相应的表单详情
+                                const event = new Event('change');
+                                taskSelect.dispatchEvent(event);
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        // 禁用下拉框，防止修改
+                        taskSelect.disabled = true;
+                    }
+                    
+                    // 如果没找到，尝试其他可能的select元素（作为后备策略）
+                    if (!taskSelect || taskSelect.options.length === 0) {
+                        const selectElements = document.querySelectorAll('select');
+                        selectElements.forEach(select => {
+                            for (let i = 0; i < select.options.length; i++) {
+                                const option = select.options[i];
+                                if (option.text.includes(attachmentName) || option.value.includes(attachmentName)) {
+                                    select.value = option.value;
+                                    const event = new Event('change');
+                                    select.dispatchEvent(event);
+                                    select.disabled = true;
+                                }
+                            }
+                        });
+                    }
+                }, 300); // 300毫秒延迟
             });
         });
     }

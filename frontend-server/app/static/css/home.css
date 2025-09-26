@@ -1,6 +1,6 @@
 /* 系统设置页面相关样式 */
 
-h1, h2, .menu-title span, .filter-title, th, .btn-outline{
+h1, h2, .menu-title span, .filter-title, th, .btn-outline, .btn-complete, #close-task-modal-button{
     color:  #c12c1f !important;
 }
 

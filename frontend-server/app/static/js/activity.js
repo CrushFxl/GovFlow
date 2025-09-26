@@ -73,6 +73,7 @@ $(document).ready(function() {
             dataType: "json",
             data: {
                 'uid': localStorage.getItem('uid'),
+                'mode': 'private',
             },
             success: function (resp) {
                 if (resp.code === 1000) {
@@ -142,6 +143,12 @@ $(document).ready(function() {
             let actionButtons = `
                 <button class="btn-action btn-detail" data-id="${item.id}" data-type="${item.type}">详情</button>
             `;
+
+            // 如果attachment_name不为空，添加'去完成'按钮
+            if (item.attachment_name) {
+                actionButtons += `
+                <button class="btn-action btn-complete" data-id="${item.id}" data-attachment="${item.attachment_name}" data-task-id="${item.id}">去完成</button>`;
+            }
             
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -189,6 +196,57 @@ $(document).ready(function() {
                     }
                 });
             });
+
+            // 绑定"去完成"按钮事件
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function() {
+                const attachmentName = this.getAttribute('data-attachment');
+                const taskId = this.getAttribute('data-id');
+                
+                // 打开"添加党员发展"的模态框
+                openAddRecordModal(1, '党员发展');
+                
+                // 延迟一下，确保模态框已经渲染
+                setTimeout(function() {
+                    // 查找任务选择下拉框
+                    const taskSelect = document.getElementById('task-select');
+                    if (taskSelect) {
+                        // 查找匹配附件名称的任务选项
+                        const options = Array.from(taskSelect.options);
+                        let found = false;
+                        
+                        for (let option of options) {
+                            // 使用includes进行模糊匹配
+                            if (option.text.includes(attachmentName) || option.value === taskId) {
+                                option.selected = true;
+                                // 触发change事件以加载任务详情
+                                const event = new Event('change');
+                                taskSelect.dispatchEvent(event);
+                                // 禁用下拉框
+                                taskSelect.disabled = true;
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
+                        if (!found) {
+                            const allSelects = document.querySelectorAll('select');
+                            for (let select of allSelects) {
+                                const selectOptions = Array.from(select.options);
+                                for (let option of selectOptions) {
+                                    if (option.text.includes(attachmentName) || option.value === taskId) {
+                                        option.selected = true;
+                                        select.disabled = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, 300);
+            });
+        });
     }
 
     // 上一页按钮点击事件

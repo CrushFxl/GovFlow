@@ -172,7 +172,7 @@ $(document).ready(function() {
             
             // 处理说明内容过长的情况，超出部分用省略号显示
             let description = record.description || '';
-            const maxDescriptionLength = 20;
+            const maxDescriptionLength = 18;
             const fullDescription = description;
             if (description.length > maxDescriptionLength) {
                 description = description.substring(0, maxDescriptionLength) + '...';
@@ -183,6 +183,14 @@ $(document).ready(function() {
             const statusText = statusTextMap[status] || '未知';
             const statusClass = statusMap[status] || 'status-unknown';
             
+            // 构建操作按钮
+            let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'development'}">详情</button>`;
+            
+            // 如果有attachment_name且不为空，则添加"去完成"按钮
+            if (record.attachment_name && record.attachment_name.trim() !== '' && record.status === 2) {
+                actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}" data-type="${record.task_type || 'development'}">去完成</button>`;
+            }
+            
             tableHtml += `
                 <tr>
                     <td>${startIndex + index + 1}</td>
@@ -190,7 +198,7 @@ $(document).ready(function() {
                     <td><span title="${fullDescription}">${description}</span></td>
                     <td>${formattedDate}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td><button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'development'}">详情</button></td>
+                    <td>${actionButtons}</td>
                 </tr>
             `;
         });
@@ -204,7 +212,7 @@ $(document).ready(function() {
     // 绑定表格按钮事件
     function bindTableButtons() {
         // 先移除所有已存在的监听器
-        document.querySelectorAll('.btn-detail').forEach(button => {
+        document.querySelectorAll('.btn-detail, .btn-complete').forEach(button => {
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
         });
@@ -222,6 +230,57 @@ $(document).ready(function() {
                     // 调用统一的详情显示函数
                     showTaskDetail(item);
                 }
+            });
+        });
+        
+        // 绑定"去完成"按钮事件
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function() {
+                const attachmentName = this.getAttribute('data-attachment');
+                const taskId = this.getAttribute('data-id');
+                
+                // 打开"添加党员发展"的模态框
+                openAddRecordModal(1, '党员发展');
+                
+                // 延迟一下，确保模态框已经渲染
+                setTimeout(function() {
+                    // 查找任务选择下拉框
+                    const taskSelect = document.getElementById('task-select');
+                    if (taskSelect) {
+                        // 查找匹配附件名称的任务选项
+                        const options = Array.from(taskSelect.options);
+                        let found = false;
+                        
+                        for (let option of options) {
+                            // 使用includes进行模糊匹配
+                            if (option.text.includes(attachmentName) || option.value === taskId) {
+                                option.selected = true;
+                                // 触发change事件以加载任务详情
+                                const event = new Event('change');
+                                taskSelect.dispatchEvent(event);
+                                // 禁用下拉框
+                                taskSelect.disabled = true;
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
+                        if (!found) {
+                            const allSelects = document.querySelectorAll('select');
+                            for (let select of allSelects) {
+                                const selectOptions = Array.from(select.options);
+                                for (let option of selectOptions) {
+                                    if (option.text.includes(attachmentName) || option.value === taskId) {
+                                        option.selected = true;
+                                        select.disabled = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, 300);
             });
         });
     }

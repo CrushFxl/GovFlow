@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import request, jsonify
 from app.models import db
 from app.models.Profile import Profile
-from app.models.Form import FormSubmission
+from app.models.Form import FormSubmission, Form
 from app.models.User import User
 from ..utils import filter_related_task_by_user
 
@@ -73,7 +73,12 @@ def search_user():
 @development_bk.route('/get_development_records', methods=['GET', 'POST'])
 def get_development_records():
     uid = int(request.form.get('uid'))
-    all_data = filter_related_task_by_user("党员发展", uid)
+    all_data = filter_related_task_by_user("党员发展", uid, mode='private')
+    # 添加附件名称
+    for data in all_data:
+        if data.get('need_attachment') == 'true':
+            form_name = Form.query.filter_by(id=int(data['attachment_id'])).first().name
+            data['attachment_name'] = form_name
     return jsonify({'code': 1000, 'data': all_data})
 
 

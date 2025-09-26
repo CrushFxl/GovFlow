@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from app.models import db
 from app.models.Profile import Profile
-from app.models.Form import FormSubmission
+from app.models.Form import FormSubmission, Form
 from app.models.Branch import Branch
 from ..utils import filter_related_task_by_user
 
@@ -12,7 +12,12 @@ review_bk = Blueprint('review', __name__)
 @review_bk.route('/get_review_records', methods=['GET', 'POST'])
 def get_review_records():
     uid = int(request.form.get('uid'))
-    all_records = filter_related_task_by_user('民主评议', uid)
+    all_records = filter_related_task_by_user('民主评议', uid, mode='private')
+    # 添加附件名称
+    for data in all_records:
+        if data.get('need_attachment') == 'true':
+            form_name = Form.query.filter_by(id=int(data['attachment_id'])).first().name
+            data['attachment_name'] = form_name
     return jsonify({'code': 1000, 'data': all_records})
 
 
@@ -21,13 +26,7 @@ def delete_review_record():
     try:
         # 获取记录ID
         record_id = request.form.get('id')
-        
-        # 验证参数
-        if not record_id:
-            return jsonify({
-                'code': 400,
-                'message': '缺少记录ID'
-            })
+
         
         # 查找记录
         record = FormSubmission.query.filter_by(id=record_id, form_id=3).first()

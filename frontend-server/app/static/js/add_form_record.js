@@ -18,25 +18,6 @@ $(document).ready(function() {
     });
 });
 
-// 显示加载状态
-function showLoading(message) {
-    // 检查是否已有加载遮罩
-    if ($('#global-loading').length) {
-        $('#global-loading').remove();
-    }
-    const loadingHtml = `
-        <div id="global-loading" class="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-50">
-            <div class="spinner-border text-white" style="width: 3rem; height: 3rem;"></div>
-            <p class="text-white mt-2">${message || '加载中...'}</p>
-        </div>
-    `;
-    $('body').append(loadingHtml);
-}
-
-// 隐藏加载状态
-function hideLoading() {
-    $('#global-loading').remove();
-}
 
 // 打开添加记录模态弹窗
 function openAddRecordModal(formId, formName) {
@@ -99,7 +80,7 @@ function openAddRecordModal(formId, formName) {
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">添加${formName}记录</h5>
+                        <h5 class="modal-title" style="color: var(--header-text-color);">添加${formName}记录</h5>
                         <button type="button" class="pf_close-btn" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -235,21 +216,16 @@ function loadTaskList() {
                     $taskSelect.append(`<option value="${task.uuid}">${task.title}</option>`);
                 });
             }
-        },
-        error: function() {
-            console.error('加载任务列表失败');
         }
     });
 }
 
 // 加载任务详情
 function loadTaskDetail(taskUuid) {
-    showLoading('加载任务详情...');
     $.ajax({
         url: `${URL}/get_task_detail/${taskUuid}`,
         type: 'GET',
         success: function(response) {
-            hideLoading();
             if (response.code === 0 && response.data) {
                 const taskData = response.data;
                 // 填充任务详情
@@ -266,10 +242,6 @@ function loadTaskDetail(taskUuid) {
                 $('#task-detail-header').removeClass('collapsed');
                 $('#task-detail-content').show();
             }
-        },
-        error: function() {
-            hideLoading();
-            console.error('加载任务详情失败');
         }
     });
 }
@@ -380,7 +352,6 @@ function submitRecordForm(formId, formName) {
     // 合并多选框数据到表单数据
     Object.assign(formData, checkboxGroups);
     // 显示加载状态
-    showLoading('提交中...');
     // 获取选中的任务UUID
     const taskUuid = $('#task-select').val();
     
@@ -395,7 +366,6 @@ function submitRecordForm(formId, formName) {
             task_uuid: taskUuid  // 新增：提交关联任务UUID
         },
         success: function(response) {
-            hideLoading();
             if (response.code === 200) {
                 alert(`添加${formName}记录成功`);
                 // 关闭模态弹窗
@@ -406,10 +376,6 @@ function submitRecordForm(formId, formName) {
             } else {
                 alert(`添加${formName}记录失败：${response.message || '未知错误'}`);
             }
-        },
-        error: function() {
-            hideLoading();
-            alert('网络错误，请稍后重试');
         }
     });
 }

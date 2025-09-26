@@ -30,7 +30,15 @@ frequency_map = {
 @activity_bk.route('/query', methods=['POST'])
 def query_tasks():
     uid = int(request.form.get('uid'))
-    all_records = filter_related_task_by_user('all', uid)
+    mode = request.form.get('mode')
+    if not mode:
+        mode = 'public'
+    all_records = filter_related_task_by_user('all', uid, mode=mode)
+    # 添加附件名称
+    for data in all_records:
+        if data.get('need_attachment') == 'true':
+            form_name = Form.query.filter_by(id=int(data['attachment_id'])).first().name
+            data['attachment_name'] = form_name
     return jsonify({
         'code': 1000,
         'data': all_records,
@@ -96,6 +104,48 @@ def delete_item():
         return jsonify({
             'code': 1001,
             'message': f'删除失败：{str(e)}'
+        })
+
+# 审核任务接口
+@activity_bk.route('/review_task', methods=['POST'])
+def review_task():
+    try:
+        task_id = request.form.get('task_id')
+        status = request.form.get('status')
+        uid = request.form.get('uid')
+
+        if not task_id or not status:
+            return jsonify({'code': 1001, 'message': '参数不完整'})
+        
+        # 将status转换为整数
+        status = int(status)
+        
+        # 检查状态值是否合法
+        if status not in [2, 4]:
+            return jsonify({'code': 1001, 'message': '状态值不合法'})
+        
+        # 查找对应的任务
+        task = Task.query.filter(Task.uuid == task_id, Task.status != 0).first()
+        
+        if not task:
+            return jsonify({'code': 1001, 'message': '任务不存在或已被删除'})
+        
+        # 检查任务是否处于待审核状态
+        if task.status != 1:
+            return jsonify({'code': 1001, 'message': '任务当前不处于待审核状态'})
+        
+        # 更新任务状态
+        task.status = status
+        # 更新审核时间
+        task.updated_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        db.session.commit()
+        return jsonify({'code': 1000, 'message': '审核成功'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'code': 1001,
+            'message': f'审核失败：{str(e)}'
         })
 
 

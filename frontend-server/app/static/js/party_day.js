@@ -150,7 +150,7 @@ $(document).ready(function() {
     // 绑定表格按钮事件
     function bindTableButtons() {
         // 先移除所有已存在的监听器
-        document.querySelectorAll('.btn-detail').forEach(button => {
+        document.querySelectorAll('.btn-detail, .btn-complete').forEach(button => {
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
         });
@@ -168,6 +168,52 @@ $(document).ready(function() {
                     // 调用统一的详情显示函数
                     showTaskDetail(item);
                 }
+            });
+        });
+        
+        // 绑定"去完成"按钮事件
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function() {
+                const attachmentName = this.getAttribute('data-attachment');
+                const taskId = this.getAttribute('data-id');
+                
+                // 打开"添加主题党日"的模态框
+                openAddRecordModal(5, '主题党日');
+                
+                // 延迟一下，确保模态框已经渲染
+                setTimeout(function() {
+                    // 1. 查找任务选择下拉框并自动选择对应任务
+                    const taskSelect = document.querySelector('#task-select');
+                    if (taskSelect) {
+                        // 遍历选项，查找与当前任务相关的选项
+                        for (let i = 0; i < taskSelect.options.length; i++) {
+                            if (taskSelect.options[i].text.includes(attachmentName) || 
+                                taskSelect.options[i].value.includes(taskId)) {
+                                taskSelect.value = taskSelect.options[i].value;
+                                // 触发change事件，加载任务详情
+                                $(taskSelect).trigger('change');
+                                break;
+                            }
+                        }
+                        // 禁止修改任务选择
+                        taskSelect.disabled = true;
+                    }
+                    
+                    // 2. 查找所有select元素，寻找可能包含附件名称的下拉框
+                    const allSelects = document.querySelectorAll('select');
+                    allSelects.forEach(select => {
+                        // 检查这个select是否可能是附件选择框
+                        for (let i = 0; i < select.options.length; i++) {
+                            if (select.options[i].text === attachmentName || 
+                                select.options[i].text.includes(attachmentName)) {
+                                // 找到匹配的附件，设置并禁用
+                                select.value = select.options[i].value;
+                                select.disabled = true;
+                                break;
+                            }
+                        }
+                    });
+                }, 300);
             });
         });
     }
@@ -211,6 +257,14 @@ $(document).ready(function() {
             // 获取状态信息
             const status = record.status || 0;
             
+            // 构建操作按钮
+            let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.type || 'meeting'}">详情</button>`;
+            
+            // 如果有attachment_name字段且不为空，则添加"去完成"按钮
+            if (record.attachment_name && record.attachment_name !== '' && record.status === 2) {
+                actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}">去完成</button>`;
+            }
+            
             tableHtml += `
                 <tr>
                     <td>${startIndex + index + 1}</td>
@@ -218,7 +272,7 @@ $(document).ready(function() {
                     <td>${startTime}</td>
                     <td>${endTime}</td>
                     <td><span class="status-badge ${statusMap[status]}">${statusTextMap[status]}</span></td>
-                    <td><button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.type || 'meeting'}">详情</button></td>
+                    <td>${actionButtons}</td>
                 </tr>
             `;
         });

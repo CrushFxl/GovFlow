@@ -3,7 +3,7 @@ from .models.Task import Task
 from .models.Todo import Todo
 from .models.Profile import Profile
 from .models.Branch import Branch
-from .models.Form import Form
+from .models.Form import Form, FormSubmission
 from .models.System import System
 from .models.User import User
 from app.models import db
@@ -157,11 +157,12 @@ def send_dingtalk_msg(user_ids, title, content):
     return result
 
 
-def filter_related_task_by_user(task_type, uid):
+def filter_related_task_by_user(task_type, uid, mode='public'):
     """根据用户筛选出和用户相关的任务
     Args:
         task_type (str): 任务类型 (all 表示所有类型)
         uid (int): 用户UID
+        mode (str, optional): 查询模式.
     Returns:
         list: 相关任务列表
     """
@@ -207,6 +208,11 @@ def filter_related_task_by_user(task_type, uid):
         # 获取创建者信息
         creator = User.query.filter_by(uid=task.created_uid).first()
         creator_name = creator.nick if creator else '未知'
+        is_submited = FormSubmission.query.filter_by(task_uuid=task.uuid, user_id=uid).first()
+
+        if mode == 'private' and is_submited:
+            task.status = 3
+            task.need_attachment = 'false'
         all_data.append({
             'id': task.uuid,
             'type': 'task',  # 标记为任务类型
@@ -222,7 +228,9 @@ def filter_related_task_by_user(task_type, uid):
             'end_time': task.end_time,
             'location': task.location,
             'frequency': get_frequency_text(task.frequency),
-            'task_type': task.type
+            'task_type': task.type,
+            'need_attachment': task.need_attachment,
+            'attachment_id': task.attachment_id
         })
     # 处理Notice数据
     for notice in notices:

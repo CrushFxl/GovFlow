@@ -181,7 +181,7 @@ $(document).ready(function() {
     // 绑定表格按钮事件
         function bindTableButtons() {
             // 先移除所有已存在的监听器
-            document.querySelectorAll('.btn-detail, .btn-delete').forEach(button => {
+            document.querySelectorAll('.btn-detail, .btn-delete, .btn-complete').forEach(button => {
                 const newButton = button.cloneNode(true);
                 button.parentNode.replaceChild(newButton, button);
             });
@@ -234,10 +234,6 @@ $(document).ready(function() {
                                 } else {
                                     alert('删除失败：' + resp.message);
                                 }
-                            },
-                            error: function() {
-                                hideLoading();
-                                alert('连接失败：无法连接至服务器，请联系站长或稍后再试。');
                             }
                         });
                     }

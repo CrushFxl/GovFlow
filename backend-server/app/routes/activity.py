@@ -2,11 +2,13 @@ import json
 import os
 import datetime
 from datetime import datetime
+from turtle import st
 from app.models import db
 from app.models.Task import Task
 from app.models.Notice import Notice
 from app.models.User import User
 from app.models.Branch import Branch
+from app.models.Form import Form
 from app.models.Profile import Profile
 import uuid as Uuid
 from flask import Blueprint, request, session, jsonify
@@ -15,11 +17,19 @@ from ..utils import filter_related_task_by_user
 
 activity_bk = Blueprint('activity', __name__, url_prefix='/activity')
 
+frequency_map = {
+    '一次性': 0,
+    '每周': 1,
+    '每月': 2,
+    '每季度': 3,
+    '每年': 4
+}
+
 
 # 任务下发页面表格拉取接口
 @activity_bk.route('/query', methods=['POST'])
 def query_tasks():
-    uid = request.form.get('uid')
+    uid = int(request.form.get('uid'))
     all_records = filter_related_task_by_user('all', uid)
     return jsonify({
         'code': 1000,
@@ -136,6 +146,85 @@ def save_task():
     db.session.add(new_task)
     db.session.commit()
     return jsonify({'code': 1000, 'message': '保存成功'})
+
+
+@activity_bk.route('/submit', methods=['POST'])
+def submit_activity():
+    # 从前端接收JSON数据
+    data = request.get_json()
+    
+    # 提取必要的字段
+    uid = data.get('uid')
+    title = data.get('title')
+    task_type = data.get('type')
+    description = data.get('description')
+    location = data.get('location')
+    organizations = data.get('organizations', [])
+    partners = data.get('partners', [])
+    frequency = data.get('frequency')
+    attachment = data.get('attachment')
+
+    if task_type == '通知':
+        new = Notice(
+            uuid=str(Uuid.uuid4()),
+            title=title,
+            description=description,
+            organizations=organizations,
+            partners=partners,
+            created_uid=uid,
+            next_uid=uid,
+            status=2,
+            created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        )
+    else:
+        if attachment == '无':
+            need_attachment = 'false'
+            attachment_id = ''
+        else:
+            need_attachment = 'true'
+            attachment_id = Form.query.filter_by(name=attachment).first().id
+        #解析start_date/start_time/end_date/end_time
+        st_date = data.get('startTime')
+        ed_date = data.get('endTime')
+        if st_date:
+            start_date = st_date.split('T')[0]
+            start_time = st_date.split('T')[1].split('.')[0]
+        else:
+            start_date = ''
+            start_time = ''
+
+        if ed_date:
+            end_date = ed_date.split('T')[0]
+            end_time = ed_date.split('T')[1].split('.')[0]
+        else:
+            end_date = ''
+            end_time = ''
+        pass
+        # 创建新任务
+        new = Task(
+            uuid=str(Uuid.uuid4()),
+            title=title,
+            description=description,
+            type=task_type,
+            organizations=organizations,
+            partners=partners,
+            created_uid=uid,
+            next_uid=uid,
+            start_date=start_date,
+            start_time=start_time,
+            end_date=end_date,
+            end_time=end_time,
+            location=location,
+            frequency=frequency_map.get(frequency, 0),
+            status=2,
+            need_attachment=need_attachment,
+            attachment_id=attachment_id,
+            created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        )
+    
+    db.session.add(new)
+    db.session.commit()
+    return jsonify({'success': True, 'message': '任务创建成功'})
 
 
 

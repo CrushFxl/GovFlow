@@ -11,21 +11,7 @@
     border: 1px solid #e0e0e0;
 }
 
-/* 统计信息样式 */
-.dfy_stats {
-    font-size: 14px;
-    font-weight: bold;
-}
 
-.dfy_stats span {
-    margin-right: 5px;
-}
-
-/* 金额样式 */
-.fee-amount {
-    color: var(--primary-red);
-    font-weight: bold;
-}
 
 /* 月份筛选下拉框样式 */
 #dfy_month_filter {

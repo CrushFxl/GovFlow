@@ -235,32 +235,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         const submitData = {
                             ...taskForm,
                             start_time: startTimeStr,
-                            end_time: endTimeStr
-                        };
-                        
+                            end_time: endTimeStr,
+                            uid: localStorage.getItem('uid')
+                        };                        
                         // 发送请求到后端
                         $.ajax({
-                            url: `${config.backendUrl}/api/tasks/create`,
+                            url: `${config.backendUrl}/activity/submit`,
                             type: 'POST',
                             contentType: 'application/json',
                             data: JSON.stringify(submitData),
                             success: function(result) {
                                 if (result.success) {
-                                    ElMessage.success('任务创建成功');
                                     dialogVisible.value = false;
                                     resetForm();
-                                    
-                                    // 刷新任务列表（如果页面存在）
                                     if (window.taskManagementModule && typeof window.taskManagementModule.fetchScheduleData === 'function') {
                                         window.taskManagementModule.fetchScheduleData();
                                     }
-                                } else {
-                                    ElMessage.error(result.message || '任务创建失败');
                                 }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('提交任务失败:', error);
-                                ElMessage.error('任务创建失败，请重试');
                             }
                         });
                     });

@@ -588,7 +588,9 @@
     <p id="URL" style="display: none">{{URL}}</p>
     <!-- 顶部导航栏 -->
     <nav class="top-nav">
-        <a href="#" class="logo-link"><img src="../static/img/logo-lc-white.png" alt="智慧党建AI智能体系统" class="logo-img" style="height: 40px; margin: 5px 5px 0 0;"></a>
+        <a href="#" class="logo-link">
+            <img src="../static/img/logo-lc-white.png" alt="智慧党建AI智能体系统" class="logo-img" style="height: 40px; margin: 5px 5px 0 0;">
+        </a>
         <div class="logo">党建AI智能体系统</div>
         <ul class="nav-menu">
             <li><a href="#">未读消息</a></li>
@@ -956,12 +958,20 @@
                         <h2 class="card-title">任务列表</h2>
                         <div class="search-box">
                             <label for="task_management_type_filter" class="filter-title1">任务类型：</label>
-                            <select id="task_management_type_filter">
+                            <select id="task_management_type_filter" style="margin-right: 10px;">
                                 <option value="all">全部</option>
                                 <!-- 任务类型将通过JavaScript动态加载 -->
                             </select>
+                            <label for="task_management_status_filter" class="filter-title1">任务状态：</label>
+                            <select id="task_management_status_filter" style="margin-right: 10px;">
+                                <option value="all">全部</option>
+                                <option value="1">待审核</option>
+                                <option value="2">进行中</option>
+                                <option value="3">已完成</option>
+                                <option value="4">审核拒绝</option>
+                            </select>
                             <input type="text" placeholder="搜索任务..." class="search-input">
-                            <button class="btn-outline">搜索</button>
+                            <button class="btn-outline" style="min-width: 60px;">搜索</button>
                         </div>
                     </div>
 
@@ -1153,12 +1163,16 @@
                                 <option value="党小组会">党小组会</option>
                                 <option value="党课">党课</option>
                             </select>
-                            <button id="meeting_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
+                            <label for="meeting_status_filter" style="margin: 15px 0;">会议状态：</label>
+                            <select id="meeting_status_filter">
+                                <option value="all">全部</option>
+                                <option value="1">待审核</option>
+                                <option value="2">待处理</option>
+                                <option value="3">已完成</option>
+                                <option value="4">已取消</option>
+                            </select>
+                            <button id="meeting_refresh_button" class="btn dyfz_refresh_btn" style="margin-left: 10px;">刷新</button>
                             
-                            <!-- 统计信息 -->
-                            <div class="dfy_stats" style="margin-left: 30px; display: flex; align-items: center;">
-                                <span id="meeting_total_count" style="font-size: 14px; font-weight: bold;">总记录数: <span style="color: var(--primary-red);">0</span></span>
-                            </div>
                             <!-- 用户查询区域 -->
                             <div class="dyfz_user_search_area" style="margin: 1px 0 0 20px">
                                 <div class="dyfz_search_box">
@@ -1214,6 +1228,18 @@
                     <!-- 筛选和表格区域 -->
                     <div class="dyfz_table_area">
                         <div class="dyfz_filter_area">
+                            <!-- 状态筛选 -->
+                            <div style="margin-right: 15px; display: flex; flex-direction: row; align-items: center;">
+                                <label id="t1" for="party_day_status_filter">状态：</label>
+                                <select id="party_day_status_filter">
+                                    <option value="all">全部</option>
+                                    <option value="1">待审核</option>
+                                    <option value="2">进行中</option>
+                                    <option value="3">已完成</option>
+                                    <option value="4">已取消</option>
+                                </select>
+                            </div>
+                            
                             <!-- 用户查询区域 -->
                             <div class="dyfz_search_box">
                                 <div class="dyfz_user_icon"></div>
@@ -1282,12 +1308,6 @@
                                 <option value="12">12月</option>
                             </select>
                             <button id="dfy_refresh_button" class="btn dyfz_refresh_btn">刷新</button>
-                            
-                            <!-- 统计信息 -->
-                            <div class="dfy_stats" style="margin-left: 30px; display: flex; align-items: center;">
-                                <span id="dfy_total_amount" style="margin-right: 20px; font-size: 14px; font-weight: bold;">总金额: <span style="color: var(--primary-red);">0.00</span> 元</span>
-                                <span id="dfy_total_count" style="font-size: 14px; font-weight: bold;">总笔数: <span style="color: var(--primary-red);">0</span> 笔</span>
-                            </div>
                             <!-- 用户查询区域 -->
                             <div class="dyfz_user_search_area" style="margin: 1px 0 0 20px">
                                 <div class="dyfz_search_box">
@@ -1311,11 +1331,12 @@
                                         <th>提交时间</th>
                                         <th>截止时间</th>
                                         <th>缴纳状态</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dfy_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="6" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="7" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1373,11 +1394,12 @@
                                         <th>说明内容</th>
                                         <th>发展时间</th>
                                         <th>发展状态</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dyfz_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="5" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="6" class="dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1483,6 +1505,18 @@
                     <!-- 筛选和表格区域 -->
                     <div class="rw_dyfz_table_area">
                         <div class="rw_dyfz_filter_area">
+                            <!-- 状态筛选 -->
+                            <div style="margin-right: 15px; display: flex; flex-direction: row; align-items: center;">
+                                <label id="t2" for="review_status_filter">状态：</label>
+                                <select id="review_status_filter">
+                                    <option value="all">全部</option>
+                                    <option value="1">待审核</option>
+                                    <option value="2">待处理</option>
+                                    <option value="3">已完成</option>
+                                    <option value="4">已拒绝</option>
+                                </select>
+                            </div>
+                            
                             <!-- 用户查询区域 -->
                             <div class="rw_dyfz_user_search_area" style="margin: 1px 0 0 20px">
                                 <div class="rw_dyfz_search_box">
@@ -1507,11 +1541,12 @@
                                         <th>评议说明</th>
                                         <th>截止时间</th>
                                         <th>评议状态</th>
+                                        <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="review_table_body">
                                     <!-- 表格内容将通过JavaScript动态加载 -->
-                                    <tr><td colspan="5" class="rw_dyfz_no_data">请点击刷新按钮加载数据</td></tr>
+                                    <tr><td colspan="6" class="rw_dyfz_no_data">请点击刷新按钮加载数据</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1633,102 +1668,6 @@
             </div>
 
         </main>
-    </div>
-
-    <!-- 任务确认表单弹窗 -->
-    <div id="activity-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>活动详情</h2>
-            </div>
-            <div class="modal-body">
-                <div class="modal-scrollable-content">
-                    <form id="activity-form">
-                        <div class="form-group">
-                            <label for="form-title">标题</label>
-                            <input type="text" id="form-title" name="title" required>
-                        </div>
-                        <div class="two-column-container">
-                            <div class="form-group">
-                                <label for="form-initiator">发起人</label>
-                                <input type="text" id="form-initiator" name="initiator" readonly style="background-color: #f5f5f5;">
-                            </div>
-                            <div class="form-group">
-                                <label for="form-type">任务类型</label>
-                                <select id="form-type" name="type" required>
-                                    <option value="支部党员大会">支部党员大会</option>
-                                    <option value="支部委员会">支部委员会</option>
-                                    <option value="党小组会议">党小组会议</option>
-                                    <option value="党课学习">党课学习</option>
-                                    <option value="主题党日">主题党日</option>
-                                    <option value="专题会议">专题会议</option>
-                                    <option value="组织生活会">组织生活会</option>
-                                    <option value="二级党组织委员会议">二级党组织委员会议</option>
-                                    <option value="党员大会">党员大会</option>
-                                    <option value="党课学习">党课学习</option>
-                                    <option value="理论学习中心组会议">理论学习中心组会议</option>
-                                    <option value="民主生活会">民主生活会</option>
-                                    <option value="党风廉政分析会">党风廉政分析会</option>
-                                    <option value="专项工作任务上报">专项工作任务上报</option>
-                                    <option value="数据统计上报">数据统计上报</option>
-                                    <option value="其它">其它</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="form-date">日期</label>
-                            <input type="date" id="form-date" name="date" required>
-                        </div>
-                        <div class="time-container">
-                            <div class="form-group">
-                                <label for="form-start-time">开始时间</label>
-                                <input type="time" id="form-start-time" name="start_time" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="form-end-time">结束时间</label>
-                                <input type="time" id="form-end-time" name="end_time" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="form-location">地点</label>
-                            <input type="text" id="form-location" name="location" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="form-organizations">参与组织</label>
-                            <input type="text" id="form-organizations" name="organizations">
-                        </div>
-                        <div class="form-group">
-                            <label for="form-partners">参与人员</label>
-                            <input type="text" id="form-partners" name="partners">
-                        </div>
-                        <div class="form-group">
-                            <label for="form-frequency">执行频次</label>
-                            <select id="form-frequency" name="frequency" required>
-                                <option value="0">一次性</option>
-                                <option value="1">每周</option>
-                                <option value="3">每月</option>
-                                <option value="4">每季度</option>
-                                <option value="6">每年</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="activity-form-description">描述</label>
-                            <textarea id="activity-form-description" name="description" rows="4"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="form-need-attachment">
-                                <input type="checkbox" id="form-need-attachment" name="need_attachment" value="true">
-                                是否需要附件
-                            </label>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="cancel-task-btn" class="btn-cancel">取消</button>
-                <button id="confirm-btn" class="btn-confirm">确认</button>
-            </div>
-        </div>
     </div>
 
     <!-- 党员详情弹窗 -->
@@ -1865,8 +1804,9 @@
     </script>
     
     <script src="../static/sdk/pako.js" defer></script>
-    <script src="../static/sdk/jquery.min.js" defer></script>
+    <script src="../static/sdk/jquery.min.js"></script>
     <!-- Bootstrap JS -->
+     <script src="../static/js/task_management.js"></script>
     <script src="../static/sdk/bootstrap.bundle.min.js" defer></script>
     <script src="../static/js/add_form_record.js" defer></script>
     <script src="../static/sdk/chart.umd.min.js" defer></script>
@@ -1875,7 +1815,6 @@
     <script src="../static/js/member.js" defer></script>
     <script src="../static/js/profile.js" defer></script>
     <script src="../static/js/activity.js" defer></script>
-    <script src="../static/js/task_management.js" defer></script>
     <script src="../static/js/meeting.js" defer></script>
     <script src="../static/js/fee.js" defer></script>
     <script src="../static/js/development.js" defer></script>

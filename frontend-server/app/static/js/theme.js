@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showAllMenuItems();
             // 切换到橙色图标
             updateMenuIcons('orange-icon');
+            // 管理员身份 - 切换logo为红色
+            updateLogo('logo-lc-red.png');
         } else {
             // 普通用户 - 恢复默认红色主题
             root.style.setProperty('--primary-red', '#c12c1f');
@@ -37,6 +39,17 @@ document.addEventListener('DOMContentLoaded', function() {
             hideRestrictedMenuItems();
             // 切换到红色图标
             updateMenuIcons('red-icon');
+            // 普通用户 - 切换logo为白色
+            updateLogo('logo-lc-white.png');
+        }
+    }
+    
+    // 根据用户状态更新顶部导航栏logo
+    function updateLogo(logoFileName) {
+        const logoElement = document.querySelector('.logo-link img');
+        if (logoElement) {
+            // 假设logo图片位于static/img目录下
+            logoElement.setAttribute('src', `../static/img/${logoFileName}`);
         }
     }
     

@@ -32,7 +32,7 @@ window.feeModule = {
     // 加载党费数据
     loadFeeData: function() {
         // 显示加载状态
-        this.tableBody.html('<tr><td colspan="6" class="dyfz_no_data">正在加载数据...</td></tr>');
+        this.tableBody.html('<tr><td colspan="7" class="dyfz_no_data">正在加载数据...</td></tr>');
         
         // 发送请求获取记录
         $.ajax({
@@ -42,16 +42,15 @@ window.feeModule = {
             type: 'POST',
             success: function(response) {
                 if (response.code === 200) {
-                    window.feeModule.allRecords = response.data;
-                    window.feeModule.totalPages = Math.ceil(window.feeModule.allRecords.length / window.feeModule.pageSize);
-                    window.feeModule.currentPage = 1; // 重置为第一页
-                    window.feeModule.renderTable();
+                    // 过滤掉通知类型任务
+                    window.feeModule.allRecords = response.data.filter(record => record.task_type !== '通知');
+                    window.feeModule.filterByStatus(); // 加载数据后应用筛选
                 } else {
-                    window.feeModule.tableBody.html('<tr><td colspan="5" class="dyfz_no_data">' + response.msg + '</td></tr>');
+                    window.feeModule.tableBody.html('<tr><td colspan="7" class="dyfz_no_data">' + response.msg + '</td></tr>');
                 }
             },
             error: function() {
-                window.feeModule.tableBody.html('<tr><td colspan="6" class="dyfz_no_data">加载失败，请稍后再试</td></tr>');
+                window.feeModule.tableBody.html('<tr><td colspan="7" class="dyfz_no_data">加载失败，请稍后再试</td></tr>');
             }
         });
     },
@@ -60,8 +59,8 @@ window.feeModule = {
     renderTable: function() {
         // 计算当前页的数据
         const startIndex = (this.currentPage - 1) * this.pageSize;
-        const endIndex = Math.min(startIndex + this.pageSize, this.allRecords.length);
-        const currentRecords = this.allRecords.slice(startIndex, endIndex);
+        const endIndex = Math.min(startIndex + this.pageSize, this.filteredRecords.length);
+        const currentRecords = this.filteredRecords.slice(startIndex, endIndex);
         
         // 更新分页信息
         this.currentPageElement.text(this.currentPage);
@@ -101,6 +100,14 @@ window.feeModule = {
                 deadlineTime = '-';
             }
             
+            // 处理说明内容过长的情况，超出部分用省略号显示
+            let description = record.description || '';
+            const maxDescriptionLength = 20;
+            const fullDescription = description;
+            if (description.length > maxDescriptionLength) {
+                description = description.substring(0, maxDescriptionLength) + '...';
+            }
+            
             // 获取状态信息
             const status = record.status || 0;
             const statusText = window.feeModule.statusTextMap[status] || '未知';
@@ -108,17 +115,46 @@ window.feeModule = {
             
             tableHtml += `
                 <tr>
-                    <td>${startIndex + index + 1}</td>
-                    <td>${record.title || '-'}</td>
-                    <td>${record.description || '-'}</td>
-                    <td>${submitTime}</td>
-                    <td>${deadlineTime}</td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                </tr>
+                        <td>${startIndex + index + 1}</td>
+                        <td>${record.title || '-'}</td>
+                        <td><span title="${fullDescription}">${description}</span></td>
+                        <td>${submitTime}</td>
+                        <td>${deadlineTime}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td><button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'fee'}">详情</button></td>
+                    </tr>
             `;
         });
         
         this.tableBody.html(tableHtml);
+        
+        // 为详情按钮绑定事件
+        this.bindTableButtons();
+    },
+    
+    // 绑定表格按钮事件
+    bindTableButtons: function() {
+        // 先移除所有已存在的监听器
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+        });
+
+        // 绑定详情按钮事件
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                // 获取完整的数据
+                const allData = [...window.feeModule.allRecords];
+                const item = allData.find(item => item.id === id);
+                
+                if (item) {
+                    // 调用统一的详情显示函数
+                    showTaskDetail(item);
+                }
+            });
+        });
     },
     
     // 绑定事件处理程序
@@ -143,6 +179,11 @@ window.feeModule = {
                 window.feeModule.renderTable();
             }
         });
+        
+        // 状态筛选下拉框改变事件
+        this.statusFilter.change(function() {
+            window.feeModule.filterByStatus();
+        });
     },
     
     // 初始化模块
@@ -157,15 +198,53 @@ window.feeModule = {
         this.nextPageButton = $('#dfy_next_page');
         this.currentPageElement = $('#dfy_current_page');
         this.totalPagesElement = $('#dfy_total_pages');
+        this.statusFilter = $('#dfy_month_filter'); // 复用现有下拉框作为状态筛选
         
         // 重置分页参数
         this.currentPage = 1;
         this.pageSize = 5;
         this.totalPages = 1;
         this.allRecords = [];
+        this.filteredRecords = [];
         
         this.bindEvents();
         this.loadFeeData();
+        this.updateFilterOptions();
+    },
+    
+    // 更新筛选下拉框选项为状态选项
+    updateFilterOptions: function() {
+        const statusFilter = this.statusFilter;
+        statusFilter.empty();
+        statusFilter.append('<option value="all">全部</option>');
+        
+        // 遍历状态映射，添加状态选项
+        for (const [key, value] of Object.entries(this.statusTextMap)) {
+            statusFilter.append(`<option value="${key}">${value}</option>`);
+        }
+        
+        // 更新标签文本
+        const label = statusFilter.prev('label');
+        if (label) {
+            label.text('筛选状态：');
+        }
+    },
+    
+    // 根据状态筛选数据
+    filterByStatus: function() {
+        const selectedStatus = this.statusFilter.val();
+        
+        if (selectedStatus === 'all') {
+            this.filteredRecords = [...this.allRecords];
+        } else {
+            this.filteredRecords = this.allRecords.filter(record => 
+                record.status === parseInt(selectedStatus)
+            );
+        }
+        
+        this.currentPage = 1;
+        this.totalPages = Math.ceil(this.filteredRecords.length / this.pageSize);
+        this.renderTable();
     }
 };
 

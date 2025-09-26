@@ -28,7 +28,7 @@ $(document).ready(function() {
         if (scheduleData.length > 0) {
             const types = new Set();
             scheduleData.forEach(item => {
-                if (item.type === 'task' && item.task_type) {
+                if (item.task_type) {
                     types.add(item.task_type);
                 }
             });
@@ -56,7 +56,7 @@ $(document).ready(function() {
             filteredData = [...scheduleData];
         } else {
             filteredData = scheduleData.filter(item => 
-                item.type === 'task' && item.task_type === selectedType
+                item.task_type === selectedType
             );
         }
         
@@ -138,7 +138,7 @@ $(document).ready(function() {
                     break;
             }
             
-            // 构建详情按钮
+            // 构建操作按钮
             let actionButtons = `
                 <button class="btn-action btn-detail" data-id="${item.id}" data-type="${item.type}">详情</button>
             `;
@@ -167,28 +167,28 @@ $(document).ready(function() {
     }
 
     // 绑定表格按钮事件
-    function bindTableButtons() {
-        // 先移除所有已存在的监听器
-        document.querySelectorAll('.btn-detail, .btn-complete, .btn-delete').forEach(button => {
-            const newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-        });
-
-        // 绑定详情按钮事件
-        document.querySelectorAll('.btn-detail').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const type = this.getAttribute('data-type');
-                // 获取完整的数据
-                const allData = JSON.parse(sessionStorage.getItem('activityData') || '[]');
-                const item = allData.find(item => item.id === id && item.type === type);
-                
-                if (item) {
-                    // 查看详情逻辑已简化，仅做提示
-                    alert(`任务详情：\n${item.title}\n${item.task_type || '无类型'}\n${item.created_time || '无时间'}\n${item.frequency || '一次性'}`);
-                }
+        function bindTableButtons() {
+            // 先移除所有已存在的监听器
+            document.querySelectorAll('.btn-detail, .btn-complete, .btn-delete').forEach(button => {
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
             });
-        });
+
+            // 绑定详情按钮事件
+            document.querySelectorAll('.btn-detail').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const type = this.getAttribute('data-type');
+                    // 获取完整的数据
+                    const allData = JSON.parse(sessionStorage.getItem('activityData') || '[]');
+                    const item = allData.find(item => item.id === id && item.type === type);
+                    
+                    if (item) {
+                        // 调用统一的详情显示函数
+                        showTaskDetail(item);
+                    }
+                });
+            });
     }
 
     // 上一页按钮点击事件

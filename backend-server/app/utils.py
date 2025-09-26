@@ -10,14 +10,6 @@ from app.models import db
 import uuid as Uuid
 import requests
 
-# 限制文本长度函数
-def truncate_text(text, max_length=15):
-    if not text:
-        return '-'
-    if isinstance(text, str) and len(text) > max_length:
-        return text[:max_length] + '...'
-    return text
-
 # 任务频率映射函数
 def get_frequency_text(frequency):
     frequency_map = {
@@ -219,9 +211,9 @@ def filter_related_task_by_user(task_type, uid):
             'id': task.uuid,
             'type': 'task',  # 标记为任务类型
             'title': task.title,
-            'description': truncate_text(task.description),
+            'description': task.description,
             'created_time': task.created_time,
-            'partners': truncate_text("; ".join(task.partners)),
+            'partners': "; ".join(task.partners),
             'status': task.status,
             'creator': creator_name,
             'start_date': task.start_date,
@@ -241,9 +233,9 @@ def filter_related_task_by_user(task_type, uid):
             'id': notice.uuid,
             'type': 'notice',  # 标记为通知类型
             'title': notice.title,
-            'description': truncate_text(notice.description),
+            'description': notice.description,
             'created_time': notice.created_time,
-            'partners': truncate_text("; ".join(notice.partners)),
+            'partners': "; ".join(notice.partners),
             'status': notice.status,
             'creator': creator_name,
             'start_date': '',  # Notice表可能没有这些字段

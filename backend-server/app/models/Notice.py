@@ -1,3 +1,5 @@
+from scripts.regsetup import description
+
 from . import db
 from datetime import datetime
 
@@ -30,4 +32,23 @@ class Notice(db.Model):
     created_time = db.Column('created_time', db.Text, nullable=False)
     next_uid = db.Column('next_uid', db.Integer, nullable=False)
     status = db.Column('status', db.Integer, nullable=False, default=0)
+
+def init_notices():
+    if not Notice.query.first():
+        default_notice = [
+            Notice(uuid="TEST-NOTICE-1",
+                   title="通知小冯明天下午三点来119开会",
+                   description="通知小冯明天下午三点来119开会，会议准时开始，不要迟到。",
+                   partners=['冯小二'],
+                   organizations=[],
+                   created_uid=101,
+                   created_time=str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                   next_uid=101,
+                   status=2
+                   ),
+        ]
+        db.session.bulk_save_objects(default_notice)
+        db.session.commit()
+        print("初始化测试通知完成.")
+
 

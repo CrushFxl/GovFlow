@@ -11,12 +11,14 @@ $(document).ready(function() {
     const currentPageElement = $('#party_day_current_page');
     const totalPagesElement = $('#party_day_total_pages');
     const totalCountElement = $('#party_day_total_count');
+    const statusFilter = $('#party_day_status_filter'); // 状态筛选下拉框
     
     // 分页参数
     let currentPage = 1;
     const pageSize = 5;
     let totalPages = 1;
-    let allRecords = [];
+    let allRecords = []; // 原始数据
+    let filteredRecords = []; // 筛选后的数据
     
     // 初始化页面
     function initPartyDay() {
@@ -29,6 +31,7 @@ $(document).ready(function() {
         });
         prevPageButton.click(goToPrevPage);
         nextPageButton.click(goToNextPage);
+        statusFilter.change(filterByStatus); // 绑定状态筛选事件
         loadPartyDayData();
     }
     
@@ -44,10 +47,9 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.code === 1000) {
                     allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
+                    filteredRecords = [...allRecords]; // 初始化筛选后数据
                     currentPage = 1;
-                    renderTable();
-                    updateStatistics();
+                    filterByStatus(); // 应用状态筛选
                 } else {
                     tableBody.html('<tr><td colspan="6" class="dyfz_no_data">' + (response.msg || '加载失败') + '</td></tr>');
                 }
@@ -61,31 +63,51 @@ $(document).ready(function() {
     // 搜索主题党日活动
     function searchPartyDay() {
         const keyword = searchInput.val().trim();
+        
+        // 如果搜索框为空，则显示所有数据
         if (!keyword) {
-            alert('请输入活动标题进行查询');
+            filteredRecords = [...allRecords];
+            filterByStatus(); // 重新应用状态筛选
             return;
         }
-        // 发送请求查询活动 - 修改为调用filter_related_task_by_user相关接口
-        $.ajax({
-            url: URL + '/activity/query',
-            xhrFields: {withCredentials: true},
-            type: 'POST',
-            data: {'task_type': 'party_day', 'uid': localStorage.getItem('uid'), 'keyword': keyword},
-            success: function(response) {
-                if (response.code === 1000) {
-                    allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
-                    currentPage = 1;
-                    renderTable();
-                    updateStatistics();
-                } else {
-                    alert('搜索失败：' + (response.msg || '未知错误'));
-                }
-            },
-            error: function() {
-                alert('搜索失败，请稍后再试');
-            }
+        
+        // 先尝试在本地过滤数据，确保只筛选主题党日类型的活动
+        const tempRecords = allRecords.filter(record => {
+            // 确保任务类型是主题党日
+            if (record.task_type !== '主题党日') return false;
+            
+            const title = record.title || '';
+            return title.toLowerCase().includes(keyword.toLowerCase());
         });
+        
+        filteredRecords = [...tempRecords];
+        filterByStatus(); // 应用状态筛选
+    }
+    
+    // 按状态筛选
+    function filterByStatus() {
+        const selectedStatus = statusFilter.val();
+        
+        // 如果选择全部，则使用所有筛选后的数据
+        if (selectedStatus === 'all') {
+            const themePartyDayRecords = filteredRecords.filter(record => record.task_type === '主题党日');
+            totalPages = Math.ceil(themePartyDayRecords.length / pageSize);
+            currentPage = 1;
+            renderTable();
+            updateStatistics();
+            return;
+        }
+        
+        // 根据状态筛选
+        const statusValue = parseInt(selectedStatus);
+        const filteredByStatus = filteredRecords.filter(record => {
+            return record.task_type === '主题党日' && record.status === statusValue;
+        });
+        
+        totalPages = Math.ceil(filteredByStatus.length / pageSize);
+        currentPage = 1;
+        renderTable();
+        updateStatistics();
     }
     
     // 日期时间格式化函数
@@ -124,16 +146,51 @@ $(document).ready(function() {
         3: '已完成',
         4: '已取消'
     };
+
+    // 绑定表格按钮事件
+    function bindTableButtons() {
+        // 先移除所有已存在的监听器
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+        });
+
+        // 绑定详情按钮事件
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                // 获取完整的数据
+                const allData = [...allRecords];
+                const item = allData.find(item => item.id === id);
+                
+                if (item) {
+                    // 调用统一的详情显示函数
+                    showTaskDetail(item);
+                }
+            });
+        });
+    }
     
     // 渲染表格数据
     function renderTable() {
+        // 确保只显示主题党日类型的活动
+        let displayRecords = filteredRecords.filter(record => record.task_type === '主题党日');
+        
+        // 应用状态筛选
+        const selectedStatus = statusFilter.val();
+        if (selectedStatus !== 'all') {
+            const statusValue = parseInt(selectedStatus);
+            displayRecords = displayRecords.filter(record => record.status === statusValue);
+        }
+        
         // 计算当前页的数据
         const startIndex = (currentPage - 1) * pageSize;
-        const endIndex = Math.min(startIndex + pageSize, allRecords.length);
-        const currentRecords = allRecords.slice(startIndex, endIndex);
+        const endIndex = Math.min(startIndex + pageSize, displayRecords.length);
+        const currentRecords = displayRecords.slice(startIndex, endIndex);
         // 更新分页信息
         currentPageElement.text(currentPage);
-        totalPagesElement.text(totalPages);
+        totalPagesElement.text(Math.ceil(displayRecords.length / pageSize));
         // 更新分页按钮状态
         prevPageButton.prop('disabled', currentPage === 1);
         nextPageButton.prop('disabled', currentPage === totalPages);
@@ -161,16 +218,29 @@ $(document).ready(function() {
                     <td>${startTime}</td>
                     <td>${endTime}</td>
                     <td><span class="status-badge ${statusMap[status]}">${statusTextMap[status]}</span></td>
-                    <td></td>
+                    <td><button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.type || 'meeting'}">详情</button></td>
                 </tr>
             `;
         });
         tableBody.html(tableHtml);
+
+        bindTableButtons();
+
     }
     
     // 更新统计信息
     function updateStatistics() {
-        totalCountElement.html(`总记录数: <span style="color: var(--primary-red);">${allRecords.length}</span>`);
+        // 确保只统计主题党日类型的活动
+        let displayRecords = filteredRecords.filter(record => record.task_type === '主题党日');
+        
+        // 应用状态筛选
+        const selectedStatus = statusFilter.val();
+        if (selectedStatus !== 'all') {
+            const statusValue = parseInt(selectedStatus);
+            displayRecords = displayRecords.filter(record => record.status === statusValue);
+        }
+        
+        totalCountElement.html(`总记录数: <span style="color: var(--primary-red);">${displayRecords.length}</span>`);
     }
     
     // 跳转到上一页

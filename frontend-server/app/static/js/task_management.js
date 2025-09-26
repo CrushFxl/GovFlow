@@ -1,4 +1,3 @@
-// 日程下发管理模块逻辑
 $(document).ready(function() {
     const URL = $('#URL').text();
     // 分页参数
@@ -9,14 +8,14 @@ $(document).ready(function() {
     let filteredData = []; // 筛选后的数据
     
     // 定位DOM元素
-    const tableBody = document.querySelector('#activity .table tbody');
-    const prevBtn = document.querySelector('#activity .pagination .btn-outline:first-child');
-    const nextBtn = document.querySelector('#activity .pagination .btn-outline:last-child');
-    const pageInfo = document.querySelector('#activity .pagination .page-info');
-    const taskTypeFilter = document.getElementById('task_type_filter');
+    const tableBody = document.querySelector('#task_management .table tbody');
+    const prevBtn = document.querySelector('#task_management .pagination .btn-outline:first-child');
+    const nextBtn = document.querySelector('#task_management .pagination .btn-outline:last-child');
+    const pageInfo = document.querySelector('#task_management .pagination .page-info');
+    const taskTypeFilter = document.getElementById('task_management_type_filter');
 
-    // 初始化日程模块
-    function initActivity() {        
+    // 初始化任务管理模块
+    function initTaskManagement() {        
         fetchScheduleData();
         // 绑定类型筛选事件
         taskTypeFilter.addEventListener('change', applyFilters);
@@ -64,7 +63,7 @@ $(document).ready(function() {
         renderTableData();
     }
 
-    // 获取并渲染日程
+    // 获取并渲染任务数据
     function fetchScheduleData() {
         $.ajax({
             url: URL + "/activity/query",
@@ -77,7 +76,7 @@ $(document).ready(function() {
             success: function (resp) {
                 if (resp.code === 1000) {
                     scheduleData = resp.data;
-                    sessionStorage.setItem('activityData', JSON.stringify(scheduleData));
+                    sessionStorage.setItem('taskManagementData', JSON.stringify(scheduleData));
                     // 初始化筛选数据
                     filteredData = [...scheduleData];
                     // 获取并填充任务类型
@@ -169,7 +168,7 @@ $(document).ready(function() {
     // 绑定表格按钮事件
     function bindTableButtons() {
         // 先移除所有已存在的监听器
-        document.querySelectorAll('.btn-detail, .btn-complete, .btn-delete').forEach(button => {
+        document.querySelectorAll('.btn-detail').forEach(button => {
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
         });
@@ -180,7 +179,7 @@ $(document).ready(function() {
                 const id = this.getAttribute('data-id');
                 const type = this.getAttribute('data-type');
                 // 获取完整的数据
-                const allData = JSON.parse(sessionStorage.getItem('activityData') || '[]');
+                const allData = JSON.parse(sessionStorage.getItem('taskManagementData') || '[]');
                 const item = allData.find(item => item.id === id && item.type === type);
                 
                 if (item) {
@@ -219,7 +218,7 @@ $(document).ready(function() {
     }
     
     // 暴露初始化函数供home.js调用
-    window.activityModule = {
-        init: initActivity
+    window.taskManagementModule = {
+        init: initTaskManagement
     };
 });

@@ -61,6 +61,10 @@
     margin-bottom: 15px;
 }
 
+#party-status-label{
+    color: var(--header-text-color, white);
+}
+
 .time-container .form-group {
     flex: 1;
     margin-bottom: 0;
@@ -71,6 +75,9 @@ label {
     font-weight: bold;
 }
 
+.filter-title1{
+    min-width: 80px;
+}
 /* 两列布局样式 */
 .two-column-container {
     display: flex;
@@ -84,7 +91,6 @@ label {
 }
 input, textarea, select {
     width: 100%;
-    max-width: 140px;
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;

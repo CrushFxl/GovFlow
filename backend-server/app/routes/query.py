@@ -25,11 +25,11 @@ def get_partners_list():
             profile_info.append(f"{col.name}: {str(value) if value else 'None'}")
         # 将该档案的所有信息合并为一个字符串
         partners_list.append('; '.join(profile_info))
-    return jsonify({'code': 0, 'message': 'success', 'data': partners_list})
+    return jsonify({'code': 0, 'message': 'success', 'data': partners_list, 'list': profiles})
 
 
 @query_bk.route('/organizations_list', methods=['GET'])
-def get_organizations_list():
+def get_organizations_str():
     branches = Branch.query.filter_by().all()
     # 获取党组织名称列表
     organizations_list = [branch.name for branch in branches]
@@ -274,3 +274,37 @@ def get_task_detail(task_uuid):
         return jsonify({'code': 0, 'message': '查询成功', 'data': task_detail})
     except Exception as e:
         return jsonify({'code': -1, 'message': f'查询失败: {str(e)}', 'data': None})
+
+@query_bk.route('/get_organizations_list', methods=['GET'])
+def get_organizations_list():
+    branches = Branch.query.filter_by().all()
+    result = []
+    for branch in branches:
+        result.append(branch.name)
+    return jsonify({'code': 0, 'message': 'success', 'data': result})
+
+
+# 查询某个党组织下所有所属党员的真实姓名
+@query_bk.route('/get_party_members/<string:organization>', methods=['GET'])
+def get_party_members(organization):
+    # 查询指定党组织下的所有党员
+    branch_value = Branch.query.filter_by(name=organization).first().value
+    members = Profile.query.filter_by(party_branch=branch_value).all()
+    if not members:
+        members = Profile.query.filter_by(party_subcommittee=branch_value).all()
+    if not members:
+        members = Profile.query.filter_by(party_committee=branch_value).all()
+    result = []
+    for member in members:
+        result.append(member.real_name)
+    return jsonify({'code': 0, 'message': 'success', 'data': result})
+
+
+# 查询所有表单名称列表
+@query_bk.route('/get_forms_list', methods=['GET'])
+def get_forms_list():
+    forms = Form.query.all()
+    result = []
+    for form in forms:
+        result.append(form.name)
+    return jsonify({'code': 0, 'message': 'success', 'data': result})

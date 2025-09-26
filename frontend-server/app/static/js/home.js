@@ -19,6 +19,7 @@ $(document).ready(function() {
                 const user_type = resp.data['user_type'];
                 localStorage.setItem('coin', coin);
                 localStorage.setItem('uid', uid);
+                localStorage.setItem('nick', name);
                 // 更新UI上的coin数量显示
                 updateCoinDisplay();
                 if(admin === 1){
@@ -224,6 +225,12 @@ $(document).ready(function() {
                 if (window.activityModule && window.activityModule.init) {
                     $('.page-title').text('我的任务');
                     activityModule.init();
+                }
+                break;
+            case 'task_management':
+                if (window.taskManagementModule && window.taskManagementModule.init) {
+                    $('.page-title').text('任务管理');
+                    taskManagementModule.init();
                 }
                 break;
             case 'meeting':
@@ -484,7 +491,6 @@ function initPagination(totalPages, currentPage,
             onPageChange(currentPage);
         }
     });
-    
     // 初始化显示
     updatePageDisplay();
 }
@@ -527,13 +533,6 @@ function submitForm(formId, submitUrl, successCallback, errorCallback) {
                     alert('提交失败：' + (resp.msg || '未知错误'));
                 }
             }
-        },
-        error: function (xhr) {
-            if (errorCallback) {
-                errorCallback({code: -1, msg: '网络错误'});
-            } else {
-                alert('网络错误，请稍后再试');
-            }
         }
     });
 }
@@ -558,14 +557,6 @@ function fetchData(url, successCallback, errorCallback) {
                 } else {
                     alert('获取数据失败：' + (resp.msg || '未知错误'));
                 }
-            }
-        },
-        error: function (xhr) {
-            hideLoading();
-            if (errorCallback) {
-                errorCallback({code: -1, msg: '网络错误'});
-            } else {
-                alert('网络错误，请稍后再试');
             }
         }
     });
@@ -595,14 +586,6 @@ function deleteData(url, dataId, successCallback, errorCallback) {
                 } else {
                     alert('删除失败：' + (resp.msg || '未知错误'));
                 }
-            }
-        },
-        error: function (xhr) {
-            hideLoading();
-            if (errorCallback) {
-                errorCallback({code: -1, msg: '网络错误'});
-            } else {
-                alert('网络错误，请稍后再试');
             }
         }
     });

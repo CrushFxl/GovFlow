@@ -1,4 +1,17 @@
 /* 系统设置页面相关样式 */
+
+h1, h2, .menu-title span, .filter-title, th, .btn-outline{
+    color:  #c12c1f !important;
+}
+
+button, #party-status-label{
+    color: var(--menu-text-color) !important;
+}
+
+.user-avatar{
+    background-color: var(--menu-text-color) !important;;
+}
+
 .settings-container {
     display: flex;
     justify-content: center;

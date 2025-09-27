@@ -12,7 +12,7 @@ from app.models.Form import Form
 from app.models.Profile import Profile
 import uuid as Uuid
 from flask import Blueprint, request, session, jsonify
-from ..utils import filter_related_task_by_user
+from ..utils import filter_related_task_by_user, add_todo_for_all_users
 
 
 activity_bk = Blueprint('activity', __name__, url_prefix='/activity')
@@ -109,44 +109,26 @@ def delete_item():
 # 审核任务接口
 @activity_bk.route('/review_task', methods=['POST'])
 def review_task():
-    try:
-        task_id = request.form.get('task_id')
-        status = request.form.get('status')
-        uid = request.form.get('uid')
-
-        if not task_id or not status:
-            return jsonify({'code': 1001, 'message': '参数不完整'})
-        
-        # 将status转换为整数
-        status = int(status)
-        
-        # 检查状态值是否合法
-        if status not in [2, 4]:
-            return jsonify({'code': 1001, 'message': '状态值不合法'})
-        
-        # 查找对应的任务
-        task = Task.query.filter(Task.uuid == task_id, Task.status != 0).first()
-        
-        if not task:
-            return jsonify({'code': 1001, 'message': '任务不存在或已被删除'})
-        
-        # 检查任务是否处于待审核状态
-        if task.status != 1:
-            return jsonify({'code': 1001, 'message': '任务当前不处于待审核状态'})
-        
-        # 更新任务状态
-        task.status = status
-        # 更新审核时间
-        task.updated_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        db.session.commit()
-        return jsonify({'code': 1000, 'message': '审核成功'})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({
-            'code': 1001,
-            'message': f'审核失败：{str(e)}'
-        })
+    task_id = request.form.get('task_id')
+    status = request.form.get('status')
+    uid = request.form.get('uid')
+    # 将status转换为整数
+    status = int(status)
+    # 检查状态值是否合法
+    if status not in [2, 4]:
+        return jsonify({'code': 1001, 'message': '状态值不合法'})
+    # 查找对应的任务
+    task = Task.query.filter(Task.uuid == task_id, Task.status != 0).first()
+    if not task:
+        task = Notice.query.filter(Notice.uuid == task_id, Notice.status != 0).first()
+    # 检查任务是否处于待审核状态
+    if task.status != 1:
+        return jsonify({'code': 1001, 'message': '任务当前不处于待审核状态'})
+    task.status = status
+    if status == 2:
+        add_todo_for_all_users(task_id)  # 审核成功后下发给指定党员
+    db.session.commit()
+    return jsonify({'code': 1000, 'message': '审核成功'})
 
 
 @activity_bk.route('/save', methods=['POST'])
@@ -214,9 +196,10 @@ def submit_activity():
     frequency = data.get('frequency')
     attachment = data.get('attachment')
 
+    uuid = str(Uuid.uuid4())
     if task_type == '通知':
         new = Notice(
-            uuid=str(Uuid.uuid4()),
+            uuid=uuid,
             title=title,
             description=description,
             organizations=organizations,
@@ -252,7 +235,7 @@ def submit_activity():
         pass
         # 创建新任务
         new = Task(
-            uuid=str(Uuid.uuid4()),
+            uuid=uuid,
             title=title,
             description=description,
             type=task_type,
@@ -271,9 +254,9 @@ def submit_activity():
             attachment_id=attachment_id,
             created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         )
-    
     db.session.add(new)
     db.session.commit()
+    add_todo_for_all_users(uuid, range='limit')        # 任务下发给所有相关用户
     return jsonify({'success': True, 'message': '任务创建成功'})
 
 

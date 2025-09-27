@@ -4,6 +4,7 @@ from app.models.Branch import Branch
 from app.models.Profile import Profile
 from app.models.Form import Form, FormControl, FormSubmission
 from app.models.Task import Task
+from app.models.Todo import Todo
 from flask import Blueprint, jsonify, request
 import json
 
@@ -25,7 +26,7 @@ def get_partners_list():
             profile_info.append(f"{col.name}: {str(value) if value else 'None'}")
         # 将该档案的所有信息合并为一个字符串
         partners_list.append('; '.join(profile_info))
-    return jsonify({'code': 0, 'message': 'success', 'data': partners_list, 'list': profiles})
+    return jsonify({'code': 0, 'message': 'success', 'data': partners_list})
 
 
 @query_bk.route('/organizations_list', methods=['GET'])
@@ -168,6 +169,12 @@ def submit_form_data():
         task_uuid=task_uuid  # 新增：保存关联任务UUID
     )
     db.session.add(submission)
+
+    # 对应待办标记为完成
+    todo = Todo.query.filter_by(related_uuid=task_uuid, uid=user_id).first()
+    todo.status = 1
+    todo.form_submit_id = submission.id
+
     db.session.commit()
     return jsonify({'code': 200, 'message': '提交成功', 'data': {'id': submission.id}})
 

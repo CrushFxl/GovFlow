@@ -85,6 +85,32 @@ $(document).ready(function() {
         });
     }
     
+    // 审核任务函数
+    function reviewTask(taskId, status) {
+        $.ajax({
+            url: URL + '/activity/review_task',
+            xhrFields: {withCredentials: true},
+            type: 'POST',
+            data: {
+                task_id: taskId,
+                status: status,
+                uid: localStorage.getItem('uid')
+            },
+            success: function(response) {
+                if (response.code === 1000) {
+                    alert(status === 2 ? '审核通过！' : '已拒绝该任务！');
+                    // 重新加载数据
+                    loadMeetingData();
+                } else {
+                    alert(response.msg || '操作失败，请稍后重试');
+                }
+            },
+            error: function() {
+                alert('网络错误，请稍后重试');
+            }
+        });
+    }
+    
     // 根据会议类型筛选
     function filterByType() {
         currentPage = 1;
@@ -201,8 +227,13 @@ $(document).ready(function() {
             let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.type || 'meeting'}">详情</button>`;
             
             // 如果有attachment_name且不为空，则添加"去完成"按钮
-            if (record.attachment_name && record.attachment_name.trim() !== '' && record.status === 2) {
+            if (record.attachment_name && record.attachment_name.trim() !== '' && record.status == 2) {
                 actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}" data-type="${record.type || 'meeting'}">去完成</button>`;
+            }
+            
+            // 为待审核状态的任务添加"去审核"按钮
+            if (record.status == 1) {
+                actionButtons += ` <button class="btn-action btn-review" data-id="${record.id}">去审核</button>`;
             }
             
             tableHtml += `
@@ -312,6 +343,29 @@ $(document).ready(function() {
                         }
                     }
                 }, 300);
+            });
+        });
+
+        // 绑定"去审核"按钮事件
+        document.querySelectorAll('.btn-review').forEach(button => {
+            button.addEventListener('click', function() {
+                const taskId = this.getAttribute('data-id');
+                
+                // 使用prompt提供三个选项
+                const choice = prompt('请选择审核操作:\n1. 同意\n2. 拒绝\n3. 取消');
+                
+                if (choice === '1') {
+                    // 同意审核
+                    reviewTask(taskId, 2);
+                } else if (choice === '2') {
+                    // 拒绝审核
+                    reviewTask(taskId, 4);
+                } else if (choice === '3' || choice === null) {
+                    // 取消操作，不执行任何操作
+                    return;
+                } else {
+                    alert('无效的选择，请输入1、2或3');
+                }
             });
         });
     }

@@ -4,85 +4,184 @@ $(document).ready(function() {
     let currentPage = 1;
     const pageSize = 10;
     let totalPages = 1;
-    let allData = []; // 存储所有数据，用于分页
-    let filteredData = []; // 存储筛选后的数据
+    let allData = []; // 存储所有数据
+    let filteredData = []; // 筛选后的数据
 
     // 获取DOM元素
     const reviewTableBody = $('#review_table_body');
     const reviewSearchInput = $('#review_search_input');
     const reviewSearchButton = $('#review_search_button');
-    const reviewRefreshButton = $('#review_refresh_button');
     const reviewPrevPage = $('#review_prev_page');
     const reviewNextPage = $('#review_next_page');
     const reviewCurrentPage = $('#review_current_page');
     const reviewTotalPages = $('#review_total_pages');
+    const URL = $('#URL').text();
+    const statusFilter = $('#review_status_filter'); // 状态筛选下拉框
+
+    // 状态映射 - 参考development.js的徽标渲染逻辑
+    const statusMap = {
+        1: 'status-pending',
+        2: 'status-processing',  // 待处理
+        3: 'status-completed', // 已完成
+        4: 'status-canceled' // 已拒绝/已取消
+    };
+
+    const statusTextMap = {
+        1: '待审核',
+        2: '待处理',
+        3: '已完成',
+        4: '已拒绝'
+    };
 
     // 加载民主评议数据
-    function loadReviewData(keyword = '') {
+    function loadReviewData() {
         // 显示加载状态
-        reviewTableBody.html('<tr><td colspan="7" class="rw_dyfz_no_data">加载中...</td></tr>');
+        reviewTableBody.html('<tr><td colspan="6" class="rw_dyfz_no_data">加载中...</td></tr>');
+        
         // 发送请求到后端获取数据
         $.ajax({
-            url: `${config.backendUrl}/get_review_records`,
-            type: 'GET',
-            data: {
-                uid: localStorage.getItem('uid'),
-                keyword: keyword,
-                page: currentPage,
-                page_size: pageSize
-            },
+            url: URL + '/get_review_records',
+            xhrFields: {withCredentials: true},
+            type: 'POST',
+            data: {uid: localStorage.getItem('uid')},
             success: function(response) {
-                if (response.code === 200 && response.data) {
-                    allData = response.data.records || [];
-                    filteredData = [...allData];
-                    totalPages = response.data.total_pages || 1;
-                    // 更新表格
-                    renderReviewTable();
-                    // 更新分页信息
-                    updatePagination();
+                if (response.code === 1000) {
+                    // 过滤掉通知类型任务
+                    allData = (response.data || []).filter(record => record.task_type !== '通知');
+                    filteredData = [...allData]; // 初始化筛选后数据
+                    currentPage = 1; // 重置为第一页
+                    filterByStatus(); // 应用状态筛选
                 } else {
-                    reviewTableBody.html('<tr><td colspan="7" class="rw_dyfz_no_data">加载数据失败</td></tr>');
+                    reviewTableBody.html('<tr><td colspan="6" class="rw_dyfz_no_data">' + (response.msg || '加载失败') + '</td></tr>');
                 }
             },
             error: function() {
-                reviewTableBody.html('<tr><td colspan="7" class="rw_dyfz_no_data">网络错误，请稍后重试</td></tr>');
+                reviewTableBody.html('<tr><td colspan="6" class="rw_dyfz_no_data">网络错误，请稍后重试</td></tr>');
             }
         });
     }
 
     // 渲染民主评议表格
     function renderReviewTable() {
-        reviewTableBody.empty();
-        if (filteredData.length === 0) {
-            reviewTableBody.html('<tr><td colspan="7" class="rw_dyfz_no_data">暂无数据</td></tr>');
+        // 获取当前应该显示的数据
+        let displayData = [...filteredData];
+        
+        // 应用状态筛选
+        const selectedStatus = statusFilter.val();
+        if (selectedStatus !== 'all') {
+            const statusValue = parseInt(selectedStatus);
+            displayData = displayData.filter(record => record.status === statusValue);
+        }
+        
+        // 计算当前页的数据
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = Math.min(startIndex + pageSize, displayData.length);
+        const currentPageData = displayData.slice(startIndex, endIndex);
+        
+        // 计算实际总页数
+        const actualTotalPages = Math.ceil(displayData.length / pageSize);
+        
+        // 更新分页信息
+        reviewCurrentPage.text(currentPage);
+        reviewTotalPages.text(actualTotalPages);
+        reviewPrevPage.prop('disabled', currentPage === 1);
+        reviewNextPage.prop('disabled', currentPage === actualTotalPages);
+        
+        // 渲染表格内容
+        if (currentPageData.length === 0) {
+            reviewTableBody.html('<tr><td colspan="5" class="rw_dyfz_no_data">暂无数据</td></tr>');
             return;
         }
-        // 计算当前页要显示的数据
-        const startIndex = (currentPage - 1) * pageSize;
-        const endIndex = Math.min(startIndex + pageSize, filteredData.length);
-        const currentPageData = filteredData.slice(startIndex, endIndex);
         
-        // 渲染表格行
-        currentPageData.forEach((item, index) => {
-            const row = $('<tr></tr>');
-            const rowNumber = startIndex + index + 1;
-            row.append(`<td>${rowNumber}</td>`);
-            row.append(`<td>${item.name || '-'}</td>`);
-            row.append(`<td>${item.branch || ''}</td>`);
-            row.append(`<td>${item.year || '-'}</td>`);
-            row.append(`<td>${item.result || '合格'}</td>`);
-            row.append(`<td>${item.other_comments || '-'}</td>`);
-            row.append(`<td><button class="pf_detail-btn btn btn-action delete-review" data-id="${item.id}">删除</button></td>`);
-            reviewTableBody.append(row);
+        let tableHtml = '';
+        currentPageData.forEach(function(record, index) {
+            // 合并end_date和end_time作为截止时间
+            const endDate = record.end_date || '';
+            const endTime = record.end_time || '';
+            const deadline = endDate ? (endDate + (endTime ? ' ' + endTime : '')) : '';
+            
+            // 处理评议说明过长的情况，超出部分用省略号显示
+            let description = record.description || '';
+            const maxDescriptionLength = 18;
+            const fullDescription = description;
+            if (description.length > maxDescriptionLength) {
+                description = description.substring(0, maxDescriptionLength) + '...';
+            }
+            
+            // 根据状态设置状态徽标样式
+            const statusClass = statusMap[record.status] || '';
+            const statusText = statusTextMap[record.status] || '-';
+            
+            // 根据attachment_name是否为空决定是否添加'去完成'按钮
+            let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'review'}">详情</button>`;
+            
+            // 如果attachment_name不为空，添加'去完成'按钮
+            if (record.attachment_name  && record.status === 2) {
+                actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}" data-task-id="${record.id}">去完成</button>`;
+            }
+            
+            tableHtml += `
+                <tr>
+                    <td>${startIndex + index + 1}</td>
+                    <td>${record.title || ''}</td>
+                    <td><span title="${fullDescription}">${description}</span></td>
+                    <td>${deadline}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${actionButtons}</td>
+                </tr>
+            `;
         });
+        
+        reviewTableBody.html(tableHtml);
+        
+        // 为详情按钮绑定事件
+        bindTableButtons();
     }
 
-    // 更新分页控件
-    function updatePagination() {
-        reviewCurrentPage.text(currentPage);
-        reviewTotalPages.text(totalPages);
-        reviewPrevPage.prop('disabled', currentPage <= 1);
-        reviewNextPage.prop('disabled', currentPage >= totalPages);
+    // 搜索功能 - 前端筛选
+    function searchReview(keyword) {
+        // 清空搜索结果提示
+        
+        if (!keyword) {
+            // 如果搜索框为空，重置筛选数据
+            filteredData = [...allData];
+            filterByStatus(); // 重新应用状态筛选
+            return;
+        }
+        
+        // 前端筛选
+        if (allData.length > 0) {
+            const tempData = allData.filter(function(record) {
+                return (
+                    record.title && record.title.includes(keyword) ||
+                    record.description && record.description.includes(keyword)
+                );
+            });
+            
+            filteredData = [...tempData];
+            filterByStatus(); // 应用状态筛选
+        }
+    }
+    
+    // 按状态筛选
+    function filterByStatus() {
+        const selectedStatus = statusFilter.val();
+        
+        // 如果选择全部，则使用所有筛选后的数据
+        if (selectedStatus === 'all') {
+            totalPages = Math.ceil(filteredData.length / pageSize);
+            currentPage = 1;
+            renderReviewTable();
+            return;
+        }
+        
+        // 根据状态筛选
+        const statusValue = parseInt(selectedStatus);
+        const statusFilteredData = filteredData.filter(record => record.status === statusValue);
+        
+        totalPages = Math.ceil(statusFilteredData.length / pageSize);
+        currentPage = 1;
+        renderReviewTable();
     }
 
     // 绑定事件
@@ -90,8 +189,7 @@ $(document).ready(function() {
         // 搜索按钮点击事件
         reviewSearchButton.on('click', function() {
             const keyword = reviewSearchInput.val().trim();
-            currentPage = 1;
-            loadReviewData(keyword);
+            searchReview(keyword);
         });
         
         // 回车键搜索
@@ -101,18 +199,11 @@ $(document).ready(function() {
             }
         });
         
-        // 刷新按钮点击事件
-        reviewRefreshButton.on('click', function() {
-            reviewSearchInput.val('');
-            currentPage = 1;
-            loadReviewData();
-        });
-        
         // 上一页按钮点击事件
         reviewPrevPage.on('click', function() {
             if (currentPage > 1) {
                 currentPage--;
-                loadReviewData(reviewSearchInput.val().trim());
+                renderReviewTable();
             }
         });
         
@@ -120,38 +211,87 @@ $(document).ready(function() {
         reviewNextPage.on('click', function() {
             if (currentPage < totalPages) {
                 currentPage++;
-                loadReviewData(reviewSearchInput.val().trim());
+                renderReviewTable();
             }
         });
-        // 删除按钮点击事件
-        $(document).on('click', '.delete-review', function() {
-            const recordId = $(this).data('id');
-            deleteReviewRecord(recordId);
-        });
-    }
-
-    // 删除民主评议记录
-    function deleteReviewRecord(recordId) {
-        if (!confirm('确定要删除这条民主评议记录吗？')) {
-            return;
-        }
         
-        $.ajax({
-            url: `${config.backendUrl}/delete_review_record`,
-            type: 'POST',
-            data: {id: recordId},
-            success: function(response) {
-                if (response.code === 200) {
-                    alert('删除成功');
-                    // 重新加载数据
-                    loadReviewData(reviewSearchInput.val().trim());
-                } else {
-                    alert('删除失败：' + (response.message || '未知错误'));
+        // 状态筛选下拉框变更事件
+        statusFilter.change(filterByStatus);
+    }
+    
+    // 绑定表格按钮事件
+    function bindTableButtons() {
+        // 先移除所有已存在的监听器
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+        });
+
+        // 绑定详情按钮事件
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                // 获取完整的数据
+                const item = allData.find(item => item.id === id);
+                
+                if (item) {
+                    // 调用统一的详情显示函数
+                    showTaskDetail(item);
                 }
-            },
-            error: function() {
-                alert('网络错误，请稍后重试');
-            }
+            });
+        });
+
+        // 绑定'去完成'按钮事件
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function() {
+                const taskId = this.getAttribute('data-task-id');
+                const attachmentName = this.getAttribute('data-attachment');
+                
+                // 打开添加民主评议模态框
+                openAddRecordModal(3, '民主评议');
+                
+                // 延迟执行，确保模态框已经渲染完成
+                setTimeout(function() {
+                    // 查找并设置关联表单
+                    const taskSelect = document.getElementById('task-select');
+                    if (taskSelect) {
+                        // 遍历所有选项，找到匹配的附件名称
+                        let found = false;
+                        for (let i = 0; i < taskSelect.options.length; i++) {
+                            const option = taskSelect.options[i];
+                            // 使用includes条件，增加匹配的灵活性
+                            if (option.text.includes(attachmentName) || option.value.includes(attachmentName)) {
+                                taskSelect.value = option.value;
+                                // 触发change事件，确保加载相应的表单详情
+                                const event = new Event('change');
+                                taskSelect.dispatchEvent(event);
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        // 禁用下拉框，防止修改
+                        taskSelect.disabled = true;
+                    }
+                    
+                    // 如果没找到，尝试其他可能的select元素（作为后备策略）
+                    if (!taskSelect || taskSelect.options.length === 0) {
+                        const selectElements = document.querySelectorAll('select');
+                        selectElements.forEach(select => {
+                            for (let i = 0; i < select.options.length; i++) {
+                                const option = select.options[i];
+                                if (option.text.includes(attachmentName) || option.value.includes(attachmentName)) {
+                                    select.value = option.value;
+                                    const event = new Event('change');
+                                    select.dispatchEvent(event);
+                                    select.disabled = true;
+                                }
+                            }
+                        });
+                    }
+                }, 300); // 300毫秒延迟
+            });
         });
     }
     
@@ -160,7 +300,7 @@ $(document).ready(function() {
         console.log('民主评议页面初始化');
         bindEvents();
         
-        // 直接加载数据，不需要额外的检查
+        // 直接加载数据
         currentPage = 1;
         loadReviewData();
     }

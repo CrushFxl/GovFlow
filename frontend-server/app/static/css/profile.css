@@ -56,6 +56,10 @@
     transition: border-color 0.3s ease;
 }
 
+.form-group input[type="radio"]{
+    width: 20px;
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {

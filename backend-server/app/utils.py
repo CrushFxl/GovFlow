@@ -3,11 +3,23 @@ from .models.Task import Task
 from .models.Todo import Todo
 from .models.Profile import Profile
 from .models.Branch import Branch
-from .models.Form import Form
+from .models.Form import Form, FormSubmission
 from .models.System import System
+from .models.User import User
 from app.models import db
 import uuid as Uuid
 import requests
+
+# 任务频率映射函数
+def get_frequency_text(frequency):
+    frequency_map = {
+        0: '一次性',
+        1: '每周一次',
+        2: '每月一次',
+        3: '每季度一次',
+        4: '每年一次'
+    }
+    return frequency_map.get(frequency, '未知')
 
 
 def create_task_prompt(uuid):
@@ -144,4 +156,104 @@ def send_dingtalk_msg(user_ids, title, content):
     result = response.json()
     return result
 
+
+def filter_related_task_by_user(task_type, uid, mode='public'):
+    """根据用户筛选出和用户相关的任务
+    Args:
+        task_type (str): 任务类型 (all 表示所有类型)
+        uid (int): 用户UID
+        mode (str, optional): 查询模式.
+    Returns:
+        list: 相关任务列表
+    """
+    profile = Profile.query.filter_by(uid=uid).first()
+    if profile.admin_status == 1:
+        # 管理员查询所有任务
+        if task_type == 'all':
+            tasks = Task.query.filter(Task.status != 0).all()
+        else:
+            tasks = Task.query.filter(Task.status != 0, Task.type == task_type).all()
+        notices = Notice.query.filter(Notice.status != 0).all()
+    else:
+        # 普通用户查询自己创建的任务和需要自己完成的任务
+        realname = profile.real_name
+        if task_type == 'all':
+            created_tasks = Task.query.filter(Task.created_uid == uid, Task.status != 0).all()
+            _task = Task.query.filter(Task.status != 0).all()
+        else:
+            created_tasks = Task.query.filter(Task.created_uid == uid, Task.status != 0, Task.type == task_type).all()
+            _task = Task.query.filter(Task.status != 0, Task.type == task_type).all()
+        partner_tasks = []
+        for t in _task:
+            if realname in t.partners:
+                partner_tasks.append(t)
+        tasks = list(set(created_tasks + partner_tasks))
+        # 普通用户查询自己创建的通知和需要自己查看的通知
+        if task_type == 'all':
+            created_notices = Notice.query.filter(Notice.created_uid == uid, Notice.status != 0).all()
+            _notice = Notice.query.filter(Notice.status != 0).all()
+        else:
+            created_notices = Notice.query.filter(Notice.created_uid == uid, Notice.status != 0).all()
+            _notice = Notice.query.filter(Notice.status != 0).all()
+        partner_notices = []
+        for n in _notice:
+            if realname in n.partners:
+                partner_notices.append(n)
+        notices = list(set(created_notices + partner_notices))
+    # 将通知和任务转化为统一形式JSON
+    # 合并数据并转换为统一格式
+    all_data = []
+    # 处理Task数据
+    for task in tasks:
+        # 获取创建者信息
+        creator = User.query.filter_by(uid=task.created_uid).first()
+        creator_name = creator.nick if creator else '未知'
+        is_submited = FormSubmission.query.filter_by(task_uuid=task.uuid, user_id=uid).first()
+
+        if mode == 'private' and is_submited:
+            task.status = 3
+            task.need_attachment = 'false'
+        all_data.append({
+            'id': task.uuid,
+            'type': 'task',  # 标记为任务类型
+            'title': task.title,
+            'description': task.description,
+            'created_time': task.created_time,
+            'partners': "; ".join(task.partners),
+            'status': task.status,
+            'creator': creator_name,
+            'start_date': task.start_date,
+            'start_time': task.start_time,
+            'end_date': task.end_date,
+            'end_time': task.end_time,
+            'location': task.location,
+            'frequency': get_frequency_text(task.frequency),
+            'task_type': task.type,
+            'need_attachment': task.need_attachment,
+            'attachment_id': task.attachment_id
+        })
+    # 处理Notice数据
+    for notice in notices:
+        # 获取创建者信息
+        creator = User.query.filter_by(uid=notice.created_uid).first()
+        creator_name = creator.nick if creator else '未知'
+        all_data.append({
+            'id': notice.uuid,
+            'type': 'notice',  # 标记为通知类型
+            'title': notice.title,
+            'description': notice.description,
+            'created_time': notice.created_time,
+            'partners': "; ".join(notice.partners),
+            'status': notice.status,
+            'creator': creator_name,
+            'start_date': '',  # Notice表可能没有这些字段
+            'start_time': '',
+            'end_date': '',
+            'end_time': '',
+            'location': '',
+            'task_type': '通知'
+        })
+    # 按创建时间倒序排序
+    all_data.sort(key=lambda x: x['created_time'], reverse=True)
+    return all_data
 

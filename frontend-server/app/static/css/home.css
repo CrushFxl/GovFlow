@@ -1,4 +1,42 @@
 /* 系统设置页面相关样式 */
+
+h1, h2, .menu-title span, .filter-title, th, .btn-outline, .btn-complete, #close-task-modal-button{
+    color:  #c12c1f !important;
+}
+
+.btn-detail{
+    color:  #ffffff !important;
+    background-color: #1890ff;
+    border: none;
+    padding: 4px 12px;
+    font-size: 12px;
+    margin-right: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-detail:hover {
+    background-color: #40a9ff;
+}
+
+button, #party-status-label{
+    color: var(--menu-text-color) !important;
+}
+
+.user-avatar, .dyfz_user_icon{
+    background-color: var(--menu-text-color) !important;
+}
+
+#meeting_type_filter, #dfy_month_filter, #dyfz_status_filter, #meeting_status_filter{
+    max-width: 150px;
+}
+
+#t1, #t2{
+    min-width: 50px;
+    font-size: 14px;
+}
+
 .settings-container {
     display: flex;
     justify-content: center;

@@ -2,106 +2,48 @@ import json
 import os
 import datetime
 from datetime import datetime
+from turtle import st
 from app.models import db
 from app.models.Task import Task
 from app.models.Notice import Notice
 from app.models.User import User
 from app.models.Branch import Branch
+from app.models.Form import Form
 from app.models.Profile import Profile
 import uuid as Uuid
 from flask import Blueprint, request, session, jsonify
+from ..utils import filter_related_task_by_user
 
 
 activity_bk = Blueprint('activity', __name__, url_prefix='/activity')
 
-
-# 限制文本长度函数
-def truncate_text(text, max_length=15):
-    if not text:
-        return '-'
-    if isinstance(text, str) and len(text) > max_length:
-        return text[:max_length] + '...'
-    return text
-
-# 任务频率映射函数
-def get_frequency_text(frequency):
-    frequency_map = {
-        0: '一次性',
-        1: '每周一次',
-        2: '每月一次',
-        3: '每季度一次',
-        4: '每年一次'
-    }
-    return frequency_map.get(frequency, '未知')
+frequency_map = {
+    '一次性': 0,
+    '每周': 1,
+    '每月': 2,
+    '每季度': 3,
+    '每年': 4
+}
 
 
 # 任务下发页面表格拉取接口
 @activity_bk.route('/query', methods=['POST'])
 def query_tasks():
-    try:
-        # 从Task表和Notice表中获取数据，排除status=0的记录
-        tasks = Task.query.filter(Task.status != 0).all()
-        notices = Notice.query.filter(Notice.status != 0).all()
-        # 合并数据并转换为统一格式
-        all_data = []
-        # 处理Task数据
-        for task in tasks:
-            # 获取创建者信息
-            creator = User.query.filter_by(uid=task.created_uid).first()
-            creator_name = creator.nick if creator else '未知'
-            all_data.append({
-                'id': task.uuid,
-                'type': 'task',  # 标记为任务类型
-                'title': task.title,
-                'description': truncate_text(task.description),
-                'created_time': task.created_time,
-                'partners': truncate_text("; ".join(task.partners)),
-                'status': task.status,
-                'creator': creator_name,
-                'start_date': task.start_date,
-                'start_time': task.start_time,
-                'end_date': task.end_date,
-                'end_time': task.end_time,
-                'location': task.location,
-                'frequency': get_frequency_text(task.frequency)
-            })
-        
-        # 处理Notice数据
-        for notice in notices:
-            # 获取创建者信息
-            creator = User.query.filter_by(uid=notice.created_uid).first()
-            creator_name = creator.nick if creator else '未知'
-            
-            all_data.append({
-                'id': notice.uuid,
-                'type': 'notice',  # 标记为通知类型
-                'title': notice.title,
-                'description': truncate_text(notice.description),
-                'created_time': notice.created_time,
-                'partners': truncate_text("; ".join(notice.partners)),
-                'status': notice.status,
-                'creator': creator_name,
-                'start_date': '',  # Notice表可能没有这些字段
-                'start_time': '',
-                'end_date': '',
-                'end_time': '',
-                'location': ''
-            })
-        
-        # 按创建时间倒序排序
-        all_data.sort(key=lambda x: x['created_time'], reverse=True)
-        
-        return jsonify({
-            'code': 1000,
-            'data': all_data,
-            'message': '查询成功'
-        })
-    except Exception as e:
-        return jsonify({
-            'code': 1001,
-            'data': [],
-            'message': f'查询失败：{str(e)}'
-        })
+    uid = int(request.form.get('uid'))
+    mode = request.form.get('mode')
+    if not mode:
+        mode = 'public'
+    all_records = filter_related_task_by_user('all', uid, mode=mode)
+    # 添加附件名称
+    for data in all_records:
+        if data.get('need_attachment') == 'true':
+            form_name = Form.query.filter_by(id=int(data['attachment_id'])).first().name
+            data['attachment_name'] = form_name
+    return jsonify({
+        'code': 1000,
+        'data': all_records,
+        'message': '查询成功'
+    })
 
 
 # 标记任务完成接口
@@ -164,6 +106,48 @@ def delete_item():
             'message': f'删除失败：{str(e)}'
         })
 
+# 审核任务接口
+@activity_bk.route('/review_task', methods=['POST'])
+def review_task():
+    try:
+        task_id = request.form.get('task_id')
+        status = request.form.get('status')
+        uid = request.form.get('uid')
+
+        if not task_id or not status:
+            return jsonify({'code': 1001, 'message': '参数不完整'})
+        
+        # 将status转换为整数
+        status = int(status)
+        
+        # 检查状态值是否合法
+        if status not in [2, 4]:
+            return jsonify({'code': 1001, 'message': '状态值不合法'})
+        
+        # 查找对应的任务
+        task = Task.query.filter(Task.uuid == task_id, Task.status != 0).first()
+        
+        if not task:
+            return jsonify({'code': 1001, 'message': '任务不存在或已被删除'})
+        
+        # 检查任务是否处于待审核状态
+        if task.status != 1:
+            return jsonify({'code': 1001, 'message': '任务当前不处于待审核状态'})
+        
+        # 更新任务状态
+        task.status = status
+        # 更新审核时间
+        task.updated_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        db.session.commit()
+        return jsonify({'code': 1000, 'message': '审核成功'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'code': 1001,
+            'message': f'审核失败：{str(e)}'
+        })
+
 
 @activity_bk.route('/save', methods=['POST'])
 def save_task():
@@ -212,6 +196,85 @@ def save_task():
     db.session.add(new_task)
     db.session.commit()
     return jsonify({'code': 1000, 'message': '保存成功'})
+
+
+@activity_bk.route('/submit', methods=['POST'])
+def submit_activity():
+    # 从前端接收JSON数据
+    data = request.get_json()
+    
+    # 提取必要的字段
+    uid = data.get('uid')
+    title = data.get('title')
+    task_type = data.get('type')
+    description = data.get('description')
+    location = data.get('location')
+    organizations = data.get('organizations', [])
+    partners = data.get('partners', [])
+    frequency = data.get('frequency')
+    attachment = data.get('attachment')
+
+    if task_type == '通知':
+        new = Notice(
+            uuid=str(Uuid.uuid4()),
+            title=title,
+            description=description,
+            organizations=organizations,
+            partners=partners,
+            created_uid=uid,
+            next_uid=uid,
+            status=2,
+            created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        )
+    else:
+        if attachment == '无':
+            need_attachment = 'false'
+            attachment_id = ''
+        else:
+            need_attachment = 'true'
+            attachment_id = Form.query.filter_by(name=attachment).first().id
+        #解析start_date/start_time/end_date/end_time
+        st_date = data.get('startTime')
+        ed_date = data.get('endTime')
+        if st_date:
+            start_date = st_date.split('T')[0]
+            start_time = st_date.split('T')[1].split('.')[0]
+        else:
+            start_date = ''
+            start_time = ''
+
+        if ed_date:
+            end_date = ed_date.split('T')[0]
+            end_time = ed_date.split('T')[1].split('.')[0]
+        else:
+            end_date = ''
+            end_time = ''
+        pass
+        # 创建新任务
+        new = Task(
+            uuid=str(Uuid.uuid4()),
+            title=title,
+            description=description,
+            type=task_type,
+            organizations=organizations,
+            partners=partners,
+            created_uid=uid,
+            next_uid=uid,
+            start_date=start_date,
+            start_time=start_time,
+            end_date=end_date,
+            end_time=end_time,
+            location=location,
+            frequency=frequency_map.get(frequency, 0),
+            status=2,
+            need_attachment=need_attachment,
+            attachment_id=attachment_id,
+            created_time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        )
+    
+    db.session.add(new)
+    db.session.commit()
+    return jsonify({'success': True, 'message': '任务创建成功'})
 
 
 

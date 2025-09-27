@@ -74,11 +74,11 @@ def form_submission_description():
     【字段描述】
     - id, int, 主键, 自增
     - form_id, int, 该提交记录所属的表格ID
+    - task_uuid, str, 该表格填写记录关联的Task UUID
     - user_id, int, 提交用户的UID
     - data, str, 提交的数据, 格式为JSON, 例如：{"姓名": "张三", "学号": "6401230103"}, 键为表格控件的label
     - status, int, 提交状态（此字段已弃用）
     - created_at, datetime, 提交时间
-    
     """
     return text
 
@@ -92,6 +92,7 @@ class FormSubmission(db.Model):
     data = db.Column('data', db.Text, nullable=False)  # JSON格式存储表单数据
     status = db.Column('status', db.Integer, default=0)  # 0: 待处理, 1: 已同意, 2: 已拒绝
     created_at = db.Column('created_at', db.DateTime, default=datetime.now)
+    task_uuid = db.Column('task_uuid', db.String(100), nullable=True)  # 关联任务UUID
 
     # 与Form建立多对一关系
     form = db.relationship('Form', backref='submissions', lazy=True)

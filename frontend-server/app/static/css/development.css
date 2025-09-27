@@ -273,7 +273,7 @@
 }
 
 .dyfz_page_btn:disabled {
-    background-color: #ccc;
+    background-color: #eee;
     cursor: not-allowed;
 }
 

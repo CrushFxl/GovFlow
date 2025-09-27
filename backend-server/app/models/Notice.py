@@ -1,3 +1,5 @@
+from scripts.regsetup import description
+
 from . import db
 from datetime import datetime
 
@@ -14,14 +16,13 @@ def notice_description():
     - created_time, str, 通知创建时间, 格式为YYYY-MM-DD HH:MM
     - next_uid, int, 需要审核该通知的用户UID
     - status, int, 通知状态, 0: 待发布, 1: 待审核, 2: 审核通过, 3: 已完成, 4:审核拒绝
-    
     """
     return text
 
 
 class Notice(db.Model):
     __tablename__ = 'notices'
-    
+    task_type = db.Column('task_type', db.Text, nullable=False, default='通知')
     uuid = db.Column('uuid', db.Text, primary_key=True, unique=True, index=True, nullable=False)
     title = db.Column('title', db.Text, nullable=False)
     description = db.Column('description', db.Text, nullable=False)
@@ -31,4 +32,23 @@ class Notice(db.Model):
     created_time = db.Column('created_time', db.Text, nullable=False)
     next_uid = db.Column('next_uid', db.Integer, nullable=False)
     status = db.Column('status', db.Integer, nullable=False, default=0)
+
+def init_notices():
+    if not Notice.query.first():
+        default_notice = [
+            Notice(uuid="TEST-NOTICE-1",
+                   title="通知小冯明天下午三点来119开会",
+                   description="通知小冯明天下午三点来119开会，会议准时开始，不要迟到。",
+                   partners=['冯小二'],
+                   organizations=[],
+                   created_uid=101,
+                   created_time=str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                   next_uid=101,
+                   status=2
+                   ),
+        ]
+        db.session.bulk_save_objects(default_notice)
+        db.session.commit()
+        print("初始化测试通知完成.")
+
 

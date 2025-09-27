@@ -3,8 +3,8 @@ from app.models import db
 from app.models.Branch import Branch
 from app.models.Profile import Profile
 from app.models.Form import Form, FormControl, FormSubmission
+from app.models.Task import Task
 from flask import Blueprint, jsonify, request
-
 import json
 
 
@@ -25,11 +25,11 @@ def get_partners_list():
             profile_info.append(f"{col.name}: {str(value) if value else 'None'}")
         # 将该档案的所有信息合并为一个字符串
         partners_list.append('; '.join(profile_info))
-    return jsonify({'code': 0, 'message': 'success', 'data': partners_list})
+    return jsonify({'code': 0, 'message': 'success', 'data': partners_list, 'list': profiles})
 
 
 @query_bk.route('/organizations_list', methods=['GET'])
-def get_organizations_list():
+def get_organizations_str():
     branches = Branch.query.filter_by().all()
     # 获取党组织名称列表
     organizations_list = [branch.name for branch in branches]
@@ -42,7 +42,6 @@ def get_form_list():
     for f in forms:
         prompt += f'表单ID: {f.id}  名称: {f.name}  描述: {f.description}\n '
     return {'data': {'form_list': prompt}}
-
 
 @query_bk.route('/form_preview/<int:form_id>', methods=['GET'])
 def form_preview(form_id):
@@ -98,7 +97,6 @@ def form_preview(form_id):
     except Exception as e:
         return jsonify({'code': -1, 'message': f'查询失败: {str(e)}', 'data': None})
 
-
 @query_bk.route('/form_get', methods=['GET'])
 def form_get():
     """
@@ -134,11 +132,13 @@ def submit_form_data():
     - form_id: 表单ID
     - form_data: 表单数据（JSON格式字符串）
     - uid: 用户ID
+    - task_uuid: 关联任务UUID（可选）
     """
     # 获取请求参数
     form_id = int(request.form.get('form_id'))
     form_data_str = request.form.get('form_data')
     user_id = int(request.form.get('uid'))
+    task_uuid = request.form.get('task_uuid')  # 新增：获取关联任务UUID
     # 验证参数
     if not form_id or not form_data_str or not user_id:
         return jsonify({'code': 400, 'message': '参数不完整', 'data': None})
@@ -164,7 +164,8 @@ def submit_form_data():
     submission = FormSubmission(
         form_id=form_id,
         user_id=user_id,
-        data=json.dumps(form_data)
+        data=json.dumps(form_data),
+        task_uuid=task_uuid  # 新增：保存关联任务UUID
     )
     db.session.add(submission)
     db.session.commit()
@@ -216,3 +217,94 @@ def get_party_member_detail(member_id):
         'address': member.address
     }
     return jsonify({'code': 1000, 'message': '查询成功', 'data': detail_info})
+
+
+@query_bk.route('/get_task_list', methods=['GET'])
+def get_task_list():
+    """
+    获取任务列表，用于前端弹窗的关联任务下拉列表
+    返回：任务ID和任务标题的列表
+    """
+    try:
+        # 查询所有任务
+        tasks = Task.query.all()
+        
+        # 格式化返回数据，只包含必要的信息用于下拉列表
+        task_list = []
+        for task in tasks:
+            task_list.append({
+                'uuid': task.uuid,
+                'title': task.title
+            })
+        
+        return jsonify({'code': 0, 'message': '查询成功', 'data': task_list})
+    except Exception as e:
+        return jsonify({'code': -1, 'message': f'查询失败: {str(e)}', 'data': None})
+
+
+@query_bk.route('/get_task_detail/<string:task_uuid>', methods=['GET'])
+def get_task_detail(task_uuid):
+    """
+    获取任务详情信息
+    参数：
+    - task_uuid: 任务的唯一标识符
+    返回：任务的详细信息，包括参与党组、参与党员、时间、地点等
+    """
+    try:
+        # 查询指定UUID的任务
+        task = Task.query.filter_by(uuid=task_uuid).first()
+        
+        if not task:
+            return jsonify({'code': -1, 'message': '任务不存在', 'data': None})
+        
+        # 格式化返回任务详情，包含所有需要在前端显示的字段
+        task_detail = {
+            'uuid': task.uuid,
+            'title': task.title,
+            'description': task.description,
+            'start_date': task.start_date,
+            'start_time': task.start_time,
+            'end_date': task.end_date,
+            'end_time': task.end_time,
+            'location': task.location,
+            'partners': task.partners,  # 参与党员列表
+            'organizations': task.organizations  # 参与党组织列表
+        }
+        
+        return jsonify({'code': 0, 'message': '查询成功', 'data': task_detail})
+    except Exception as e:
+        return jsonify({'code': -1, 'message': f'查询失败: {str(e)}', 'data': None})
+
+@query_bk.route('/get_organizations_list', methods=['GET'])
+def get_organizations_list():
+    branches = Branch.query.filter_by().all()
+    result = []
+    for branch in branches:
+        result.append(branch.name)
+    return jsonify({'code': 0, 'message': 'success', 'data': result})
+
+
+# 查询某个党组织下所有所属党员的真实姓名
+@query_bk.route('/get_party_members/<string:organization>', methods=['GET'])
+def get_party_members(organization):
+    # 查询指定党组织下的所有党员
+    branch_value = Branch.query.filter_by(name=organization).first().value
+    members = Profile.query.filter_by(party_branch=branch_value).all()
+    if not members:
+        members = Profile.query.filter_by(party_subcommittee=branch_value).all()
+    if not members:
+        members = Profile.query.filter_by(party_committee=branch_value).all()
+    result = []
+    for member in members:
+        result.append(member.real_name)
+    return jsonify({'code': 0, 'message': 'success', 'data': result})
+
+
+# 查询所有表单名称列表
+@query_bk.route('/get_forms_list', methods=['GET'])
+def get_forms_list():
+    forms = Form.query.all()
+    result = []
+    for form in forms:
+        result.append(form.name)
+    return jsonify({'code': 0, 'message': 'success', 'data': result})

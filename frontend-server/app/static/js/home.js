@@ -16,18 +16,19 @@ $(document).ready(function() {
                 const uid = resp.data['uid'];
                 const admin = resp.data['admin'];
                 const coin = resp.data['coin'];
+                const user_type = resp.data['user_type'];
                 localStorage.setItem('coin', coin);
                 localStorage.setItem('uid', uid);
+                localStorage.setItem('nick', name);
                 // 更新UI上的coin数量显示
                 updateCoinDisplay();
                 if(admin === 1){
                     localStorage.setItem('admin', 1);
                 }
-                if (uid) {
-                    // 更新iframe URL，添加编码后的uid参数
-                    updateIframeWithUid(uid);
-                }
-                
+                // 添加用户身份标签
+                addPartyStatusLabel(user_type);
+                // 更新iframe URL，添加编码后的uid参数
+                updateIframeWithUid(uid);
                 // 检查用户档案是否完整
                 checkUserProfileComplete();
             }
@@ -36,6 +37,34 @@ $(document).ready(function() {
             alert("同步状态失败：无法连接至服务器，请联系网站管理员或稍后再试。");
         }
     });
+    
+    // 添加用户身份标签函数
+    function addPartyStatusLabel(partyStatus) {
+        // 首先移除可能存在的旧标签
+        const oldLabel = document.getElementById('party-status-label');
+        if (oldLabel) {
+            oldLabel.remove();
+        }
+        // 根据partyStatus创建相应的标签
+        const usernameElement = document.getElementById('username');
+        if (usernameElement) {
+            const statusLabel = document.createElement('span');
+            statusLabel.id = 'party-status-label';
+            statusLabel.innerText = partyStatus;
+            statusLabel.style.cssText = `
+                margin-left: 8px;
+                padding: 2px 8px;
+                border-radius: 12px;
+                background-color: rgba(255, 255, 255, 0.2);
+                font-size: 0.8em;
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                font-weight: normal;
+            `;
+            // 插入到用户名后面
+            usernameElement.parentNode.insertBefore(statusLabel, usernameElement.nextSibling);
+        }
+    };
 
     // 检查用户档案是否完整
     function checkUserProfileComplete() {
@@ -194,8 +223,14 @@ $(document).ready(function() {
                 break;
             case 'activity':
                 if (window.activityModule && window.activityModule.init) {
-                    $('.page-title').text('任务管理');
+                    $('.page-title').text('我的任务');
                     activityModule.init();
+                }
+                break;
+            case 'task_management':
+                if (window.taskManagementModule && window.taskManagementModule.init) {
+                    $('.page-title').text('任务管理');
+                    taskManagementModule.init();
                 }
                 break;
             case 'meeting':
@@ -205,10 +240,8 @@ $(document).ready(function() {
                 }
                 break;
             case 'fee':
-                if (window.feeModule && window.feeModule.init) {
-                    $('.page-title').text('党费管理');
-                    feeModule.init();
-                }
+                $('.page-title').text('党费缴纳');
+                feeModule.init();
                 break;
             case 'development':
                 if (window.developmentModule && window.developmentModule.init) {
@@ -354,4 +387,206 @@ function updateCoinDisplay() {
     if (coin !== null) {
         $('#coin-amount').text(coin);
     }
+}
+
+// 日期时间格式化函数
+function formatDateTime(dateStr, timeStr) {
+    if (!dateStr) return '';
+    if (!timeStr) return dateStr;
+    return `${dateStr} ${timeStr}`;
+}
+
+// 根据状态获取CSS类
+function getStatusClass(status) {
+    const statusMap = {
+        0: 'status-canceled',
+        1: 'status-pending',
+        2: 'status-ongoing',
+        3: 'status-completed'
+    };
+    return statusMap[status] || 'status-unknown';
+}
+
+// 根据状态获取文本
+function getStatusText(status) {
+    const statusTextMap = {
+        0: '已取消',
+        1: '待处理',
+        2: '进行中',
+        3: '已完成'
+    };
+    return statusTextMap[status] || '未知状态';
+}
+
+// 关闭模态框函数
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// 绑定表格通用按钮事件
+function bindTableCommonButtons(editBtnSelector, detailBtnSelector, deleteBtnSelector, 
+                                 editHandler, detailHandler, deleteHandler) {
+    // 编辑按钮点击事件
+    document.querySelectorAll(editBtnSelector).forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            editHandler(id);
+        });
+    });
+    
+    // 详情按钮点击事件
+    document.querySelectorAll(detailBtnSelector).forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            detailHandler(id);
+        });
+    });
+    
+    // 删除按钮点击事件
+    document.querySelectorAll(deleteBtnSelector).forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            if (confirm('确定要删除这条记录吗？')) {
+                deleteHandler(id);
+            }
+        });
+    });
+}
+
+// 初始化分页控件
+function initPagination(totalPages, currentPage, 
+                        prevBtnSelector, nextBtnSelector, 
+                        pageNumSelector, 
+                        onPageChange) {
+    const prevBtn = document.querySelector(prevBtnSelector);
+    const nextBtn = document.querySelector(nextBtnSelector);
+    const pageNumElement = document.querySelector(pageNumSelector);
+    
+    if (!prevBtn || !nextBtn || !pageNumElement) return;
+    
+    // 更新页码显示
+    function updatePageDisplay() {
+        pageNumElement.textContent = `${currentPage}/${totalPages}`;
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= totalPages;
+    }
+    
+    // 上一页按钮点击事件
+    prevBtn.addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            updatePageDisplay();
+            onPageChange(currentPage);
+        }
+    });
+    
+    // 下一页按钮点击事件
+    nextBtn.addEventListener('click', function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            updatePageDisplay();
+            onPageChange(currentPage);
+        }
+    });
+    // 初始化显示
+    updatePageDisplay();
+}
+
+// 通用表单提交处理函数
+function submitForm(formId, submitUrl, successCallback, errorCallback) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    
+    // 收集表单数据
+    const formData = {};
+    const inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        if (input.name) {
+            formData[input.name] = input.value;
+        }
+    });
+    
+    // 添加当前用户信息
+    formData.uid = localStorage.getItem('uid');
+    
+    $.ajax({
+        url: submitUrl,
+        xhrFields: {withCredentials: true},
+        type: "POST",
+        data: JSON.stringify({ data: formData }),
+        contentType: "application/json",
+        dataType: "json",
+        success: function (resp) {
+            if (resp.code === 1000) {
+                if (successCallback) {
+                    successCallback(resp);
+                } else {
+                    alert('提交成功');
+                }
+            } else {
+                if (errorCallback) {
+                    errorCallback(resp);
+                } else {
+                    alert('提交失败：' + (resp.msg || '未知错误'));
+                }
+            }
+        }
+    });
+}
+
+// 通用数据获取函数
+function fetchData(url, successCallback, errorCallback) {
+    showLoading('加载中...');
+    $.ajax({
+        url: url,
+        xhrFields: {withCredentials: true},
+        type: "POST",
+        dataType: "json",
+        success: function (resp) {
+            hideLoading();
+            if (resp.code === 1000) {
+                if (successCallback) {
+                    successCallback(resp.data);
+                }
+            } else {
+                if (errorCallback) {
+                    errorCallback(resp);
+                } else {
+                    alert('获取数据失败：' + (resp.msg || '未知错误'));
+                }
+            }
+        }
+    });
+}
+
+// 通用删除数据函数
+function deleteData(url, dataId, successCallback, errorCallback) {
+    showLoading('删除中...');
+    $.ajax({
+        url: url,
+        xhrFields: {withCredentials: true},
+        type: "POST",
+        data: JSON.stringify({ id: dataId }),
+        contentType: "application/json",
+        dataType: "json",
+        success: function (resp) {
+            hideLoading();
+            if (resp.code === 1000) {
+                if (successCallback) {
+                    successCallback(resp);
+                } else {
+                    alert('删除成功');
+                }
+            } else {
+                if (errorCallback) {
+                    errorCallback(resp);
+                } else {
+                    alert('删除失败：' + (resp.msg || '未知错误'));
+                }
+            }
+        }
+    });
 }

@@ -1,109 +1,146 @@
 // 党员发展模块逻辑
-// 党员发展页面交互逻辑
 
 // 页面加载完成后执行
 $(document).ready(function() {
-    // 从home.html获取后端base_url
     const URL = $('#URL').text();
     
     // 页面元素
     const searchInput = $('#dyfz_search_input');
     const searchButton = $('#dyfz_search_button');
     const searchResult = $('#dyfz_search_result');
-    const statusFilter = $('#dyfz_status_filter');
     const refreshButton = $('#dyfz_refresh_button');
     const tableBody = $('#dyfz_table_body');
     const prevPageButton = $('#dyfz_prev_page');
     const nextPageButton = $('#dyfz_next_page');
     const currentPageElement = $('#dyfz_current_page');
     const totalPagesElement = $('#dyfz_total_pages');
+    const statusFilter = $('#dyfz_status_filter'); // 复用现有下拉框作为状态筛选
+
+    const statusMap = {
+        1: 'status-pending',
+        2: 'status-processing',
+        3: 'status-completed',
+        4: 'status-canceled'
+    };
+
+    const statusTextMap = {
+        1: '待审核',
+        2: '待处理',
+        3: '已完成',
+        4: '已取消'
+    };
     
     // 分页参数
     let currentPage = 1;
     const pageSize = 10;
     let totalPages = 1;
     let allRecords = [];
+    let filteredRecords = [];
     
-    // 初始化流程条
-    function initProgressBar() {
-        // 默认将申请入党节点设为激活状态
-        $('.dyfz_progress_step').removeClass('active highlight');
-        $('.dyfz_progress_step:first').addClass('active');
+    // 更新筛选下拉框选项为状态选项
+    function updateFilterOptions() {
+        statusFilter.empty();
+        statusFilter.append('<option value="all">全部</option>');
+        
+        // 遍历状态映射，添加状态选项
+        for (const [key, value] of Object.entries(statusTextMap)) {
+            statusFilter.append(`<option value="${key}">${value}</option>`);
+        }
+        
+        // 更新标签文本
+        const label = statusFilter.prev('label');
+        if (label) {
+            label.text('筛选状态：');
+        }
     }
     
-    // 搜索用户
+    // 根据状态筛选数据
+    function filterByStatus() {
+        const selectedStatus = statusFilter.val();
+        
+        if (selectedStatus === 'all') {
+            filteredRecords = [...allRecords];
+        } else {
+            filteredRecords = allRecords.filter(record => 
+                record.status === parseInt(selectedStatus)
+            );
+        }
+        
+        currentPage = 1;
+        totalPages = Math.ceil(filteredRecords.length / pageSize);
+        renderTable();
+    }
+    
+    // 搜索功能（根据新接口调整）
     function searchUser() {
         const keyword = searchInput.val().trim();
         if (!keyword) {
-            searchResult.html('<div style="color: #e74c3c;">请输入学工号或姓名</div>');
+            searchResult.html('<div style="color: #e74c3c;">请输入关键词查询</div>');
             return;
         }
-        // 发送请求查询用户
-        $.ajax({
-            url: URL + '/get_development_records',
-            xhrFields: {withCredentials: true},
-            type: 'GET',
-            data: {'status' : 'all', 'keyword': keyword},
-            success: function(response) {
-                if (response.code === 200) {
-                    allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
-                    currentPage = 1;
-                    renderTable();        // 重新刷新页面
+        
+        // 根据新接口，先获取所有数据然后在前端筛选
+        loadDevelopmentRecords().then(function() {
+            if (allRecords.length > 0) {
+                // 在前端进行关键词筛选，同时过滤掉通知类型
+                const keywordFiltered = allRecords.filter(function(record) {
+                    return record.task_type !== '通知' && (
+                        record.title && record.title.includes(keyword) ||
+                        record.description && record.description.includes(keyword)
+                    );
+                });
+                
+                // 应用状态筛选
+                const selectedStatus = statusFilter.val();
+                let finalFiltered = [];
+                
+                if (selectedStatus === 'all') {
+                    finalFiltered = [...keywordFiltered];
+                } else {
+                    finalFiltered = keywordFiltered.filter(record => 
+                        record.status === parseInt(selectedStatus)
+                    );
                 }
-            },
-            error: function() {
-                searchResult.html('<div style="color: #e74c3c;">搜索失败，请稍后再试</div>');
+                
+                if (finalFiltered.length > 0) {
+                    filteredRecords = finalFiltered;
+                    totalPages = Math.ceil(filteredRecords.length / pageSize);
+                    currentPage = 1;
+                    renderTable();
+                    searchResult.html('');
+                } else {
+                    tableBody.html('<tr><td colspan="6" class="dyfz_no_data">未找到相关数据</td></tr>');
+                    searchResult.html('<div style="color: #e74c3c;">未找到相关数据</div>');
+                }
             }
         });
     }
     
-    // 高亮显示政治面貌
-    function highlightPoliticalStatus(status) {
-        // 重置所有节点样式
-        $('.dyfz_progress_step').removeClass('active highlight');
-        
-        // 高亮显示目标状态节点
-        const statusStep = $('.dyfz_progress_step.dyfz_step' + status);
-        
-        if (statusStep.length > 0) {
-            // 高亮目标节点
-            statusStep.addClass('highlight');
-            
-            // 激活所有前面的节点
-            const allSteps = $('.dyfz_progress_step');
-            const targetIndex = allSteps.index(statusStep);
-            
-            for (let i = 0; i <= targetIndex; i++) {
-                allSteps.eq(i).addClass('active');
-            }
-        } else {
-            // 如果没找到对应状态，默认激活第一个节点
-            $('.dyfz_progress_step:first').addClass('active');
-        }
-    }
-    
     // 加载党员发展记录
     function loadDevelopmentRecords() {
-        const status = statusFilter.val();
         // 显示加载状态
-        tableBody.html('<tr><td colspan="7" class="dyfz_no_data">正在加载数据...</td></tr>');
-        // 发送请求获取记录
-        $.ajax({
-            url: URL + `/get_development_records`,
-            xhrFields: {withCredentials: true},
-            data: {'status' : status, 'keyword': ''},
-            type: 'GET',
-            success: function(response) {
-                if (response.code === 200) {
-                    allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
-                    currentPage = 1; // 重置为第一页
-                    renderTable();
-                } else {
-                    tableBody.html('<tr><td colspan="7" class="dyfz_no_data">' + response.msg + '</td></tr>');
+        tableBody.html('<tr><td colspan="6" class="dyfz_no_data">正在加载数据...</td></tr>');
+        
+        // 返回Promise以便searchUser函数可以等待数据加载完成
+        return new Promise(function(resolve, reject) {
+            // 发送请求获取记录
+            $.ajax({
+                url: URL + '/get_development_records',
+                xhrFields: {withCredentials: true},
+                type: 'POST',
+                data: {uid: localStorage.getItem('uid')},
+                success: function(response) {
+                    if (response.code === 1000) {
+                        // 过滤掉通知类型任务
+                        allRecords = response.data.filter(record => record.task_type !== '通知');
+                        filterByStatus(); // 加载数据后应用状态筛选
+                        resolve();
+                    } else {
+                        tableBody.html('<tr><td colspan="6" class="dyfz_no_data">' + (response.msg || '加载失败') + '</td></tr>');
+                        reject(response);
+                    }
                 }
-            }
+            });
         });
     }
     
@@ -111,8 +148,8 @@ $(document).ready(function() {
     function renderTable() {
         // 计算当前页的数据
         const startIndex = (currentPage - 1) * pageSize;
-        const endIndex = Math.min(startIndex + pageSize, allRecords.length);
-        const currentRecords = allRecords.slice(startIndex, endIndex);
+        const endIndex = Math.min(startIndex + pageSize, filteredRecords.length);
+        const currentRecords = filteredRecords.slice(startIndex, endIndex);
         
         // 更新分页信息
         currentPageElement.text(currentPage);
@@ -124,70 +161,129 @@ $(document).ready(function() {
         
         // 渲染表格内容
         if (currentRecords.length === 0) {
-            tableBody.html('<tr><td colspan="7" class="dyfz_no_data">暂无数据</td></tr>');
-            // 无数据时重置流程条
-            initProgressBar();
+            tableBody.html('<tr><td colspan="5" class="dyfz_no_data">暂无数据</td></tr>');
             return;
         }
         
         let tableHtml = '';
         currentRecords.forEach(function(record, index) {
+            // 格式化日期
+            const formattedDate = record.start_date ? new Date(record.start_date).toLocaleDateString() : '';
+            
+            // 处理说明内容过长的情况，超出部分用省略号显示
+            let description = record.description || '';
+            const maxDescriptionLength = 18;
+            const fullDescription = description;
+            if (description.length > maxDescriptionLength) {
+                description = description.substring(0, maxDescriptionLength) + '...';
+            }
+            
+            // 获取状态信息
+            const status = record.status || 0;
+            const statusText = statusTextMap[status] || '未知';
+            const statusClass = statusMap[status] || 'status-unknown';
+            
+            // 构建操作按钮
+            let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'development'}">详情</button>`;
+            
+            // 如果有attachment_name且不为空，则添加"去完成"按钮
+            if (record.attachment_name && record.attachment_name.trim() !== '' && record.status === 2) {
+                actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}" data-type="${record.task_type || 'development'}">去完成</button>`;
+            }
+            
             tableHtml += `
                 <tr>
                     <td>${startIndex + index + 1}</td>
-                    <td>${record.real_name}</td>
-                    <td>
-                        <span class="dyfz_status_${record.political_status.replace(/\s+/g, '_')}">
-                            ${record.political_status}
-                        </span>
-                    </td>
-                    <td>${record.student_id}</td>
-                    <td>${record.contact}</td>
-                    <td>${record.description}</td>
-                    <td><button class="pf_detail-btn btn btn-action delete-development" data-id="${record.id}">删除</button></td>
+                    <td>${record.title || ''}</td>
+                    <td><span title="${fullDescription}">${description}</span></td>
+                    <td>${formattedDate}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${actionButtons}</td>
                 </tr>
             `;
         });
         
         tableBody.html(tableHtml);
         
-        // 为删除按钮添加点击事件
-        $('.delete-development').click(function() {
-            const recordId = $(this).data('id');
-            deleteDevelopmentRecord(recordId);
-        });
-        
-        // 以表格的第一个对象的政治面貌为准，渲染流程条
-        const firstRecord = currentRecords[0];
-        if (firstRecord && firstRecord.political_status) {
-            highlightPoliticalStatus(firstRecord.political_status);
-        }
+        // 为详情按钮绑定事件
+        bindTableButtons();
     }
     
-    // 为不同政治面貌添加颜色样式
-    function addStatusColorStyles() {
-        const styleElement = $('<style></style>');
-        const statusColors = {
-            '群众': '#95a5a6',
-            '入党积极分子': '#3498db',
-            '发展对象': '#f39c12',
-            '预备党员': '#e67e22',
-            '普通正式党员': '#27ae60'
-        };
-        
-        let cssRules = '';
-        Object.entries(statusColors).forEach(([status, color]) => {
-            const className = `.dyfz_status_${status.replace(/\s+/g, '_')}`;
-            cssRules += `${className} { color: ${color}; font-weight: bold; }
-`;
+    // 绑定表格按钮事件
+    function bindTableButtons() {
+        // 先移除所有已存在的监听器
+        document.querySelectorAll('.btn-detail, .btn-complete').forEach(button => {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+        });
+
+        // 绑定详情按钮事件
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                // 获取完整的数据
+                const allData = [...allRecords];
+                const item = allData.find(item => item.id === id);
+                
+                if (item) {
+                    // 调用统一的详情显示函数
+                    showTaskDetail(item);
+                }
+            });
         });
         
-        styleElement.text(cssRules);
-        $('head').append(styleElement);
+        // 绑定"去完成"按钮事件
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function() {
+                const attachmentName = this.getAttribute('data-attachment');
+                const taskId = this.getAttribute('data-id');
+                
+                // 打开"添加党员发展"的模态框
+                openAddRecordModal(1, '党员发展');
+                
+                // 延迟一下，确保模态框已经渲染
+                setTimeout(function() {
+                    // 查找任务选择下拉框
+                    const taskSelect = document.getElementById('task-select');
+                    if (taskSelect) {
+                        // 查找匹配附件名称的任务选项
+                        const options = Array.from(taskSelect.options);
+                        let found = false;
+                        
+                        for (let option of options) {
+                            // 使用includes进行模糊匹配
+                            if (option.text.includes(attachmentName) || option.value === taskId) {
+                                option.selected = true;
+                                // 触发change事件以加载任务详情
+                                const event = new Event('change');
+                                taskSelect.dispatchEvent(event);
+                                // 禁用下拉框
+                                taskSelect.disabled = true;
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
+                        if (!found) {
+                            const allSelects = document.querySelectorAll('select');
+                            for (let select of allSelects) {
+                                const selectOptions = Array.from(select.options);
+                                for (let option of selectOptions) {
+                                    if (option.text.includes(attachmentName) || option.value === taskId) {
+                                        option.selected = true;
+                                        select.disabled = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, 300);
+            });
+        });
     }
-    
-    // 添加状态颜色样式
-    addStatusColorStyles();
     
     // 绑定事件处理程序
     function bindEvents() {
@@ -205,11 +301,6 @@ $(document).ready(function() {
         refreshButton.click(function() {
             loadDevelopmentRecords();
         });
-        // 筛选条件变化事件
-        statusFilter.change(function() {
-            currentPage = 1;
-            loadDevelopmentRecords();
-        });
         // 上一页按钮点击事件
         prevPageButton.click(function() {
             if (currentPage > 1) {
@@ -224,33 +315,9 @@ $(document).ready(function() {
                 renderTable();
             }
         });
-    }
-    
-    // 删除党员发展记录
-    function deleteDevelopmentRecord(recordId) {
-        // 显示确认对话框
-        if (!confirm('确定要删除这条党员发展记录吗？此操作不可撤销。')) {
-            return;
-        }
-        
-        // 发送删除请求
-        $.ajax({
-            url: URL + '/delete_record',
-            xhrFields: {withCredentials: true},
-            type: 'POST',
-            data: {id: recordId},
-            success: function(response) {
-                if (response.code === 200) {
-                    alert('删除成功');
-                    // 重新加载数据
-                    loadDevelopmentRecords();
-                } else {
-                    alert('删除失败：' + response.msg);
-                }
-            },
-            error: function() {
-                alert('网络错误，请稍后再试');
-            }
+        // 状态筛选下拉框改变事件
+        statusFilter.change(function() {
+            filterByStatus();
         });
     }
     
@@ -258,10 +325,10 @@ $(document).ready(function() {
     window.developmentModule = {
         init: function() {
             console.log('党员发展页面初始化');
+            // 更新筛选选项
+            updateFilterOptions();
             // 绑定事件处理程序
             bindEvents();
-            // 初始化流程条
-            initProgressBar();
             // 加载数据
             loadDevelopmentRecords();
         }

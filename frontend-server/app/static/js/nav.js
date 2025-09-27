@@ -190,6 +190,4 @@ function showItemsModal(title, items) {
     modal.style.display = 'flex';
 }
 
-// 注意：我们不再依赖非标准的:contains()选择器
-// 所有元素选择都通过标准DOM方法和自定义的findLinkByText函数实现
-// 这种方式在所有现代浏览器中都能正常工作
+// showTaskDetail函数已移至task_management.js文件中，使用ElementUI风格模态框

@@ -7,6 +7,7 @@ $(document).ready(function() {
     
     // 页面元素
     const typeFilter = $('#meeting_type_filter');
+    const statusFilter = $('#meeting_status_filter'); // 状态筛选下拉框
     const refreshButton = $('#meeting_refresh_button');
     const searchInput = $('#meeting_search_input');
     const searchButton = $('#meeting_search_button');
@@ -17,11 +18,27 @@ $(document).ready(function() {
     const totalPagesElement = $('#meeting_total_pages');
     const totalCountElement = $('#meeting_total_count');
     
+    // 状态映射
+    const statusMap = {
+        1: 'status-pending',
+        2: 'status-processing',
+        3: 'status-completed',
+        4: 'status-canceled'
+    };
+
+    const statusTextMap = {
+        1: '待审核',
+        2: '待处理',
+        3: '已完成',
+        4: '已取消'
+    };
+
     // 分页参数
     let currentPage = 1;
     const pageSize = 5;
     let totalPages = 1;
-    let allRecords = [];
+    let allRecords = []; // 原始数据
+    let filteredRecords = []; // 筛选后的数据
     
     // 初始化页面
     function initMeeting() {
@@ -37,29 +54,29 @@ $(document).ready(function() {
         prevPageButton.click(goToPrevPage);
         nextPageButton.click(goToNextPage);
         typeFilter.change(filterByType);
+        statusFilter.change(filterByStatus); // 绑定状态筛选事件
         loadMeetingData()
     }
     
     // 加载三会一课数据
     function loadMeetingData() {
-        const meetingType = typeFilter.val();
         // 显示加载状态
-        tableBody.html('<tr><td colspan="6" class="dyfz_no_data">正在加载数据...</td></tr>');
+        tableBody.html('<tr><td colspan="7" class="dyfz_no_data">正在加载数据...</td></tr>');
         // 发送请求获取记录
         $.ajax({
             url: URL + `/get_meeting_records`,
             xhrFields: {withCredentials: true},
-            data: {'type' : meetingType, 'keyword': ''},
-            type: 'GET',
+            type: 'POST',
+            data: {'type' : 'all', 'keyword': '', 'uid': localStorage.getItem('uid')},
             success: function(response) {
-                if (response.code === 200) {
-                    allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
+                if (response.code === 1000) {
+                    // 过滤掉通知类型任务
+                    allRecords = response.data.filter(record => record.task_type !== '通知');
+                    filteredRecords = [...allRecords]; // 初始化筛选后数据
                     currentPage = 1; // 重置为第一页
-                    renderTable();
-                    updateStatistics();
+                    filterByType(); // 应用类型筛选
                 } else {
-                    tableBody.html('<tr><td colspan="6" class="dyfz_no_data">' + response.msg + '</td></tr>');
+                    tableBody.html('<tr><td colspan="6" class="dyfz_no_data">' + (response.msg || '加载失败') + '</td></tr>');
                 }
             },
             error: function() {
@@ -70,7 +87,33 @@ $(document).ready(function() {
     
     // 根据会议类型筛选
     function filterByType() {
-        loadMeetingData();
+        currentPage = 1;
+        const meetingType = typeFilter.val();
+        if (meetingType === 'all') {
+            filteredRecords = [...allRecords];
+        } else {
+            filteredRecords = allRecords.filter(record => record.task_type === meetingType);
+        }
+        filterByStatus(); // 应用状态筛选
+    }
+
+    // 根据会议状态筛选
+    function filterByStatus() {
+        const status = statusFilter.val();
+        let tempRecords = [...filteredRecords];
+        
+        if (status !== 'all') {
+            tempRecords = tempRecords.filter(record => record.status.toString() === status);
+        }
+        
+        // 计算总页数
+        totalPages = Math.ceil(tempRecords.length / pageSize);
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
+        
+        renderTable(tempRecords);
+        updateStatistics(tempRecords);
     }
     
     // 搜索会议
@@ -80,33 +123,37 @@ $(document).ready(function() {
             alert('请输入会议标题进行查询');
             return;
         }
-        // 发送请求查询会议
-        $.ajax({
-            url: URL + '/get_meeting_records',
-            xhrFields: {withCredentials: true},
-            type: 'GET',
-            data: {'type' : typeFilter.val(), 'keyword': keyword},
-            success: function(response) {
-                if (response.code === 200) {
-                    allRecords = response.data;
-                    totalPages = Math.ceil(allRecords.length / pageSize);
-                    currentPage = 1;
-                    renderTable();
-                    updateStatistics();
-                }
-            },
-            error: function() {
-                alert('搜索失败，请稍后再试');
-            }
-        });
+        
+        // 在当前筛选结果中进行本地搜索
+        const meetingType = typeFilter.val();
+        let searchRecords = allRecords;
+        
+        // 先应用类型筛选
+        if (meetingType !== 'all') {
+            searchRecords = searchRecords.filter(record => record.task_type === meetingType);
+        }
+        
+        // 应用关键词搜索
+        searchRecords = searchRecords.filter(record => 
+            record.title.toLowerCase().includes(keyword.toLowerCase()) ||
+            (record.description && record.description.toLowerCase().includes(keyword.toLowerCase()))
+        );
+        
+        // 更新筛选记录并应用状态筛选
+        filteredRecords = [...searchRecords];
+        currentPage = 1;
+        filterByStatus();
     }
     
     // 渲染表格数据
-    function renderTable() {
+    function renderTable(records) {
+        // 使用传入的records参数，如果没有则使用filteredRecords
+        const dataToRender = records || filteredRecords;
+        
         // 计算当前页的数据
         const startIndex = (currentPage - 1) * pageSize;
-        const endIndex = Math.min(startIndex + pageSize, allRecords.length);
-        const currentRecords = allRecords.slice(startIndex, endIndex);
+        const endIndex = Math.min(startIndex + pageSize, dataToRender.length);
+        const currentRecords = dataToRender.slice(startIndex, endIndex);
         
         // 更新分页信息
         currentPageElement.text(currentPage);
@@ -118,14 +165,14 @@ $(document).ready(function() {
         
         // 渲染表格内容
         if (currentRecords.length === 0) {
-            tableBody.html('<tr><td colspan="6" class="dyfz_no_data">暂无数据</td></tr>');
+            tableBody.html('<tr><td colspan="7" class="dyfz_no_data">暂无数据</td></tr>');
             return;
         }
         
         let tableHtml = '';
         currentRecords.forEach(function(record, index) {
-            // 格式化日期
-            const submitTime = new Date(record.created_at).toLocaleString('zh-CN', {
+            // 格式化日期 - 使用created_time代替created_at
+            const submitTime = new Date(record.created_time).toLocaleString('zh-CN', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -134,51 +181,54 @@ $(document).ready(function() {
                 second: '2-digit'
             });
             
-            // 处理会议纪要过长的情况，超出部分用省略号显示
-            let summary = record.summary || '';
-            const maxSummaryLength = 100;
+            // 处理会议纪要过长的情况，超出部分用省略号显示 - 使用description代替summary
+            let summary = record.description || '';
+            const maxSummaryLength = 18;
             const fullSummary = summary;
             if (summary.length > maxSummaryLength) {
                 summary = summary.substring(0, maxSummaryLength) + '...';
+            }
+            
+            // 获取会议类型 - 使用task_type代替type
+            const meetingType = record.task_type;
+            
+            // 获取状态信息
+            const status = record.status;
+            const statusText = statusTextMap[status];
+            const statusClass = statusMap[status];
+            
+            // 构建操作按钮
+            let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.type || 'meeting'}">详情</button>`;
+            
+            // 如果有attachment_name且不为空，则添加"去完成"按钮
+            if (record.attachment_name && record.attachment_name.trim() !== '' && record.status === 2) {
+                actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}" data-type="${record.type || 'meeting'}">去完成</button>`;
             }
             
             tableHtml += `
                 <tr>
                     <td>${startIndex + index + 1}</td>
                     <td>${record.title}</td>
-                    <td>${record.type}</td>
+                    <td>${meetingType}</td>
                     <td><span class="meeting-summary" title="${fullSummary}">${summary}</span></td>
                     <td>${submitTime}</td>
-                    <td><button class="pf_detail-btn btn btn-action delete-meeting" data-id="${record.id}">删除</button></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${actionButtons}</td>
                 </tr>
             `;
         });
         
         tableBody.html(tableHtml);
         
-        // 为会议纪要添加点击事件，显示完整内容
-        $('.meeting-summary').click(function() {
-            const fullSummary = $(this).attr('title');
-            showSummaryModal(fullSummary);
-        });
-        
-        // 为删除按钮添加点击事件
-        $('.delete-meeting').click(function() {
-            const recordId = $(this).data('id');
-            deleteMeetingRecord(recordId);
-        });
-    }
-    
-    // 更新统计信息
-    function updateStatistics() {
-        totalCountElement.html(`总记录数: <span style="color: var(--primary-red);">${allRecords.length}</span>`);
+        // 为详情按钮绑定事件
+        bindTableButtons();
     }
     
     // 跳转到上一页
     function goToPrevPage() {
         if (currentPage > 1) {
             currentPage--;
-            renderTable();
+            renderTable(filteredRecords);
         }
     }
     
@@ -186,57 +236,92 @@ $(document).ready(function() {
     function goToNextPage() {
         if (currentPage < totalPages) {
             currentPage++;
-            renderTable();
+            renderTable(filteredRecords);
         }
     }
     
-    // 显示会议纪要模态框
-    function showSummaryModal(summary) {
-        // 创建模态框
-        const modalHtml = `
-            <div id="summary-modal" class="modal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;">
-                <div class="modal-content" style="background-color: white; border-radius: 6px; padding: 20px; max-width: 800px; max-height: 80vh; overflow-y: auto; width: 90%;">
-                    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee;">
-                        <h3 class="modal-title">会议纪要</h3>
-                        <button id="close-summary-modal" class="close-btn" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <p style="white-space: pre-wrap;">${summary}</p>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // 添加模态框到body
-        $('body').append(modalHtml);
-        
-        // 绑定关闭事件
-        $('#close-summary-modal').click(function() {
-            $('#summary-modal').remove();
+    // 绑定表格按钮事件
+    function bindTableButtons() {
+        // 先移除所有已存在的监听器
+        document.querySelectorAll('.btn-detail, .btn-complete').forEach(button => {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
         });
-        
-    }
-    
-    // 删除三会一课记录
-    function deleteMeetingRecord(recordId) {
-        // 显示确认对话框
-        if (confirm('确定要删除这条记录吗？删除后将无法恢复。')) {
-            // 发送删除请求
-            $.ajax({
-                url: URL + '/delete_record',
-                type: 'POST',
-                data: {id: recordId},
-                xhrFields: {withCredentials: true},
-                success: function(response) {
-                    if (response.code === 200) {
-                        alert('删除成功');
-                        loadMeetingData();
-                    } else {
-                        alert('删除失败：' + response.msg);
-                    }
+
+        // 绑定详情按钮事件
+        document.querySelectorAll('.btn-detail').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                // 获取完整的数据
+                const allData = [...allRecords];
+                const item = allData.find(item => item.id === id);
+                
+                if (item) {
+                    // 调用统一的详情显示函数
+                    showTaskDetail(item);
                 }
             });
-        }
+        });
+        
+        // 绑定"去完成"按钮事件
+        document.querySelectorAll('.btn-complete').forEach(button => {
+            button.addEventListener('click', function() {
+                const attachmentName = this.getAttribute('data-attachment');
+                const taskId = this.getAttribute('data-id');
+                
+                // 打开"添加三会一课"的模态框
+                openAddRecordModal(4, '三会一课');
+                
+                // 延迟一下，确保模态框已经渲染
+                setTimeout(function() {
+                    // 查找任务选择下拉框
+                    const taskSelect = document.getElementById('task-select');
+                    if (taskSelect) {
+                        // 查找匹配附件名称的任务选项
+                        const options = Array.from(taskSelect.options);
+                        let found = false;
+                        
+                        for (let option of options) {
+                            // 使用includes进行模糊匹配
+                            if (option.text.includes(attachmentName) || option.value === taskId) {
+                                option.selected = true;
+                                // 触发change事件以加载任务详情
+                                const event = new Event('change');
+                                taskSelect.dispatchEvent(event);
+                                // 禁用下拉框
+                                taskSelect.disabled = true;
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
+                        if (!found) {
+                            const allSelects = document.querySelectorAll('select');
+                            for (let select of allSelects) {
+                                const selectOptions = Array.from(select.options);
+                                for (let option of selectOptions) {
+                                    if (option.text.includes(attachmentName) || option.value === taskId) {
+                                        option.selected = true;
+                                        select.disabled = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, 300);
+            });
+        });
+    }
+    
+    // 更新统计信息
+    function updateStatistics(records) {
+        const dataToCount = records || filteredRecords;
+        
+        // 更新总记录数
+        totalCountElement.text(dataToCount.length);
     }
     
     // 暴露初始化函数供home.js调用

@@ -16,11 +16,16 @@ user_bk = Blueprint('user', __name__, url_prefix='/user')
 def get_nick():
     uid = session.get('uid')
     user = User.query.filter_by(uid=uid).first()
-    nick = user.nick
-    coin = user.coin
-    admin = Profile.query.filter_by(uid=uid).first().admin_status
-    return {'code': 1000, 'msg': 'ok', 'data':
-        {'uid': uid, 'nick': nick, 'admin': admin, 'coin': coin}}
+    profile = Profile.query.filter_by(uid=uid).first()
+    party_status = '管理员' if profile.admin_status else profile.party_status
+    return {'code': 1000, 'msg': 'ok', 'data':{
+        'uid': uid,
+        'nick': user.nick,
+        'admin': profile.admin_status,
+        'coin': user.coin,
+        'user_type': party_status
+        }
+    }
 
 
 @user_bk.route('/add_coin', methods=['POST'])

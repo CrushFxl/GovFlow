@@ -114,14 +114,35 @@ $(document).ready(function() {
                 }
             }
         });
+    }  
+
+    // 审核任务函数
+    function reviewTask(taskId, status) {
+        $.ajax({
+            url: this.URL + '/activity/review_task',
+            xhrFields: {withCredentials: true},
+            type: 'POST',
+            data: {
+                task_id: taskId,
+                status: status,
+                uid: localStorage.getItem('uid')
+            },
+            success: function(response) {
+                if (response.code === 200) {
+                    alert(status === 2 ? '审核通过！' : '已拒绝该任务！');
+                    // 重新加载数据
+                    window.developmentModule.loadDevelopmentData();
+                } else {
+                    alert(response.msg || '操作失败，请稍后重试');
+                }
+            }
+        });
     }
     
     // 加载党员发展记录
     function loadDevelopmentRecords() {
         // 显示加载状态
         tableBody.html('<tr><td colspan="6" class="dyfz_no_data">正在加载数据...</td></tr>');
-        
-        // 返回Promise以便searchUser函数可以等待数据加载完成
         return new Promise(function(resolve, reject) {
             // 发送请求获取记录
             $.ajax({
@@ -150,26 +171,21 @@ $(document).ready(function() {
         const startIndex = (currentPage - 1) * pageSize;
         const endIndex = Math.min(startIndex + pageSize, filteredRecords.length);
         const currentRecords = filteredRecords.slice(startIndex, endIndex);
-        
         // 更新分页信息
         currentPageElement.text(currentPage);
         totalPagesElement.text(totalPages);
-        
         // 更新分页按钮状态
         prevPageButton.prop('disabled', currentPage === 1);
         nextPageButton.prop('disabled', currentPage === totalPages);
-        
         // 渲染表格内容
         if (currentRecords.length === 0) {
             tableBody.html('<tr><td colspan="5" class="dyfz_no_data">暂无数据</td></tr>');
             return;
         }
-        
         let tableHtml = '';
         currentRecords.forEach(function(record, index) {
             // 格式化日期
             const formattedDate = record.start_date ? new Date(record.start_date).toLocaleDateString() : '';
-            
             // 处理说明内容过长的情况，超出部分用省略号显示
             let description = record.description || '';
             const maxDescriptionLength = 18;
@@ -177,20 +193,20 @@ $(document).ready(function() {
             if (description.length > maxDescriptionLength) {
                 description = description.substring(0, maxDescriptionLength) + '...';
             }
-            
             // 获取状态信息
             const status = record.status || 0;
             const statusText = statusTextMap[status] || '未知';
             const statusClass = statusMap[status] || 'status-unknown';
-            
             // 构建操作按钮
-            let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'development'}">详情</button>`;
-            
-            // 如果有attachment_name且不为空，则添加"去完成"按钮
-            if (record.attachment_name && record.attachment_name.trim() !== '' && record.status === 2) {
-                actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}" data-type="${record.task_type || 'development'}">去完成</button>`;
-            }
-            
+                let actionButtons = `<button class="btn-action btn-detail" data-id="${record.id}" data-type="${record.task_type || 'development'}">详情</button>`;
+                // 如果有attachment_name且不为空，则添加"去完成"按钮
+                if (record.attachment_name && record.attachment_name.trim() !== '' && record.status == 2) {
+                    actionButtons += ` <button class="btn-action btn-complete" data-id="${record.id}" data-attachment="${record.attachment_name}" data-type="${record.task_type || 'development'}">去完成</button>`;
+                }
+                // 为待审核状态的任务添加"去审核"按钮
+                if (record.status == 1) {
+                    actionButtons += ` <button class="btn-action btn-review" data-id="${record.id}">去审核</button>`;
+                }
             tableHtml += `
                 <tr>
                     <td>${startIndex + index + 1}</td>
@@ -202,9 +218,7 @@ $(document).ready(function() {
                 </tr>
             `;
         });
-        
         tableBody.html(tableHtml);
-        
         // 为详情按钮绑定事件
         bindTableButtons();
     }
@@ -216,7 +230,6 @@ $(document).ready(function() {
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
         });
-
         // 绑定详情按钮事件
         document.querySelectorAll('.btn-detail').forEach(button => {
             button.addEventListener('click', function() {
@@ -225,23 +238,19 @@ $(document).ready(function() {
                 // 获取完整的数据
                 const allData = [...allRecords];
                 const item = allData.find(item => item.id === id);
-                
                 if (item) {
                     // 调用统一的详情显示函数
                     showTaskDetail(item);
                 }
             });
         });
-        
         // 绑定"去完成"按钮事件
         document.querySelectorAll('.btn-complete').forEach(button => {
             button.addEventListener('click', function() {
                 const attachmentName = this.getAttribute('data-attachment');
                 const taskId = this.getAttribute('data-id');
-                
                 // 打开"添加党员发展"的模态框
                 openAddRecordModal(1, '党员发展');
-                
                 // 延迟一下，确保模态框已经渲染
                 setTimeout(function() {
                     // 查找任务选择下拉框
@@ -250,7 +259,6 @@ $(document).ready(function() {
                         // 查找匹配附件名称的任务选项
                         const options = Array.from(taskSelect.options);
                         let found = false;
-                        
                         for (let option of options) {
                             // 使用includes进行模糊匹配
                             if (option.text.includes(attachmentName) || option.value === taskId) {
@@ -264,7 +272,6 @@ $(document).ready(function() {
                                 break;
                             }
                         }
-                        
                         // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
                         if (!found) {
                             const allSelects = document.querySelectorAll('select');
@@ -283,7 +290,32 @@ $(document).ready(function() {
                 }, 300);
             });
         });
+
+        // 绑定"去审核"按钮事件
+        document.querySelectorAll('.btn-review').forEach(button => {
+            button.addEventListener('click', function() {
+                const taskId = this.getAttribute('data-id');
+                
+                // 使用prompt提供三个选项
+                const choice = prompt('请选择审核操作:\n1. 同意\n2. 拒绝\n3. 取消');
+                
+                if (choice === '1') {
+                    // 同意审核
+                    reviewTask(taskId, 2);
+                } else if (choice === '2') {
+                    // 拒绝审核
+                    reviewTask(taskId, 4);
+                } else if (choice === '3' || choice === null) {
+                    // 取消操作，不执行任何操作
+                    return;
+                } else {
+                    alert('无效的选择，请输入1、2或3');
+                }
+            });
+        });
     }
+
+    
     
     // 绑定事件处理程序
     function bindEvents() {

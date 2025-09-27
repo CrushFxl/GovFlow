@@ -1,5 +1,3 @@
-from scripts.regsetup import description
-
 from . import db
 from datetime import datetime
 

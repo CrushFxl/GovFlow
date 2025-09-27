@@ -83,7 +83,7 @@ def get_user_todos_list_prompt(uid):
     return prompt, count
 
 
-def add_todo_for_all_users(uuid):
+def add_todo_for_all_users(uuid, range='all'):
     # 定位待办任务
     todo_type = 'notice'
     todo = Notice.query.filter_by(uuid=uuid).first()
@@ -98,11 +98,12 @@ def add_todo_for_all_users(uuid):
         real_name = p.real_name
         branches = [p.party_committee, p.party_subcommittee, p.party_branch]
         parties = [Branch.query.filter_by(value=b).first().name for b in branches]
-        for party in todo.organizations:
-            if party in parties:
-                users_uid.add(p.uid)
-                users_student_id.add(p.student_id)
-                break
+        if range == 'all':
+            for party in todo.organizations:
+                if party in parties:
+                    users_uid.add(p.uid)
+                    users_student_id.add(p.student_id)
+                    break
         for name in todo.partners:
             if name == real_name:
                 users_uid.add(p.uid)

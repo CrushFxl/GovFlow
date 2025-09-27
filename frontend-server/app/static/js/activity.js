@@ -145,9 +145,15 @@ $(document).ready(function() {
             `;
 
             // 如果attachment_name不为空，添加'去完成'按钮
-            if (item.attachment_name) {
+            if (item.attachment_name && item.status == 2) {
                 actionButtons += `
                 <button class="btn-action btn-complete" data-id="${item.id}" data-attachment="${item.attachment_name}" data-task-id="${item.id}">去完成</button>`;
+            }
+
+            // 如果是待审核状态，添加'去审核'按钮
+            if (item.status == 1) {
+                actionButtons += `
+                <button class="btn-action btn-review" data-id="${item.id}" data-type="${item.type}">去审核</button>`;
             }
             
             const row = document.createElement('tr');
@@ -173,10 +179,35 @@ $(document).ready(function() {
         bindTableButtons();
     }
 
+    // 审核任务函数
+    function reviewTask(taskId, status) {
+        // 发送审核请求
+        $.ajax({
+            url: URL + '/activity/review_task',
+            xhrFields: {withCredentials: true},
+            type: 'POST',
+            data: {
+                task_id: taskId,
+                status: status,
+                uid: localStorage.getItem('uid')
+            },
+            success: function(resp) {
+                hideLoading();
+                if (resp.code === 1000) {
+                    alert('审核成功');
+                    // 重新获取数据并渲染表格
+                    fetchScheduleData();
+                } else {
+                    alert('审核失败：' + resp.message);
+                }
+            }
+        });
+    }
+
     // 绑定表格按钮事件
         function bindTableButtons() {
             // 先移除所有已存在的监听器
-            document.querySelectorAll('.btn-detail, .btn-complete, .btn-delete').forEach(button => {
+            document.querySelectorAll('.btn-detail, .btn-complete, .btn-delete, .btn-review').forEach(button => {
                 const newButton = button.cloneNode(true);
                 button.parentNode.replaceChild(newButton, button);
             });
@@ -198,53 +229,71 @@ $(document).ready(function() {
             });
 
             // 绑定"去完成"按钮事件
-        document.querySelectorAll('.btn-complete').forEach(button => {
-            button.addEventListener('click', function() {
-                const attachmentName = this.getAttribute('data-attachment');
-                const taskId = this.getAttribute('data-id');
-                
-                // 打开"添加党员发展"的模态框
-                openAddRecordModal(1, '党员发展');
-                
-                // 延迟一下，确保模态框已经渲染
-                setTimeout(function() {
-                    // 查找任务选择下拉框
-                    const taskSelect = document.getElementById('task-select');
-                    if (taskSelect) {
-                        // 查找匹配附件名称的任务选项
-                        const options = Array.from(taskSelect.options);
-                        let found = false;
-                        
-                        for (let option of options) {
-                            // 使用includes进行模糊匹配
-                            if (option.text.includes(attachmentName) || option.value === taskId) {
-                                option.selected = true;
-                                // 触发change事件以加载任务详情
-                                const event = new Event('change');
-                                taskSelect.dispatchEvent(event);
-                                // 禁用下拉框
-                                taskSelect.disabled = true;
-                                found = true;
-                                break;
+            document.querySelectorAll('.btn-complete').forEach(button => {
+                button.addEventListener('click', function() {
+                    const attachmentName = this.getAttribute('data-attachment');
+                    const taskId = this.getAttribute('data-id');
+                    // 打开"添加党员发展"的模态框
+                    openAddRecordModal(1, '党员发展');
+                    // 延迟一下，确保模态框已经渲染
+                    setTimeout(function() {
+                        // 查找任务选择下拉框
+                        const taskSelect = document.getElementById('task-select');
+                        if (taskSelect) {
+                            // 查找匹配附件名称的任务选项
+                            const options = Array.from(taskSelect.options);
+                            let found = false;
+                            for (let option of options) {
+                                // 使用includes进行模糊匹配
+                                if (option.text.includes(attachmentName) || option.value === taskId) {
+                                    option.selected = true;
+                                    // 触发change事件以加载任务详情
+                                    const event = new Event('change');
+                                    taskSelect.dispatchEvent(event);
+                                    // 禁用下拉框
+                                    taskSelect.disabled = true;
+                                    found = true;
+                                    break;
+                                }
                             }
-                        }
-                        
-                        // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
-                        if (!found) {
-                            const allSelects = document.querySelectorAll('select');
-                            for (let select of allSelects) {
-                                const selectOptions = Array.from(select.options);
-                                for (let option of selectOptions) {
-                                    if (option.text.includes(attachmentName) || option.value === taskId) {
-                                        option.selected = true;
-                                        select.disabled = true;
-                                        break;
+                            // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
+                            if (!found) {
+                                const allSelects = document.querySelectorAll('select');
+                                for (let select of allSelects) {
+                                    const selectOptions = Array.from(select.options);
+                                    for (let option of selectOptions) {
+                                        if (option.text.includes(attachmentName) || option.value === taskId) {
+                                            option.selected = true;
+                                            select.disabled = true;
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                }, 300);
+                    }, 100);
+                });
+        });
+
+        // 绑定"去审核"按钮事件
+        document.querySelectorAll('.btn-review').forEach(button => {
+            button.addEventListener('click', function() {
+                const taskId = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                
+                // 显示包含三个选项的审核对话框
+                const reviewAction = prompt('请输入审核操作编号：\n1. 同意审核\n2. 拒绝审核\n3. 取消操作\n\n默认：取消操作');
+                
+                if (reviewAction === '1') {
+                    // 用户选择同意审核
+                    reviewTask(taskId, 2);
+                } else if (reviewAction === '2') {
+                    // 用户选择拒绝审核
+                    reviewTask(taskId, 4);
+                } else {
+                    // 用户选择取消操作或输入无效
+                    // 不执行任何操作
+                }
             });
         });
     }

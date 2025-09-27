@@ -49,6 +49,56 @@
             height: 100vh;
             overflow: hidden;
         }
+        
+        /* 状态徽章样式 */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-failed {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* 数据表格样式 */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 4px;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f9f9f9;
+        }
 
         /* 顶部导航栏 */
         .top-nav {
@@ -1662,6 +1712,30 @@
                                     </div>
                                 </form>
                                 <div id="password-update-message" class="success-message" style="display: none; color: green; margin-top: 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 第三方消息推送记录卡片 -->
+                    <div class="card" style="margin-top: 20px; width: 100%;">
+                        <div class="card-header">
+                            <h2 class="card-title">第三方消息推送记录</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>企业名称</th>
+                                            <th>渠道</th>
+                                            <th>事件标题</th>
+                                            <th>推送人数</th>
+                                            <th>状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="message-push-records">
+                                        <!-- 数据将通过JavaScript动态填充 -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

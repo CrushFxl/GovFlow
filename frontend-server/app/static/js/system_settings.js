@@ -177,4 +177,67 @@ document.addEventListener('DOMContentLoaded', function() {
             element.style.display = 'none';
         }, 3000);
     }
+    
+    // 加载第三方消息推送记录
+    function loadMessagePushRecords() {
+        // 模拟推送记录数据
+        const pushRecords = [
+            {
+                companyName: '杭州医学院',
+                channel: '钉钉(DingTalk)',
+                eventTitle: '关于冯小二年度评议的通知',
+                pushCount: 12,
+                status: '成功'
+            },
+            {
+                companyName: '杭州医学院',
+                channel: '钉钉(DingTalk)',
+                eventTitle: '2024年度党员发展工作安排',
+                pushCount: 28,
+                status: '成功'
+            },
+            {
+                companyName: '杭州医学院',
+                channel: '钉钉(DingTalk)',
+                eventTitle: '5月份主题党日活动通知',
+                pushCount: 45,
+                status: '成功'
+            },
+            {
+                companyName: '杭州医学院',
+                channel: '微信(WeChat)',
+                eventTitle: '党费缴纳提醒',
+                pushCount: 73,
+                status: '成功'
+            },
+            {
+                companyName: '杭州医学院',
+                channel: '微信(WeChat)',
+                eventTitle: '2024年第一季度三会一课安排',
+                pushCount: 62,
+                status: '成功'
+            }
+        ];
+        
+        // 获取表格tbody元素
+        const tableBody = document.getElementById('message-push-records');
+        // 清空表格
+        tableBody.innerHTML = '';
+        // 填充表格数据
+        pushRecords.forEach(record => {
+            const row = document.createElement('tr');
+            // 根据状态设置不同的样式
+            const statusClass = record.status === '成功' ? 'status-success' : 'status-failed';
+            row.innerHTML = `
+                <td>${record.companyName}</td>
+                <td>${record.channel}</td>
+                <td>${record.eventTitle}</td>
+                <td>${record.pushCount}</td>
+                <td><span class="status-badge ${statusClass}">${record.status}</span></td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+    }
+    loadMessagePushRecords();
 });

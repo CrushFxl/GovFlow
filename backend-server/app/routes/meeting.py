@@ -6,7 +6,6 @@ from app.models import db
 from app.models.Profile import Profile
 from app.models.Form import FormSubmission
 from app.models.User import User
-from app.models.Form import Form
 from app.utils import filter_related_task_by_user
 
 
@@ -16,25 +15,12 @@ meeting_bk = Blueprint('meeting', __name__)
 @meeting_bk.route('/get_meeting_records', methods=['POST', 'GET', 'PUT'])
 def get_meeting_records():
     uid = int(request.form.get('uid'))
-    meeting_type = request.form.get('type', 'all')  # 获取会议类型参数，默认为'all'
-    keyword = request.form.get('keyword', '')  # 获取关键词参数，默认为空字符串
-    
-    # 根据会议类型筛选记录
-    if meeting_type == 'all':
-        # 获取所有类型的会议记录
-        records1 = filter_related_task_by_user('支部党员大会', uid, mode='private')
-        records2 = filter_related_task_by_user('支部委员会', uid, mode='private')
-        records3 = filter_related_task_by_user('党小组会', uid, mode='private')
-        records4 = filter_related_task_by_user('党课', uid, mode='private')
-        # 合并所有记录
-        all_records = records1 + records2 + records3 + records4
-    else:
-        # 只获取指定类型的会议记录
-        all_records = filter_related_task_by_user(meeting_type, uid, mode='private')
-    # 如果有关键词，进行标题搜索筛选
-    if keyword:
-        all_records = [record for record in all_records if keyword in record.get('title', '')]
-    
+    records1 = filter_related_task_by_user('支部党员大会', uid)
+    records2 = filter_related_task_by_user('支部委员会', uid)
+    records3 = filter_related_task_by_user('党小组会', uid)
+    records4 = filter_related_task_by_user('党课', uid)
+    # 合并所有记录
+    all_records = records1 + records2 + records3 + records4
     # 去重
     unique_records = []
     seen_ids = set()
@@ -44,12 +30,6 @@ def get_meeting_records():
             seen_ids.add(record_id)
             unique_records.append(record)
     all_records = unique_records
-
-    # 添加附件名称
-    for data in all_records:
-        if data.get('need_attachment') == 'true':
-            form_name = Form.query.filter_by(id=int(data['attachment_id'])).first().name
-            data['attachment_name'] = form_name
     return jsonify({'code': 1000, 'data': all_records})
 
 

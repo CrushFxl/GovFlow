@@ -183,35 +183,35 @@ document.addEventListener('DOMContentLoaded', function() {
         // 模拟推送记录数据
         const pushRecords = [
             {
-                companyName: '杭州医学院',
+                companyName: '灵创大学',
                 channel: '钉钉(DingTalk)',
                 eventTitle: '关于冯小二年度评议的通知',
                 pushCount: 12,
                 status: '成功'
             },
             {
-                companyName: '杭州医学院',
+                companyName: '灵创大学',
                 channel: '钉钉(DingTalk)',
                 eventTitle: '2024年度党员发展工作安排',
                 pushCount: 28,
                 status: '成功'
             },
             {
-                companyName: '杭州医学院',
+                companyName: '灵创大学',
                 channel: '钉钉(DingTalk)',
                 eventTitle: '5月份主题党日活动通知',
                 pushCount: 45,
                 status: '成功'
             },
             {
-                companyName: '杭州医学院',
+                companyName: '灵创大学',
                 channel: '微信(WeChat)',
                 eventTitle: '党费缴纳提醒',
                 pushCount: 73,
                 status: '成功'
             },
             {
-                companyName: '杭州医学院',
+                companyName: '灵创大学',
                 channel: '微信(WeChat)',
                 eventTitle: '2024年第一季度三会一课安排',
                 pushCount: 62,

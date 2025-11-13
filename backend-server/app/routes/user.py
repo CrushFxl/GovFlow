@@ -3,6 +3,7 @@ from flask import Blueprint, request, session, jsonify
 from app.models.User import User
 from app.models.Profile import Profile
 from app.models.Notice import Notice
+from app.models.Branch import Branch
 from app.models.Task import Task
 from app.models.Todo import Todo
 
@@ -18,12 +19,15 @@ def get_nick():
     user = User.query.filter_by(uid=uid).first()
     profile = Profile.query.filter_by(uid=uid).first()
     party_status = '管理员' if profile.admin_status else profile.party_status
-    return {'code': 1000, 'msg': 'ok', 'data':{
+    return {'code': 1000, 'msg': 'ok', 'data': {
         'uid': uid,
         'nick': user.nick,
         'admin': profile.admin_status,
         'coin': user.coin,
-        'user_type': party_status
+        'user_type': party_status,
+        'party_branch': Branch.query.filter_by(value=profile.party_branch).first().name,
+        'join_time': profile.join_date,
+        'phone_number': profile.contact,
         }
     }
 
@@ -160,6 +164,3 @@ def get_dashboard_counts():
             'my_published_list': my_published_list
         }
     }
-
-
-

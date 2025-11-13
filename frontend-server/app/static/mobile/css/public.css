@@ -23,8 +23,6 @@ body{
     overflow-x: hidden;
     -ms-overflow-style: none;
     transition: all 0.3s ease;
-    margin: 0;
-    padding: 0;
 }
 
 ::-webkit-scrollbar {
@@ -34,7 +32,7 @@ body{
 div{
     display: flex;
     box-sizing: border-box;
-    max-width: 1170px;
+    max-width: 500px;
 }
 .box{
     background-color: #FFFFFF;
@@ -214,6 +212,13 @@ div{
 }
 
 #back_btn{
+    padding: 15px 10px;
+    position: absolute;
+    left: 3%;
+    margin: 1px 4px 0 4px;
+}
+
+#back_to_index_btn{
     padding: 15px 10px;
     position: absolute;
     left: 3%;

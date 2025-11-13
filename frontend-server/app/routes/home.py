@@ -27,6 +27,9 @@ def home():
             iframe_url_param=iframe_url,
             iframe_url_llm_manage_param=current_config.IFRAME_URL_LLM_MANAGE_PARAM,
             iframe_url_knowledge_manage_param=current_config.IFRAME_URL_KNOWLEDGE_MANAGE_PARAM,
+            q1="帮我整理一份灵创大学全体党员的电话",
+            q2="通知全体党员明早八点在19-215开会",
+            q3="党中央的八项规定是什么"
         )
     else:
         return render_template("home.html",

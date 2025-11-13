@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>灵创党建</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../../static/img/favicon.ico">
     <link rel="stylesheet" type="text/css" href="../../static/mobile/css/public.css">
     <link rel="stylesheet" type="text/css" href="../../static/mobile/css/index.css">
@@ -25,16 +26,16 @@
                 <img style="width: 20px; height: 20px" src="../../static/mobile/img/chat.png"  alt=""/>
                 <p>您可以尝试这样问我：</p>
             </div>
-            <div class="ai_question_box">
-                <p>帮我整理一份灵创大学全体党员的电话</p>
+            <div id="q1" class="ai_question_box">
+                <p>{{ q1 }}</p>
                 <p style="font-weight: bold; color: #AFAFAF"> > </p>
             </div>
-            <div class="ai_question_box">
-                <p>通知全体党员明早八点在19-215开会</p>
+            <div id="q2" class="ai_question_box">
+                <p>{{ q2 }}</p>
                 <p style="font-weight: bold; color: #AFAFAF"> > </p>
             </div>
-            <div class="ai_question_box">
-                <p>党中央的八项规定是什么</p>
+            <div id="q3" class="ai_question_box">
+                <p>{{ q3 }}</p>
                 <p style="font-weight: bold; color: #AFAFAF"> > </p>
             </div>
             <div class="ai_jump_button">
@@ -114,7 +115,7 @@
     </div>
     <div id="AIPage" class="page">
         <iframe
-         src="http://127.0.0.1/chatbot/7UStbWTMDyO4e1Qx"
+         src="{{ iframe_url_param }}"
          style="width: 100%; height: 100vh; border: none">
         </iframe>
     </div>
@@ -240,6 +241,7 @@
         </div>
     </div>
 </body>
+<script src="../../static/sdk/pako.js" defer></script>
 <script src="../../static/sdk/jquery.min.js" defer></script>
 <script src="../../static/mobile/js/public.js" defer></script>
 <script src="../../static/mobile/js/home.js" defer></script>

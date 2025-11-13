@@ -1,0 +1,70 @@
+.user_header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--main-color);
+    width: 100%;
+    height: 160px;
+    color: #EEEEEE;
+}
+
+.user_pic{
+    height: 60px;
+    margin-right: 10px;
+}
+
+.user_info_box{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.red_label{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    margin: 2px 4px;
+    background-color: var(--deeper-color);
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.user_info{
+    margin: 2px 0;
+}
+
+.menu_ico{
+    margin: 0 10px 0 5px;
+}
+
+.notice_bubble{
+    background-color: var(--main-color);
+    border-radius: 50%;
+    font-size: 11px;
+    color: #FFFFFF;
+    padding: 0 6px;
+    justify-content: center;
+    align-items: center;
+    margin: 0 5px;
+    width: 17px;
+    height: 17px;
+}
+
+.menu{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.menu_enter{
+    display: flex;
+    align-items: center;
+}
+
+#unread_msg, #todo_list, #my_publish, #setting{
+    cursor: pointer;
+    &:hover{
+        background-color: #EAEAEA !important;
+    }
+}

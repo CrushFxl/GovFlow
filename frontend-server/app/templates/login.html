@@ -42,7 +42,7 @@
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            margin-left: 850px;
+            margin-left: 850px; /* PC端偏移 */
         }
 
         .login-header {
@@ -126,13 +126,18 @@
             margin-right: 5px;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
+            .login-container {
+                margin-left: 0; /* 移动端居中 */
+                margin: 0 auto;
+            }
+            
             .login-body {
                 padding: 10px 20px 20px 20px;
             }
 
-            .login-header h1 {
-                font-size: 1.5em;
+            .login-header p {
+                font-size: 1.3em;
             }
         }
     </style>

@@ -1,0 +1,248 @@
+body{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    padding-bottom: 50px;
+    max-height: 100vh;
+    max-width: 100vw;
+}
+
+.page{
+    display: none;
+    align-items: center;
+    flex-direction: column;
+    width: 100vw;
+}
+
+.top_nav{
+    width: 100%;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    background-color: var(--main-color);
+    font-size: 18px;
+    z-index: 999;
+}
+
+.back{
+    color: #FFFFFF;
+    font-size: 18px;
+    display: none;
+}
+
+#indexPage{
+    background-color: #fde8e8;
+    background-attachment: fixed;
+    background-repeat: repeat;
+}
+
+.ai_bg{
+    display: flex;
+    flex-direction: column;
+    background-image: linear-gradient(0deg, #fdc5b3 40%, #FEF2F2 98%);
+}
+
+.ai_question_box{
+    cursor: pointer;
+    position: relative;
+    justify-content: space-between;
+    font-size: 14px;
+    background-color: #FFFFFF;
+    padding: 10px 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    &:hover{
+        background-color: #F5F5F5;
+    }
+}
+
+.ai_jump_button{
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    background-color: var(--main-color);
+    color: #FFFFFF;
+    height: 42px;
+    margin-top: 10px;
+    &:hover{
+        background-color: var(--deeper-color);
+    }
+}
+
+.grid_nav{
+    justify-content: space-around;
+    img{
+        width: 35px;
+        height: 35px;
+        object-fit: cover;
+    }
+    font-size: 14px;
+    flex-wrap: wrap;
+    gap: 16px 25px;
+}
+
+.shortcut{
+    cursor: pointer;
+    flex: 1 1 24%;
+    align-items: center;
+    flex-direction: column;
+    gap: 5px 0;
+    &:hover{
+        background-color: #F8F8F8;
+    }
+}
+
+.cartoon_robot{
+    position: absolute;
+    height: 140px;
+    top: 50px;
+    right: 30px;
+    z-index: 10;
+}
+
+.news_box{
+    flex-direction: column;
+    width: 100%;
+}
+
+.news_title{
+    margin: 15px 15px 10px 15px;
+    .decorate_vertical_line{
+        font-weight: bold;
+        color: var(--main-color);;
+        width: 3px;
+        height: 18px;
+        margin-top: 3px;
+        background-color: var(--main-color);;
+    }
+    flex-direction: row;
+    gap: 0 10px;
+}
+
+.line{
+    height: 1px;
+    width: 100%;
+    background-color: #DDDDDD;
+}
+
+.news{
+    padding: 15px;
+    flex-direction: row;
+    a{
+        text-decoration: none;
+        color: #050505;
+        &:hover{
+            text-decoration: underline;
+        }
+        font-size: 14.5px;
+    }
+    img{
+        min-height: 70px;
+        min-width: 70px;
+        max-height: 70px;
+        max-width: 70px;
+        margin-right: 15px;
+    }
+    .news_content{
+        cursor: pointer;
+        flex-direction: column;
+        flex-flow: column;
+        justify-content: space-between;
+        font-size: 15px;
+        gap: 15px 0;
+        width: 100%;
+    }
+    .news_data{
+        flex-direction: row;
+        justify-content: space-between;
+        color: #969696;
+        font-size: 12px;
+    }
+}
+
+.news_tip{
+    font-size: 12px;
+    color: #969696;
+    margin: 0 5px 5px 5px;
+}
+
+#my_study{
+    margin-top: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    flex-direction: column;
+}
+
+.study_record{
+    flex-direction: row;
+    margin-bottom: 10px;
+    .study_time{
+        margin-top: 5px;
+        color: #AAAAAA;
+        font-size: 13px;
+        min-width: 80px;
+    }
+    .study_vertical_line{
+        height: 50px;
+        width: 1px;
+        margin-right: 10px;
+        margin-top: 2px;
+        background-color: #DDDDDD;
+    }
+    .study_content{
+        flex-direction: column;
+        .study_score{
+            font-size: 13px;
+            color: var(--main-color);
+        }
+        .study_title{
+            color: #AAAAAA;
+            font-size: 13px;
+        }
+    }
+
+}
+
+#my_study > .line{
+    margin: 10px 0;
+    background-color: #EEEEEE;
+}
+
+.switch_box{
+    margin: 10px 0;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#sorted_by_channel, #sorted_by_time{
+    cursor: pointer;
+    margin: 0 6px;
+    width: 48%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .line{
+        margin: 5px 0;
+        width: 100%;
+        background-color: #DDDDDD;
+    }
+    p{
+        font-size: 15px;
+        color: #AAAAAA;
+    }
+}
+
+#sorted_by_channel.active, #sorted_by_time.active{
+    p{
+        color: var(--main-color);
+    }
+    .line {
+        background-color: var(--main-color);
+        height: 2px;
+    }
+}

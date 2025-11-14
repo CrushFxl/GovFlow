@@ -1,5 +1,6 @@
 from app.config import config
 import os
+import time
 import requests
 from flask import Blueprint, request, current_app, jsonify
 
@@ -22,11 +23,32 @@ def upload_file():
     base_url = config[ENV].RAGFLOW_API_URL.rstrip('/')
     url = f"{base_url}/api/v1/datasets/{dataset_id}/documents"
     with open(file_path, 'rb') as f:
+        # 上传文档
         files = {'file': f}
         response = requests.post(url, files=files, headers={'Authorization': f'Bearer {config[ENV].RAGFLOW_TOKEN}'})
         if response.status_code != 200:
             return jsonify({'code': response.status_code, 'data': {'prompt': '由于内部错误，文件上传失败。'}}), response.status_code
-        prompt = f"\n文件上传成功，文档{file.filename}已添加到RAGFlow知识库，您可在知识库管理页面查看详细内容。\n"
+        # 获取document_id
+        upload_result = response.json()
+        document_id = upload_result['data'][0]['id']
+        time.sleep(1)
+        # 解析文档
+        parse_url = f"{base_url}/api/v1/datasets/{dataset_id}/chunks"
+        parse_headers = {
+            'Authorization': f'Bearer {config[ENV].RAGFLOW_TOKEN}',
+            'Content-Type': 'application/json'
+        }
+        parse_data = {
+            "document_ids": [document_id]
+        }
+        parse_response = requests.post(parse_url, json=parse_data, headers=parse_headers)
+        try:
+            parse_result = parse_response.json()
+            if parse_result.get('code') != 0:
+                return jsonify({'code': 500, 'data': {'prompt': '文件上传成功，但文档解析返回错误。'}}), 500
+        except ValueError:
+            pass
+        prompt = f"\n文件上传成功，文档{file.filename}已添加到RAGFlow知识库并解析完成，新解析的文档最长可能需要3分钟生效。\n"
         return jsonify({'code': 200, 'data': {'prompt': prompt}}), 200
 
 @ragflow_bk.route('/chat', methods=['POST'])

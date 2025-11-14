@@ -25,3 +25,5 @@ function changePage(obj){
 
 /*点击返回按钮*/
 $(document).on("click", "#back_btn", function () {history.back();});
+/*点击返回首页按钮*/
+$(document).on("click", "#back_to_index_btn", function () {window.location.href = "/home"});

@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>灵创党建</title>
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../../static/img/favicon.ico">
     <link rel="stylesheet" type="text/css" href="../../static/mobile/css/public.css">
     <link rel="stylesheet" type="text/css" href="../../static/mobile/css/index.css">
+    <link rel="stylesheet" type="text/css" href="../../static/css/cloud-form.css">
+    <link rel="stylesheet" href="../../static/css/activity.css">
+    <link rel="stylesheet" href="../../static/css/profile.css">
+    <link rel="stylesheet" href="../../static/css/home.css">
+    <script src="../../static/js/theme.js"></script>
+    
 </head>
 <style>
     .task_box{
         display: flex;
-        justify-content: space-between;
         padding: 10px;
         margin-bottom: 10px;
         background-color: white;
@@ -43,9 +49,8 @@
         color: white;
         border-radius: 6px;
         font-size: 14px;
-        padding: 0 2px;
+        padding: 0 5px;
         height: 24px;
-        width: 50px;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -100,7 +105,10 @@
     .task_list_container {
         display: flex;
         flex-direction: column;
-        padding: 10px;
+        padding: 10px 0;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
     }
     .empty_state {
         text-align: center;
@@ -116,27 +124,103 @@
     .status-rejected {
         background-color: #999;
     }
+    /* 筛选框样式 */
+    .filter-container {
+        display: flex;
+        padding: 10px 15px;
+        background-color: white;
+        border-bottom: 1px solid #e0e0e0;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        position: sticky;
+        width: 100%;
+        top: 45px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin: 0 10px;
+    }
+    .filter-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-label {
+        font-size: 13px;
+        color: #666;
+        font-weight: 500;
+    }
+    .filter-select {
+        width: 120px;
+        padding: 8px 6px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        background-color: white;
+        color: #333;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+    .filter-select:focus {
+        border-color: var(--main-color);
+    }
+    .filter-reset {
+        padding: 0 7px;
+        background-color: #FFF;
+        border: 1px solid #999;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #333 !important;
+        cursor: pointer;
+        transition: all 0.3s;
+        align-self: flex-end;
+        height: 100%;
+        width: 40px;
+    }
 </style>
 <body style="background-color: #FAFAFA">
 <p id="URL" class="hide">{{URL}}</p>
-<div class="top_nav" style="margin-bottom: 10px">
-    <svg id="back_btn" transform="rotate(180 0 0)" width="8.43994140625" height="14.68994140625" viewBox="0 0 8.43994140625 14.68994140625"><path d="M0.289942 13.04L6.11994 7.35L0.289942 1.65C0.107385 1.45918 -5.81741e-05 1.21559 -5.81741e-05 0.949999C-5.81741e-05 0.410583 0.420541 0 0.959941 0C1.22555 0 1.45566 0.0874033 1.62994 0.27L8.10994 6.61C8.33402 6.82579 8.43994 7.0678 8.43994 7.35C8.43994 7.63219 8.33402 7.8642 8.10994 8.08L1.62994 14.42C1.45566 14.6026 1.22555 14.69 0.959941 14.69C0.420541 14.69 -5.81741e-05 14.2778 -5.81741e-05 13.73C-5.81741e-05 13.4644 0.107385 13.2226 0.289942 13.04Z" fill="#FFFFFF" ></path></svg>
+<div id="top_nav" class="top_nav" style="height: 45px;">
+    <svg id="back_to_index_btn" transform="rotate(180 0 0)" width="8.43994140625" height="14.68994140625" viewBox="0 0 8.43994140625 14.68994140625"><path d="M0.289942 13.04L6.11994 7.35L0.289942 1.65C0.107385 1.45918 -5.81741e-05 1.21559 -5.81741e-05 0.949999C-5.81741e-05 0.410583 0.420541 0 0.959941 0C1.22555 0 1.45566 0.0874033 1.62994 0.27L8.10994 6.61C8.33402 6.82579 8.43994 7.0678 8.43994 7.35C8.43994 7.63219 8.33402 7.8642 8.10994 8.08L1.62994 14.42C1.45566 14.6026 1.22555 14.69 0.959941 14.69C0.420541 14.69 -5.81741e-05 14.2778 -5.81741e-05 13.73C-5.81741e-05 13.4644 0.107385 13.2226 0.289942 13.04Z" fill="#FFFFFF" ></path></svg>
     <p class="title">任务管理</p>
 </div>
-
+<div class="blank" style="min-height: 45px;">(占位)</div>
+<!-- 筛选框 -->
+<div class="filter-container">
+    <div class="filter-item">
+        <label class="filter-label">任务状态</label>
+        <select class="filter-select" id="status-filter">
+            <option value="">全部状态</option>
+        </select>
+    </div>
+    <div class="filter-item">
+        <label class="filter-label">任务类型</label>
+        <select class="filter-select" id="type-filter">
+            <option value="">全部类型</option>
+        </select>
+    </div>
+    <button class="filter-reset" id="reset-filter">重置</button>
+</div>
 <div class="task_list_container" id="task_list">
     <div class="loading">加载中...</div>
 </div>
 
 </body>
 <script src="../../static/sdk/jquery.min.js"></script>
+<script src="../../static/sdk/bootstrap.bundle.min.js"></script>
 <script src="../../static/mobile/js/public.js" defer></script>
 <script src="../../static/mobile/js/home.js" defer></script>
+<script src="../../static/mobile/js/add_form_record.js"></script>
+<!-- 引入VUE框架 -->
+<script src="../static/sdk/vue.global.js"></script>
+<link rel="stylesheet" href="../static/sdk/element-plus.css">
+<script src="../static/sdk/element-plus.js"></script>
 <script>
     $(document).ready(function() {
         const URL = $('#URL').text();
         let taskData = []; // 存储从后端获取的任务数据
-        
+        let filteredTaskData = []; // 存储筛选后的任务数据
+        let currentStatusFilter = ''; // 当前状态筛选值
+        let currentTypeFilter = ''; // 当前类型筛选值
         // 获取任务数据
         function fetchTaskData() {
             $.ajax({
@@ -152,32 +236,74 @@
                     if (resp.code === 1000) {
                         taskData = resp.data;
                         sessionStorage.setItem('activityData', JSON.stringify(taskData));
-                        renderTaskList();
+                        // 初始化筛选选项
+                        initFilterOptions();
+                        // 应用筛选
+                        applyFilters();
                     }
-                },
-                error: function () {
-                    alert("连接失败：无法连接至服务器，请联系站长或稍后再试。");
-                    $('#task_list').html('<div class="empty_state">加载失败，请重试</div>');
                 }
             });
         }
-        
+        // 初始化筛选选项
+        function initFilterOptions() {
+            // 获取所有唯一的状态和类型
+            const statusSet = new Set();
+            const typeSet = new Set();
+            taskData.forEach(item => {
+                statusSet.add(item.status);
+                typeSet.add(item.task_type);
+            });
+            // 填充状态筛选下拉框
+            const statusFilter = $('#status-filter');
+            statusFilter.empty();
+            statusFilter.append('<option value="">全部状态</option>');
+            const statusOptions = [
+                {value: 1, text: '待审核'},
+                {value: 2, text: '进行中'},
+                {value: 3, text: '已完成'},
+                {value: 4, text: '审核拒绝'}
+            ];
+            statusOptions.forEach(option => {
+                if (statusSet.has(option.value)) {
+                    statusFilter.append(`<option value="${option.value}">${option.text}</option>`);
+                }
+            });
+            // 填充类型筛选下拉框
+            const typeFilter = $('#type-filter');
+            typeFilter.empty();
+            typeFilter.append('<option value="">全部类型</option>');
+            
+            const sortedTypes = Array.from(typeSet).sort();
+            sortedTypes.forEach(type => {
+                if (type) {
+                    typeFilter.append(`<option value="${type}">${type}</option>`);
+                }
+            });
+        }
+        // 应用筛选
+        function applyFilters() {
+            filteredTaskData = taskData.filter(item => {
+                // 状态筛选
+                const statusMatch = !currentStatusFilter || item.status == currentStatusFilter;
+                // 类型筛选
+                const typeMatch = !currentTypeFilter || item.task_type === currentTypeFilter;
+                return statusMatch && typeMatch;
+            });
+            renderTaskList();
+        }
         // 渲染任务列表
         function renderTaskList() {
             const taskListContainer = $('#task_list');
             taskListContainer.empty();
-            
-            if (taskData.length === 0) {
-                taskListContainer.html('<div class="empty_state">暂无任务数据</div>');
+            if (filteredTaskData.length === 0) {
+                taskListContainer.html('<div class="empty_state">暂无符合条件的任务</div>');
                 return;
             }
-            
             // 为每个任务创建HTML并添加到容器中
-            taskData.forEach(item => {
+            filteredTaskData.forEach(item => {
                 // 根据任务状态获取状态文本和样式
                 let statusText = '未知';
                 let statusClass = '';
-                
                 switch(item.status) {
                     case 1:
                         statusText = '待审核';
@@ -196,64 +322,51 @@
                         statusClass = 'task_status status-rejected';
                         break;
                 }
-                
                 // 创建任务盒子
                 const taskBox = $('<div class="box sd0 task_box"></div>');
-                
                 // 创建任务信息部分
                 const taskInfo = $('<div class="task_info"></div>');
-                
                 // 添加任务标题和状态
                 const titleContainer = $('<div style="display: flex; align-items: center;"></div>');
                 titleContainer.append(`<div class="${statusClass}">${statusText}</div>`);
                 titleContainer.append(`<p class="task_title" data-full-title="${item.title || ''}">${truncateTitle(item.title || '')}</p>`);
                 taskInfo.append(titleContainer);
-                
                 // 添加任务其他信息
                 taskInfo.append(`<div>发起时间：<p class="task_date">${item.created_time || '-'}</p></div>`);
                 taskInfo.append(`<div>任务类型：<p class="task_type">${item.task_type || '-'}</p></div>`);
                 taskInfo.append(`<div>执行频次：<p class="task_frequency">${item.frequency || '-'}</p></div>`);
-                
                 // 创建任务操作部分
                 const taskOperation = $('<div class="task_operation" style="gap: 5px; justify-content: center"></div>');
-                
                 // 添加详情按钮
                 taskOperation.append(`<div class="task_detail_btn" data-id="${item.id}" data-type="${item.type}">详情</div>`);
-                
                 // 根据状态添加审核按钮（只有待审核状态才有）
                 if (item.status == 1) {
                     taskOperation.append(`<div class="task_review_btn" data-id="${item.id}" data-type="${item.type}">审核</div>`);
                 } else {
                     taskOperation.append('<div class="task_review_btn disabled">审核</div>');
                 }
-                
                 // 根据状态和是否有附件添加完成按钮
                 if (item.attachment_name && item.status == 2) {
                     taskOperation.append(`<div class="task_complete_btn" data-id="${item.id}" data-attachment="${item.attachment_name}" data-task-id="${item.id}">处理</div>`);
                 } else {
                     taskOperation.append('<div class="task_complete_btn disabled">处理</div>');
                 }
-                
                 // 组装任务盒子
                 taskBox.append(taskInfo);
                 taskBox.append(taskOperation);
-                
                 // 添加到容器
                 taskListContainer.append(taskBox);
             });
-            
             // 绑定按钮事件
             bindTaskButtons();
         }
-        
         // 截断标题函数，最多12个中文字符
         function truncateTitle(title) {
-            if (!title || title.length <= 12) {
+            if (!title || title.length <= 11) {
                 return title;
             }
-            return title.substring(0, 12) + '...';
+            return title.substring(0, 11) + '..';
         }
-        
         // 绑定任务按钮事件
         function bindTaskButtons() {
             // 绑定详情按钮事件
@@ -263,27 +376,16 @@
                 // 获取完整的数据
                 const allData = JSON.parse(sessionStorage.getItem('activityData') || '[]');
                 const item = allData.find(item => item.id === id && item.type === type);
-                
                 if (item) {
-                    // 调用统一的详情显示函数（如果存在）
-                    if (typeof window.showTaskDetail === 'function') {
-                        showTaskDetail(item);
-                    } else {
-                        // 简单的详情显示
-                        let detail = `任务详情：\n标题：${item.title || '-'}\n类型：${item.task_type || '-'}\n状态：${getStatusText(item.status)}\n发起时间：${item.created_time || '-'}\n执行频次：${item.frequency || '-'}`;
-                        alert(detail);
-                    }
+                    showTaskDetail(item);
                 }
             });
-            
             // 绑定审核按钮事件
             $('.task_review_btn:not(.disabled)').click(function() {
                 const taskId = $(this).data('id');
                 const type = $(this).data('type');
-                
                 // 显示包含三个选项的审核对话框
                 const reviewAction = prompt('请输入审核操作编号：\n1. 同意审核\n2. 拒绝审核\n3. 取消操作\n\n默认：取消操作');
-                
                 if (reviewAction === '1') {
                     // 用户选择同意审核
                     reviewTask(taskId, 2);
@@ -292,64 +394,52 @@
                     reviewTask(taskId, 4);
                 }
             });
-            
             // 绑定完成按钮事件
             $('.task_complete_btn:not(.disabled)').click(function() {
                 const attachmentName = $(this).data('attachment');
                 const taskId = $(this).data('id');
-                
-                // 检查是否有openAddRecordModal函数
-                if (typeof window.openAddRecordModal === 'function') {
-                    // 打开"添加党员发展"的模态框
-                    openAddRecordModal(1, '党员发展');
-                    // 延迟一下，确保模态框已经渲染
-                    setTimeout(function() {
-                        // 查找任务选择下拉框
-                        const taskSelect = document.getElementById('task-select');
-                        if (taskSelect) {
-                            // 查找匹配附件名称的任务选项
-                            const options = Array.from(taskSelect.options);
-                            let found = false;
-                            for (let option of options) {
-                                // 使用includes进行模糊匹配
-                                if (option.text.includes(attachmentName) || option.value === taskId) {
-                                    option.selected = true;
-                                    // 触发change事件以加载任务详情
-                                    const event = new Event('change');
-                                    taskSelect.dispatchEvent(event);
-                                    // 禁用下拉框
-                                    taskSelect.disabled = true;
-                                    found = true;
-                                    break;
-                                }
+                // 打开"添加党员发展"的模态框
+                openAddRecordModal(1, '党员发展');
+                setTimeout(function() {
+                    // 查找任务选择下拉框
+                    const taskSelect = document.getElementById('task-select');
+                    if (taskSelect) {
+                        // 查找匹配附件名称的任务选项
+                        const options = Array.from(taskSelect.options);
+                        let found = false;
+                        for (let option of options) {
+                            // 使用includes进行模糊匹配
+                            if (option.text.includes(attachmentName) || option.value === taskId) {
+                                option.selected = true;
+                                // 触发change事件以加载任务详情
+                                const event = new Event('change');
+                                taskSelect.dispatchEvent(event);
+                                // 禁用下拉框
+                                taskSelect.disabled = true;
+                                found = true;
+                                break;
                             }
-                            // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
-                            if (!found) {
-                                const allSelects = document.querySelectorAll('select');
-                                for (let select of allSelects) {
-                                    const selectOptions = Array.from(select.options);
-                                    for (let option of selectOptions) {
-                                        if (option.text.includes(attachmentName) || option.value === taskId) {
-                                            option.selected = true;
-                                            select.disabled = true;
-                                            break;
-                                        }
+                        }
+                        // 如果没找到，尝试遍历所有select元素查找附件名称匹配项
+                        if (!found) {
+                            const allSelects = document.querySelectorAll('select');
+                            for (let select of allSelects) {
+                                const selectOptions = Array.from(select.options);
+                                for (let option of selectOptions) {
+                                    if (option.text.includes(attachmentName) || option.value === taskId) {
+                                        option.selected = true;
+                                        select.disabled = true;
+                                        break;
                                     }
                                 }
                             }
                         }
-                    }, 100);
-                } else {
-                    alert('去完成功能暂不可用');
-                }
+                    }
+                }, 100);
             });
         }
-        
         // 审核任务函数
-        function reviewTask(taskId, status) {
-            // 显示加载提示
-            alert('处理中...');
-            
+        function reviewTask(taskId, status) {            
             // 发送审核请求
             $.ajax({
                 url: URL + '/activity/review_task',
@@ -363,29 +453,38 @@
                 success: function(resp) {
                     if (resp.code === 1000) {
                         alert('审核成功');
-                        // 重新获取数据并渲染表格
                         fetchTaskData();
-                    } else {
-                        alert('审核失败：' + resp.message);
                     }
-                },
-                error: function() {
-                    alert('审核请求失败，请重试');
                 }
             });
         }
-        
         // 获取状态文本
         function getStatusText(status) {
             switch(status) {
                 case 1: return '待审核';
                 case 2: return '进行中';
                 case 3: return '已完成';
-                case 4: return '审核拒绝';
+                case 4: return '已拒绝';
                 default: return '未知';
             }
         }
-        
+        // 筛选事件监听
+        $('#status-filter').change(function() {
+            currentStatusFilter = $(this).val();
+            applyFilters();
+        });
+        $('#type-filter').change(function() {
+            currentTypeFilter = $(this).val();
+            applyFilters();
+        });
+        // 重置筛选
+        $('#reset-filter').click(function() {
+            currentStatusFilter = '';
+            currentTypeFilter = '';
+            $('#status-filter').val('');
+            $('#type-filter').val('');
+            applyFilters();
+        });
         // 返回按钮事件
         $('#back_btn').click(function() {
             window.history.back();
@@ -393,5 +492,150 @@
         // 页面加载时获取任务数据
         fetchTaskData();
     });
+    // 显示单个任务/通知详情 - ElementUI风格模态框
+    function showTaskDetail(item) {
+        // 检查是否已经存在模态框元素
+        let modal = document.getElementById('task-detail-modal');
+        if (!modal) {
+            // 创建ElementUI风格的模态框HTML
+            const modalHTML = `
+                <div id="task-detail-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; ">
+                    <div style="background-color: white; border-radius: 4px; width: 80%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                        <div style="padding: 15px 20px; border-bottom: 1px solid #e8e8e8; display: flex; justify-content: space-between; align-items: center; background-color: #fafafa;">
+                            <h3 id="task-modal-title" style="margin: 0; font-size: 16px; color: #262626;">任务详情</h3>
+                            <button id="close-task-modal-btn" style="background: none; border: none; font-size: 16px; cursor: pointer; color: #909399; padding: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">×</button>
+                        </div>
+                        <div id="task-modal-content" style="padding: 20px; overflow-y: auto; flex: 1; color: #303133;">
+                            <!-- 内容将通过JavaScript动态填充 -->
+                        </div>
+                        <div style="padding: 10px 20px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; gap: 10px; background-color: #fafafa;">
+                            <button id="close-task-modal-button" style="padding: 8px 16px; border: 1px solid #dcdfe6; border-radius: 4px; background-color: white; color: #606266; cursor: pointer; font-size: 14px; transition: all 0.3s;">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // 添加到body
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = modalHTML;
+            document.body.appendChild(tempDiv.firstElementChild);
+            // 获取创建的模态框
+            modal = document.getElementById('task-detail-modal');
+            // 一次性绑定关闭事件监听器
+            const closeButton = document.getElementById('close-task-modal-btn');
+            const cancelButton = document.getElementById('close-task-modal-button');
+            closeButton.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            cancelButton.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+        }
+        
+        // 设置标题
+        document.getElementById('task-modal-title').textContent = item.title || '任务详情';
+        // 填充内容
+        const contentDiv = document.getElementById('task-modal-content');
+
+        // 获取状态文本和颜色
+        let statusText = '未知';
+        let statusColor = '#909399';
+        switch(item.status) {
+            case 1:
+                statusText = '待审核';
+                statusColor = '#e6a23c';
+                break;
+            case 2:
+                statusText = '进行中';
+                statusColor = '#1890ff';
+                break;
+            case 3:
+                statusText = '已完成';
+                statusColor = '#67c23a';
+                break;
+            case 4:
+                statusText = '已拒绝';
+                statusColor = '#f56c6c';
+                break;
+        }
+        const typeLabel = item.type === 'notice' ? '通知' : item.type === 'task' ? '任务' : item.type === 'review' ? '待审批' : '其他';
+        // 构建详情内容
+        let contentHTML = `
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="task-detail-row" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px; padding-top: 4px;">标题：</span>
+                        <span class="task-detail-value" style="flex: 1; word-break: break-word;">${item.title || '-'}</span>
+                    </div>
+                    
+                    <div class="task-detail-item" style="display: flex; align-items: flex-start; gap: 10px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px; padding-top: 4px;">类型：</span>
+                        <span class="task-detail-value" style="flex: 1;"><span style="display: inline-block; padding: 4px 12px; border-radius: 10px; background-color: #ecf5ff; color: #409eff; font-size: 12px;">${typeLabel}</span></span>
+                    </div>
+                    
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">状态：</span>
+                        <span class="task-detail-value" style="flex: 1;"><span style="display: inline-block; padding: 4px 12px; border-radius: 10px; background-color: rgba(${hexToRgb(statusColor)}, 0.1); color: ${statusColor}; font-size: 12px;">${statusText}</span></span>
+                    </div>
+                    ${item.task_type ? `
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">任务类型：</span>
+                        <span class="task-detail-value" style="flex: 1;">${item.task_type}</span>
+                    </div>
+                    ` : ''}
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">描述：</span>
+                        <div class="task-detail-value" style="flex: 1; background-color: #f5f7fa; padding: 10px; border-radius: 4px; white-space: pre-wrap; line-height: 1.6;">${item.description || '-'}</div>
+                    </div>
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">创建时间：</span>
+                        <span class="task-detail-value" style="flex: 1;">${item.created_time || '-'}</span>
+                    </div>
+                    ${item.end_date ? `
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">截止时间：</span>
+                        <span class="task-detail-value" style="flex: 1;">${item.end_date}</span>
+                    </div>
+                    ` : ''}
+                    ${item.frequency ? `
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">频率：</span>
+                        <span class="task-detail-value" style="flex: 1;">${item.frequency}</span>
+                    </div>
+                    ` : ''}
+                    ${item.location ? `
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">地点：</span>
+                        <span class="task-detail-value" style="flex: 1;">${item.location}</span>
+                    </div>
+                    ` : ''}
+                    ${item.participants ? `
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">参与人：</span>
+                        <span class="task-detail-value" style="flex: 1;">${item.participants}</span>
+                    </div>
+                    ` : ''}
+                    ${item.partners ? `
+                    <div class="task-detail-item" style="display: flex; align-items: center; gap: 10px; min-height: 32px;">
+                        <span class="task-detail-label" style="font-weight: 500; color: #606266; min-width: 80px;">参与党员：</span>
+                        <span class="task-detail-value" style="flex: 1;">${item.partners}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        contentDiv.innerHTML = contentHTML;
+        // 显示模态框
+        modal.style.display = 'flex';
+        // 辅助函数：将十六进制颜色转换为RGB值（用于背景色透明度）
+        function hexToRgb(hex) {
+            // 移除#号
+            hex = hex.replace('#', '');
+            // 解析RGB值
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return `${r}, ${g}, ${b}`;
+        }
+    }
 </script>
 </html>

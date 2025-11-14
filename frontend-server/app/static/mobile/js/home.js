@@ -89,6 +89,7 @@ window.onload = function () {
                 $('#user_status').text(user_type);
                 $('#user_star').text(coin);
                 $('#user_party').text(resp.data['party_branch']);
+                updateIframeWithUid(uid);           // 在Dify对话框中嵌入UID
             }
         },
         error: function () {
@@ -99,10 +100,22 @@ window.onload = function () {
     $(document).on("click", "#indexTab", function () {
         changePage(this);
     });
-    /*点击首页 - AI工作台标签*/
+
+
+    /*点击首页AI相关跳转*/
     $(document).on("click", ".ai_jump_button", function () {
         $("#AITab").trigger("click");
     });
+    $(document).on("click", "#q1", function () {
+        $("#AITab").trigger("click");
+    });
+    $(document).on("click", "#q2", function () {
+        $("#AITab").trigger("click");
+    });
+    $(document).on("click", "#q3", function () {
+        $("#AITab").trigger("click");
+    });
+
 
     /*shortcut link*/
     $(document).on("click", "#task_manage", function () {
@@ -173,6 +186,28 @@ window.onload = function () {
             }
         });
     });
+
+
+    // 更新iframe URL，添加编码后的uid参数
+    function updateIframeWithUid(uid) {
+        // 1. GZIP压缩
+        const compressedArray = pako.gzip(JSON.stringify(uid));
+        // 2. 将Uint8Array转换为二进制字符串
+        let binaryString = '';
+        for (let i = 0; i < compressedArray.length; i++) {
+            binaryString += String.fromCharCode(compressedArray[i]);
+        }
+        // 3. Base64编码
+        const base64Encoded = btoa(binaryString);
+        // 4. encodeURIComponent编码
+        const encodedUid = encodeURIComponent(base64Encoded);
+        // 5. 更新iframe的URL
+        const iframe = document.querySelector('iframe');
+        const originalSrc = iframe.src;
+        // 检查URL是否已经包含参数
+        const separator = originalSrc.includes('?') ? '&' : '?';
+        iframe.src = originalSrc + separator + 'uid=' + encodedUid;
+    }
 
     /*刷新页面时自动触发点击事件*/
     let page = sessionStorage.getItem("page");

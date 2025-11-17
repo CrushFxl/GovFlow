@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵创党建AI智能体系统 - 登录</title>
+    <link rel="shortcut icon" href="../../static/img/favicon.ico">
+    <style>
+        :root {
+            --primary-red: #c12c1f;
+            --dark-red: #8e1c11;
+            --light-red: #f8e6e5;
+            --gold: #d4af37;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* 设置登录背景 */
+            background-image: url('../../static/img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-left: 850px; /* PC端偏移 */
+        }
+
+        .login-header {
+            background-color: #fff;
+            color: #444;
+            padding: 20px 20px 0 20px;
+            text-align: left;
+        }
+
+        .login-header p {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .login-body {
+            padding: 20px 30px 30px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-red);
+            outline: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            background-color: var(--dark-red);
+        }
+
+        .login-footer {
+            text-align: center;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        .login-footer a {
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .party-icon {
+            color: var(--gold);
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                background-image: url('../../static/mobile/img/bg.png');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+            
+            .login-container {
+                margin-left: 0; /* 移动端居中 */
+                margin: 0 auto;
+            }
+            
+            .login-body {
+                padding: 10px 20px 20px 20px;
+            }
+
+            .login-header p {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+    <style>
+        .party_icon{
+            position: fixed;
+            z-index: 999;
+            height: 25vh;
+            top: -4%;
+            right: -9%;
+        }
+        .login_logo{
+            margin-top: 20px;
+            margin-left: 20px;
+            height: 25vw;
+        }
+        .login_title{
+            height: 10vw;
+            margin-bottom: 20px;
+            margin-top: -5px;
+        }
+        body{
+            flex-direction: column;
+        }
+        #mobile_login_btn{
+            margin-top: 20px;
+            width: 93%;
+            border-radius: 24px;
+        }
+        .form-control{
+            border-radius: 24px;
+        }
+        .login_tip{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 10px 18px;
+            color: #3f3f3f;
+        }
+    </style>
+</head>
+<body>
+    <p id="URL" style="display: none">{{URL}}</p>
+    <img src="../../static/mobile/img/party_icon.png" class="party_icon" alt="" />
+    <img src="../../static/mobile/img/login_logo.png" class="login_logo" alt="" />
+    <img src="../../static/mobile/img/login_title.png" class="login_title" alt="" />
+    <div style="width: 100%">
+        <div class="login-body" style="padding: 10px">
+            <form>
+                <div class="form-group">
+                    <input type="text" id="username" class="form-control" placeholder="请输入手机号" required>
+                </div>
+                <div class="form-group" style="margin: 0">
+                    <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
+                </div>
+            </form>
+            <div class="login_tip"><p>注册账号</p><p>忘记密码</p></div>
+        </div>
+    </div>
+    <button type="submit" class="btn-login" id="mobile_login_btn">登录</button>
+    <script src="../../static/sdk/jquery.min.js"></script>
+    <script>
+        // 登录表单提交处理
+        const URL = $("#URL").text();
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            $.ajax({
+                url: URL + "/auth/login",
+                xhrFields: {withCredentials: true},
+                type: "POST",
+                dataType: "json",
+                data: {
+                    'username': username,
+                    'password': password
+                },
+                success: function (resp) {
+                    if(resp.code === 1000){
+                        window.location.replace('/home');
+                    }else{
+                        alert(resp.msg);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

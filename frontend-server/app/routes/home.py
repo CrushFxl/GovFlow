@@ -43,6 +43,10 @@ def home():
 def login():
     return render_template("login.html")
 
+@home_ft.get('/mobile_login/')
+def login():
+    return render_template("mobile/login.html")
+
 @home_ft.get('/setting/')
 def setting():
     return render_template("mobile/setting.html")

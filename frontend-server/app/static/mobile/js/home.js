@@ -177,7 +177,7 @@ window.onload = function () {
             type: "POST",
             dataType: "json",
             success: function (resp) {
-                window.location.replace('/login');
+                window.location.replace('/mobile_login');
                 localStorage.removeItem('uid');
                 localStorage.removeItem('admin');
             },

@@ -209,7 +209,7 @@
     <script>
         // 登录表单提交处理
         const URL = $("#URL").text();
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('#mobile_login_btn').addEventListener('click', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;

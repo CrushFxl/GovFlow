@@ -22,6 +22,17 @@ def create_notice():
     data = json.loads(request.args.get('data'))
     organizations = json.loads(request.args.get('organizations'))
     partners = json.loads(request.args.get('partners'))
+    # 硬编码
+    user_list = []
+    if "教工" in organizations:
+        users = Profile.query.filter(Profile.party_branch == 111).all()
+    elif "学生" in organizations:
+        users = Profile.query.filter(Profile.party_branch == 112).all()
+    else:
+        users = Profile.query.all()
+    for u in users:
+        user_list.append(u.real_name)
+    partners = user_list
     data['organizations'] = organizations
     data['partners'] = partners
     data['created_uid'] = uid
@@ -53,6 +64,17 @@ def create_task():
     data = json.loads(request.args.get('data'))
     organizations = json.loads(request.args.get('organizations'))
     partners = json.loads(request.args.get('partners'))
+    # 硬编码
+    user_list = []
+    if "教工" in organizations:
+        users = Profile.query.filter(Profile.party_branch == 111).all()
+    elif "学生" in organizations:
+        users = Profile.query.filter(Profile.party_branch == 112).all()
+    else:
+        users = Profile.query.all()
+    for u in users:
+        user_list.append(u.real_name)
+    partners = user_list
     data['organizations'] = organizations
     data['partners'] = partners
     data['created_uid'] = uid

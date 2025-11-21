@@ -135,7 +135,7 @@ def init_forms():
             FormControl(form_id=4, type='textarea', label='会议纪要', placeholder='请输入会议纪要', required=1, order=2),
             FormControl(form_id=5, type='text', label='主题党日活动名称', placeholder='请输入主题党日活动名称', required=1, order=0),
             FormControl(form_id=5, type='text', label='姓名', placeholder='请输入姓名', required=1, order=1),
-            FormControl(form_id=5, type='textarea', label='心得内容', placeholder='请输入详细心得内容，不少于200字。', required=1, order=2)
+            FormControl(form_id=5, type='textarea', label='心得内容', placeholder='请输入详细心得内容。', required=1, order=2)
         ]
         db.session.bulk_save_objects(default_controls)
         print("初始化表格组件完成.")
